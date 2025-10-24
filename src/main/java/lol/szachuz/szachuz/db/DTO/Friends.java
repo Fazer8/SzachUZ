@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.dbEntities;
+package lol.szachuz.szachuz.db.DTO;
 
 import jakarta.persistence.*;
 
@@ -68,10 +68,10 @@ public class Friends {
         this.friendSince = friendSince;
     }
 
+    public enum Status {
+        not_friends,
+        pending,
+        friends
+    }
 }
 
-enum Status {
-    not_friends,
-    pending,
-    friends
-}

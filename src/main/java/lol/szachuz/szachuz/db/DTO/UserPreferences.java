@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.dbEntities;
+package lol.szachuz.szachuz.db.DTO;
 
 import jakarta.persistence.*;
 
@@ -49,6 +49,7 @@ public class UserPreferences {
     public void setUserAvatar(String userAvatar) {
         this.userAvatar = userAvatar;
     }
+
+    public enum Lang {pl, en}
 }
 
-enum Lang {pl, en}
