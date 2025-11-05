@@ -1,3 +1,8 @@
+### Important user secrets ###
+*.env
+postgres_data/
+
+### JAVA ###
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
