@@ -1,0 +1,18 @@
+# Ignore Git and IDE stuff
+.git
+.github
+.gitignore
+.vscode
+.idea
+
+
+# OS junk
+*.log
+*.tmp
+.DS_Store
+
+# Docker / Compose files (they don't need to be copied into the image)
+docker-compose.yml
+Caddyfile
+.env
+postgres_data/

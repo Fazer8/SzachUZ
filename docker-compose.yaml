@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_ADMIN_USER}
+      POSTGRES_PASSWORD: ${PG_ADMIN_PASSWD}
+      POSTGRES_DB: ${PG_ADMIN_USER}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_ADMIN_USER}"]
+      interval: 100s
+      timeout: 5s
+      retries: 5
+
+  tomcat:
+    image: szachuz-tomcat:latest
+    restart: always
+    container_name: web
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${PG_ADMIN_USER}
+      DB_USER: ${PG_ADMIN_USER}
+      DB_PASSWORD: ${PG_ADMIN_PASSWD}
+    networks:
+      - backend
+      - frontend
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frontend
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  backend:
+    internal: true
+  frontend:
+    external: false
+

@@ -1,0 +1,7 @@
+szachuz.lol {
+    reverse_proxy tomcat:8080
+}
+
+localhost {
+    reverse_proxy tomcat:8080
+}
