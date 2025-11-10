@@ -51,14 +51,21 @@ services:
     networks:
       - frontend
 
+# ścieżka do folderu z avatarami - nie wiem gdzie ją dać ;)
+#volumes:
+#  - /opt/szachuz/avatars:/opt/szachuz/avatars
+
+
 volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+
 
 networks:
   backend:
     internal: true
   frontend:
     external: false
+
 
