@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: ${PG_ADMIN_PASSWD}
       POSTGRES_DB: ${PG_ADMIN_USER}
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - avatars:/opt/szachuz/avatars
+      - postgres_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
     networks:
       - backend
@@ -51,14 +52,19 @@ services:
     networks:
       - frontend
 
+
+
 volumes:
+  avatars:
   postgres_data:
   caddy_data:
   caddy_config:
+
 
 networks:
   backend:
     internal: true
   frontend:
     external: false
+
 

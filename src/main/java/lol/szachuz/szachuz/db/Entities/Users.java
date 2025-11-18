@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.db.DTO;
+package lol.szachuz.szachuz.db.Entities;
 
 
 import jakarta.persistence.*;

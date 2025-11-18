@@ -24,7 +24,6 @@ CREATE TABLE userPreferences
     userId     int not null unique,
     language   lang        default 'pl',                 -- pl,en
     darkMode   boolean     default false,                -- true/false
-    sound      boolean     default true,                 -- on/off (jeśli użyjemy dźwięku na stronie)
     userAvatar varchar(30) default 'default_avatar.png', -- nazwa pliku do zdjęcia czy cos
 
     PRIMARY KEY (userId),
@@ -81,11 +80,10 @@ BEGIN
     VALUES (p_username, p_email, p_password)
     RETURNING userId INTO v_user_id;
 
-    INSERT INTO userPreferences (userId, language, darkMode, sound, userAvatar)
+    INSERT INTO userPreferences (userId, language, darkMode, userAvatar)
     VALUES (v_user_id,
             'pl',
             false,
-            true,
             'default_avatar.png');
 
     INSERT INTO leaderboard (userId, mmr, matchesWon)
@@ -97,6 +95,9 @@ $$ LANGUAGE plpgsql;
 
 -- ---------------------------------------------------------------------
 -- sprawdzanie unikalności podczas rejestracji
+
+--     <<< ZBĘDNE >>>
+
 CREATE OR REPLACE FUNCTION check_user_unique(
     p_username varchar(40),
     p_email varchar(40)
@@ -118,6 +119,7 @@ BEGIN
                         WHERE email = p_email))       as is_email_taken;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- ---------------------------------------------------------------------
 -- Funkcja dodająca znajomego (wysyłająca zaproszenie)

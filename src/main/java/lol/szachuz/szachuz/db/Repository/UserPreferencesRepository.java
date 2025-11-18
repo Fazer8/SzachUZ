@@ -3,7 +3,7 @@ package lol.szachuz.szachuz.db.Repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lol.szachuz.szachuz.db.EMF;
-import lol.szachuz.szachuz.db.DTO.UserPreferences;
+import lol.szachuz.szachuz.db.Entities.UserPreferences;
 
 import java.util.List;
 
