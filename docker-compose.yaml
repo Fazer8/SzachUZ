@@ -14,15 +14,14 @@ services:
       - backend
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PG_ADMIN_USER}"]
-      interval: 100s
+      interval: 10s
       timeout: 5s
       retries: 5
 
   tomcat:
-    image: szachuz-tomcat:latest
+    build: .
     restart: always
     container_name: web
-    build: .
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,14 +51,11 @@ services:
     networks:
       - frontend
 
-
-
 volumes:
   avatars:
   postgres_data:
   caddy_data:
   caddy_config:
-
 
 networks:
   backend:
