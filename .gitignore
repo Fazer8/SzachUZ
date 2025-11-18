@@ -1,6 +1,8 @@
 ### Important user secrets ###
 *.env
 postgres_data/
+*.pem
+
 
 ### JAVA ###
 target/
