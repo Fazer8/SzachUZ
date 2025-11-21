@@ -10,5 +10,7 @@
 <br/>
 <a href="hello-servlet">Hello Servlet</a>
 <a href="users/userProfile.jsp">Profil Użytkownika</a>
+<a href="users/login.jsp">Zaloguj Się</a>
+<a href="users/register.jsp">Zarejestruj Się</a>
 </body>
 </html>
