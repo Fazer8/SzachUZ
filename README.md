@@ -3,6 +3,7 @@ projekt stronki: https://www.canva.com/design/DAG31vGBGrM/AaI2eKOEtmmA87c4d-N5XA
 # Instrukcja włączania
 
 - Pierwsze uruchomienie:
+  - w powershell:cd "ścieżka do projektu"
   - ``docker compose up``
 - Po zmianiach w javie:
   - uruchomić mvn package
