@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz;
+package lol.szachuz;
 
 import java.io.*;
 

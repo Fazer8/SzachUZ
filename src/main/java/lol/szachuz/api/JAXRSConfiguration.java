@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.api;
+package lol.szachuz.api;
 
 import jakarta.annotation.security.DeclareRoles;
 import jakarta.enterprise.context.ApplicationScoped;

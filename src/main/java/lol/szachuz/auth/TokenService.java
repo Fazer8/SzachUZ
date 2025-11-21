@@ -1,8 +1,8 @@
-package lol.szachuz.szachuz.auth;
+package lol.szachuz.auth;
 
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
-import lol.szachuz.szachuz.db.Entities.Users;
+import lol.szachuz.db.Entities.Users;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

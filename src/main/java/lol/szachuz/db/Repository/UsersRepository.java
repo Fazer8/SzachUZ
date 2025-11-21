@@ -1,14 +1,14 @@
-package lol.szachuz.szachuz.db.Repository;
+package lol.szachuz.db.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
-import lol.szachuz.szachuz.db.Entities.Users;
-import lol.szachuz.szachuz.db.EMF;
+import lol.szachuz.db.Entities.Users;
+import lol.szachuz.db.EMF;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject; // Import dla CDI
-import lol.szachuz.szachuz.auth.TokenService; // Import serwisu
+import lol.szachuz.auth.TokenService; // Import serwisu
 
 import java.util.List;
 

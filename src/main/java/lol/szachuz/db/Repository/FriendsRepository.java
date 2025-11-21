@@ -1,20 +1,20 @@
-package lol.szachuz.szachuz.db.Repository;
+package lol.szachuz.db.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import lol.szachuz.szachuz.db.EMF;
-import lol.szachuz.szachuz.db.Entities.UserPreferences;
+import lol.szachuz.db.EMF;
+import lol.szachuz.db.Entities.Friends;
 
 import java.util.List;
 
-public class UserPreferencesRepository {
+public class FriendsRepository {
 
-    public void save(UserPreferences preferences) {
+    public void save(Friends friend) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try (em) {
             tx.begin();
-            em.persist(preferences);
+            em.persist(friend);
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
@@ -22,25 +22,25 @@ public class UserPreferencesRepository {
         }
     }
 
-    public UserPreferences findByUserId(int userId) {
+    public Friends findById(int id) {
         try (EntityManager em = EMF.get().createEntityManager()) {
-            return em.find(UserPreferences.class, userId);
+            return em.find(Friends.class, id);
         }
     }
 
-    public List<UserPreferences> findAll() {
+    public List<Friends> findAll() {
         try (EntityManager em = EMF.get().createEntityManager()) {
-            return em.createQuery("SELECT p FROM UserPreferences p", UserPreferences.class)
+            return em.createQuery("SELECT f FROM Friends f", Friends.class)
                     .getResultList();
         }
     }
 
-    public void update(UserPreferences preferences) {
+    public void update(Friends friend) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try (em) {
             tx.begin();
-            em.merge(preferences);
+            em.merge(friend);
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
@@ -48,14 +48,14 @@ public class UserPreferencesRepository {
         }
     }
 
-    public void delete(int userId) {
+    public void delete(int id) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try (em) {
             tx.begin();
-            UserPreferences pref = em.find(UserPreferences.class, userId);
-            if (pref != null) {
-                em.remove(pref);
+            Friends friend = em.find(Friends.class, id);
+            if (friend != null) {
+                em.remove(friend);
             }
             tx.commit();
         } catch (Exception e) {
@@ -64,14 +64,21 @@ public class UserPreferencesRepository {
         }
     }
 
-    public List<UserPreferences> findByLanguage(String langCode) {
+    /**
+     * Znajdź przyjaźń między dwoma użytkownikami.
+     */
+    public Friends findBetweenUsers(int userId1, int userId2) {
         try (EntityManager em = EMF.get().createEntityManager()) {
-            return em.createQuery(
-                            "SELECT p FROM UserPreferences p WHERE p.language = :lang",
-                            UserPreferences.class
-                    )
-                    .setParameter("lang", Enum.valueOf(UserPreferences.Lang.class, langCode))
-                    .getResultList();
+            return em.createQuery("""
+                            SELECT f FROM Friends f
+                            WHERE (f.user1.userId = :u1 AND f.user2.userId = :u2)
+                               OR (f.user1.userId = :u2 AND f.user2.userId = :u1)
+                            """, Friends.class)
+                    .setParameter("u1", userId1)
+                    .setParameter("u2", userId2)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
         }
     }
 }

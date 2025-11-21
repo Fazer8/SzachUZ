@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.api.dto;
+package lol.szachuz.api.dto;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 

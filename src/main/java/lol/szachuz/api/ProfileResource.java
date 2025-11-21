@@ -1,19 +1,19 @@
-package lol.szachuz.szachuz.api;
+package lol.szachuz.api;
 
 import jakarta.ws.rs.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
-import lol.szachuz.szachuz.db.Entities.Users;
-import lol.szachuz.szachuz.api.dto.ProfileDTO;
+import lol.szachuz.db.Entities.Users;
+import lol.szachuz.api.dto.ProfileDTO;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import jakarta.json.bind.annotation.JsonbProperty;
-import lol.szachuz.szachuz.api.dto.ChangePasswordDTO;
-import lol.szachuz.szachuz.db.Entities.UserPreferences;
-import lol.szachuz.szachuz.db.Repository.UsersRepository;
-import lol.szachuz.szachuz.db.Repository.UserPreferencesRepository;
+import lol.szachuz.api.dto.ChangePasswordDTO;
+import lol.szachuz.db.Entities.UserPreferences;
+import lol.szachuz.db.Repository.UsersRepository;
+import lol.szachuz.db.Repository.UserPreferencesRepository;
 
 import java.io.InputStream;
 import java.io.OutputStream;

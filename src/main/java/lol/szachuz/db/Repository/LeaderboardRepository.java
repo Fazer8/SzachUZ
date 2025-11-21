@@ -1,9 +1,9 @@
-package lol.szachuz.szachuz.db.Repository;
+package lol.szachuz.db.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import lol.szachuz.szachuz.db.EMF;
-import lol.szachuz.szachuz.db.Entities.Leaderboard;
+import lol.szachuz.db.EMF;
+import lol.szachuz.db.Entities.Leaderboard;
 
 import java.util.List;
 

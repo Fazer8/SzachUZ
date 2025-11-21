@@ -1,7 +1,7 @@
-package lol.szachuz.szachuz.api.dto;
+package lol.szachuz.api.dto;
 
-import lol.szachuz.szachuz.db.Entities.UserPreferences;
-import lol.szachuz.szachuz.db.Entities.Users;
+import lol.szachuz.db.Entities.UserPreferences;
+import lol.szachuz.db.Entities.Users;
 
 public class ProfileDTO {
 

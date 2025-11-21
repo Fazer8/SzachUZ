@@ -1,4 +1,4 @@
-package lol.szachuz.szachuz.db;
+package lol.szachuz.db;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
