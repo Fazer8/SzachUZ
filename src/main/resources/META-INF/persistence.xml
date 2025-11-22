@@ -2,15 +2,17 @@
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
-                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
-             version="2.2">
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_3_1.xsd"
+             version="3.1">
+
     <persistence-unit name="myPU">
         <properties>
-            <!-- Dane połączenia do bazy w chmurze -->
+            <!-- Połączenie do bazy w Dockerze -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://db.szachuz.lol:7306/postgres"/>
-            <property name="jakarta.persistence.jdbc.user" value="${DB_USER}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${DB_PASSWORD}"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://postgres:5432/postgres"/>
+            <property name="jakarta.persistence.jdbc.user" value="${env.PB_ADMIN_USER}"/>
+            <property name="jakarta.persistence.jdbc.password" value="${env.PB_ADMIN_PASSWD}"/>
+
 
             <!-- Ustawienia Hibernate -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>

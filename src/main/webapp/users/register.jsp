@@ -8,7 +8,7 @@
 
 <h2>Rejestracja</h2>
 
-<form action="${pageContext.request.contextPath}/register" method="post">
+<form action="/register" method="post">
 
     Nazwa użytkownika: <br>
     <input type="text" name="username" required><br><br>
