@@ -148,7 +148,7 @@
     </script>
 </head>
 <body>
-<h2>My Profile</h2>
+<h1>My Profile</h1>
 
 <div id="avatarContainer"></div>
 <input type="file" id="avatarInput" style="display:none;" accept="image/*"/>
