@@ -8,6 +8,9 @@ import lol.szachuz.db.Entities.Users;
 import lol.szachuz.db.EMF;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject; // Import dla CDI
+
+import java.util.Optional;
+
 import lol.szachuz.auth.TokenService; // Import serwisu
 
 import java.util.List;
@@ -125,9 +128,22 @@ public class UsersRepository {
     }
 
 
-//  ===->====<-===->==<-LOGOWANIE->==<-===->====<-===
+    //  ===->====<-===->==<-LOGOWANIE->==<-===->====<-===
+    public Optional<Users> findUserByEmail(String email) {
+        try (EntityManager em = EMF.get().createEntityManager()) {
+            Users user = em.createQuery(
+                            "SELECT u FROM Users u WHERE u.email = :email", Users.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 
     public String login(String email, String password) {
+        // ... (Ten kod jest poprawny, ale użycie nowej metody byłoby lepsze)
         try (EntityManager em = EMF.get().createEntityManager()) {
 
             String hashedPassword;
@@ -144,7 +160,7 @@ public class UsersRepository {
                     )
                     .setParameter("email", email)
                     .setParameter("password", hashedPassword)
-                    .getSingleResult();
+                    .getSingleResult(); // <-- Tutaj ryzyko NoResultException, poprawnie łapane poniżej
 
             // Generowanie tokena JWT
             return tokenService.generateToken(user);

@@ -24,7 +24,7 @@ public class TokenService {
 
     public TokenService() {
         try {
-            this.privateKey = readPrivateKey(PRIVATE_KEY_LOCATION);
+            this.privateKey = readPrivateKey();
         } catch (Exception e) {
             throw new RuntimeException("Nie udało się załadować klucza prywatnego", e);
         }
@@ -47,11 +47,24 @@ public class TokenService {
                 .sign(privateKey);
     }
 
-    private PrivateKey readPrivateKey(String resourcePath) throws Exception {
-        InputStream is = TokenService.class.getResourceAsStream(resourcePath);
+    // W TokenService.java
+
+    private PrivateKey readPrivateKey() throws Exception {
+        InputStream is;
+
+        // Zmieniamy na bezpieczniejszy sposób ładowania zasobów z CLASSPATH
+        is = Thread.currentThread().getContextClassLoader().getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION.substring(1));
+
         if (is == null) {
-            throw new RuntimeException("Nie znaleziono pliku klucza prywatnego: " + resourcePath);
+            // Druga próba (w przypadku, gdy CLASSPATH jest inaczej skonfigurowany)
+            is = TokenService.class.getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION);
         }
+
+        if (is == null) {
+            throw new RuntimeException("Nie znaleziono pliku klucza prywatnego: " + TokenService.PRIVATE_KEY_LOCATION);
+        }
+
+        // ... reszta kodu pozostaje bez zmian ...
         String key = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         String privateKeyPEM = key
