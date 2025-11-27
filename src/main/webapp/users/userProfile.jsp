@@ -143,7 +143,6 @@
                     alert("Error: " + text);
                 }
             }
-
             window.onload = getMyProfile;
         </script>
     </jsp:attribute>
