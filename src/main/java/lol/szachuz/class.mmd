@@ -1,0 +1,187 @@
+
+classDiagram
+%% Entities
+    class Users {
+        +int userId
+        +String username
+        +String email
+        +String password
+        +getUsername() String
+        +setUsername(String) void
+        +getEmail() String
+        +setEmail(String) void
+        +getPassword() String
+        +setPassword(String) void
+        +getUserId() long
+        +setUserId(int) void
+    }
+
+    class Friends {
+        +int friendshipId
+        +Users user1
+        +Users user2
+        +Status status
+        +LocalDate friendSince
+        +getFriendshipId() int
+        +getUser1() Users
+        +getUser2() Users
+        +getStatus() Status
+        +getFriendSince() LocalDate
+    }
+
+    class Status {
+        <<enumeration>>
+        not_friends
+        pending
+        friends
+    }
+
+    class Leaderboard {
+        +int userId
+        +Users user
+        +int mmr
+        +int matchesWon
+        +getUserId() int
+        +getUser() Users
+        +getMmr() int
+        +getMatchesWon() int
+    }
+
+    class UserPreferences {
+        +int userId
+        +Users user
+        +Lang language
+        +boolean darkMode
+        +String userAvatar
+        +getUser() Users
+        +getLanguage() Lang
+        +getDarkMode() boolean
+        +getUserAvatar() String
+    }
+
+    class Lang {
+        <<enumeration>>
+        PL
+        EN
+    }
+
+%% Repositories
+    class UsersRepository {
+        <<ApplicationScoped>>
+        -TokenService tokenService
+        +save(Users) void
+        +existsByEmail(String) boolean
+        +existsByUsername(String) boolean
+        +findByEmail(String) Users
+        +findById(int) Users
+        +findAll() List~Users~
+        +update(Users) void
+        +updateUser(Users) String
+        +delete(int) void
+        +login(String, String) String
+        +register(String, String, String) String
+        +checkPassword(Users, String) boolean
+        +updatePassword(Users, String) void
+    }
+
+    class FriendsRepository {
+        +save(Friends) void
+        +findById(int) Friends
+        +findAll() List~Friends~
+        +update(Friends) void
+        +delete(int) void
+        +findBetweenUsers(int, int) Friends
+    }
+
+    class LeaderboardRepository {
+        +save(Leaderboard) void
+        +findByUserId(int) Leaderboard
+        +findAll() List~Leaderboard~
+        +update(Leaderboard) void
+        +delete(int) void
+        +findAboveMmr(int) List~Leaderboard~
+    }
+
+    class UserPreferencesRepository {
+        +save(UserPreferences) void
+        +findByUserId(int) UserPreferences
+        +findAll() List~UserPreferences~
+        +update(UserPreferences) void
+        +delete(int) void
+        +findByLanguage(String) List~UserPreferences~
+    }
+
+%% Service
+    class TokenService {
+        <<ApplicationScoped>>
+        -PrivateKey privateKey
+        -String PRIVATE_KEY_LOCATION
+        -String ISSUER
+        -long EXPIRATION_SECONDS
+        +generateToken(Users) String
+    }
+
+%% Resource
+    class ProfileResource {
+<<RequestScoped>>
+%%<<RolesAllowed("USER")>>
+-UsersRepository usersRepository
+-UserPreferencesRepository userPreferencesRepository
+-JsonWebToken jwt
++getMyProfile() Response
++updateUsername(UpdateFieldDTO) Response
++updatePassword(ChangePasswordDTO) Response
++updateDarkMode(UpdateFieldDTO) Response
++updateLanguage(UpdateFieldDTO) Response
++updateAvatar(InputStream, String) Response
++deleteAvatar() Response
+}
+
+%% DTOs
+class ProfileDTO {
++long userId
++String username
++String email
++String language
++boolean darkMode
++String userAvatar
+}
+
+class ChangePasswordDTO {
++String oldPassword
++String newPassword
+}
+
+class UpdateFieldDTO {
++String value
++Boolean darkMode
+}
+
+%% Entity Relationships
+Friends "2" --> "1" Users : user1, user2
+Friends --> Status
+Leaderboard "1" --> "1" Users : user
+UserPreferences "1" --> "1" Users : user
+UserPreferences --> Lang
+
+%% Repository -> Entity
+UsersRepository --> Users : manages
+FriendsRepository --> Friends : manages
+LeaderboardRepository --> Leaderboard : manages
+UserPreferencesRepository --> UserPreferences : manages
+
+%% Service -> Repository
+UsersRepository --> TokenService : uses
+
+%% Resource -> Repository
+ProfileResource --> UsersRepository : uses
+ProfileResource --> UserPreferencesRepository : uses
+
+%% Resource -> DTO
+ProfileResource ..> ProfileDTO : returns
+ProfileResource ..> ChangePasswordDTO : consumes
+ProfileResource ..> UpdateFieldDTO : consumes
+
+%% DTO -> Entity
+ProfileDTO ..> Users : maps from
+ProfileDTO ..> UserPreferences : maps from
