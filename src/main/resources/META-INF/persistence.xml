@@ -7,9 +7,9 @@
         <properties>
             <!-- Dane połączenia do bazy w chmurze -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://db.szachuz.lol:7306/postgres"/>
-            <property name="jakarta.persistence.jdbc.user" value="${DB_USER}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${DB_PASSWORD}"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://postgres:5432/postgres"/>
+            <property name="jakarta.persistence.jdbc.user" value="${env.DB_ADMIN_USER}"/>
+            <property name="jakarta.persistence.jdbc.password" value="${env.DB_ADMIN_PASSWORD}"/>
 
             <!-- Ustawienia Hibernate -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
