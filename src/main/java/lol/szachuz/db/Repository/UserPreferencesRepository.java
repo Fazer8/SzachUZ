@@ -1,5 +1,6 @@
 package lol.szachuz.db.Repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lol.szachuz.db.EMF;
@@ -7,6 +8,7 @@ import lol.szachuz.db.Entities.UserPreferences;
 
 import java.util.List;
 
+@ApplicationScoped
 public class UserPreferencesRepository {
 
     public void save(UserPreferences preferences) {

@@ -11,8 +11,8 @@ public class EMF {
     static {
         Map<String, String> properties = new HashMap<>();
 
-        String user = System.getenv("PG_ADMIN_USER");
-        String pass = System.getenv("PG_ADMIN_PASSWD");
+        String user = System.getenv("DB_USER");
+        String pass = System.getenv("DB_PASSWORD");
 
         if (user == null || pass == null) {
             System.err.println("Brak wymaganych zmiennych środowiskowych PG_ADMIN_USER/PG_ADMIN_PASSWD");

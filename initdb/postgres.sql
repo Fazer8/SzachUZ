@@ -1,11 +1,6 @@
-drop schema if exists szachuz cascade;
-CREATE SCHEMA szachuz;
-set search_path to szachuz;
-
-
 -- =====================================================================
 -- /====Enumy====/
-create type lang as enum ('pl', 'en');
+create type lang as enum ('PL', 'EN');
 create type status as enum ('pending', 'friends','not_friends');
 
 
@@ -22,7 +17,7 @@ CREATE TABLE users
 CREATE TABLE userPreferences
 (
     userId     int not null unique,
-    language   lang        default 'pl',                 -- pl,en
+    language   lang        default 'PL',                 -- pl,en
     darkMode   boolean     default false,                -- true/false
     userAvatar varchar(30) default 'default_avatar.png', -- nazwa pliku do zdjęcia czy cos
 
@@ -82,7 +77,7 @@ BEGIN
 
     INSERT INTO userPreferences (userId, language, darkMode, userAvatar)
     VALUES (v_user_id,
-            'pl',
+            'PL',
             false,
             'default_avatar.png');
 

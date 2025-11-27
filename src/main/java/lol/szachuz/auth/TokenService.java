@@ -33,30 +33,26 @@ public class TokenService {
     public String generateToken(Users user) {
         Set<String> roles = new HashSet<>();
         roles.add("USER");
-        // Możesz dodać więcej ról, jeśli masz je w systemie, np. "ADMIN"
 
         long now = System.currentTimeMillis() / 1000;
 
         return Jwt.issuer(ISSUER)
-                .subject(String.valueOf(user.getUserId())) // ID użytkownika jako "subject"
-                .upn(user.getEmail()) // User Principal Name
-                .claim("username", user.getUsername()) // Dodatkowa, niestandardowa dana
-                .groups(roles) // Role użytkownika
+                .subject(String.valueOf(user.getUserId()))
+                .upn(user.getEmail())
+                .claim("username", user.getUsername())
+                .groups(roles)
                 .issuedAt(now)
                 .expiresAt(now + EXPIRATION_SECONDS)
                 .sign(privateKey);
     }
 
-    // W TokenService.java
 
     private PrivateKey readPrivateKey() throws Exception {
         InputStream is;
 
-        // Zmieniamy na bezpieczniejszy sposób ładowania zasobów z CLASSPATH
         is = Thread.currentThread().getContextClassLoader().getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION.substring(1));
 
         if (is == null) {
-            // Druga próba (w przypadku, gdy CLASSPATH jest inaczej skonfigurowany)
             is = TokenService.class.getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION);
         }
 
@@ -64,7 +60,6 @@ public class TokenService {
             throw new RuntimeException("Nie znaleziono pliku klucza prywatnego: " + TokenService.PRIVATE_KEY_LOCATION);
         }
 
-        // ... reszta kodu pozostaje bez zmian ...
         String key = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         String privateKeyPEM = key

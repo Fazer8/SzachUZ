@@ -71,17 +71,11 @@ public class AuthResource {
                     .entity(new MessageResponse("Email and password cannot be empty."))
                     .build();
         }
-
-        // 1. Wywołujemy metodę logowania. Zwraca token (String) LUB null (brak użytkownika/złe hasło/błąd haszowania).
         String token = usersRepository.login(email, password);
 
-        // 2. Obsługa wyniku:
         if (token != null) {
-            // Sukces: znaleziono użytkownika, hasło OK, token wygenerowany.
             return Response.ok(new TokenResponse(token)).build();
         } else {
-            // Błąd: Repozytorium zwróciło null (brak użytkownika, złe hasło lub błąd haszowania).
-            // Zwracamy 401, aby uniemożliwić rozróżnienie, czy błąd to login, czy hasło.
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(new MessageResponse("Invalid email or password."))
                     .build();

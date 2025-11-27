@@ -178,23 +178,26 @@ public class UsersRepository {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
-        try (em) {
+        try {
             String hashedPassword = sha256(password);
 
             tx.begin();
 
-            Query query = em.createNativeQuery("SELECT add_new_user(:username, :email, :password)");
+            Query query = em.createNativeQuery(
+                    "SELECT add_new_user(:username, :email, :password)"
+            );
             query.setParameter("username", username);
             query.setParameter("email", email);
             query.setParameter("password", hashedPassword);
 
-            // funkcja zwraca userId (int)
             Integer userId = (Integer) query.getSingleResult();
             tx.commit();
 
             return "Registration successful (userId = " + userId + ")";
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
 
             String msg = e.getMessage();
             if (msg != null) {
@@ -204,8 +207,13 @@ public class UsersRepository {
 
             System.err.println("Database error: " + msg);
             return "Registration failed";
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
     }
+
 
     public boolean checkPassword(Users user, String rawPassword) {
         try {
