@@ -3,18 +3,17 @@ package lol.szachuz.api;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.inject.Inject;
-import jakarta.enterprise.context.RequestScoped;
-
 import lol.szachuz.api.dto.LoginDTO;
 import lol.szachuz.db.Repository.UsersRepository;
 
 @Path("/auth")
-@RequestScoped
 public class LoginResource {
 
-    @Inject
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
+
+    public LoginResource() {
+        this.usersRepository = new UsersRepository(); // ręczne tworzenie repo
+    }
 
     @POST
     @Path("/login")
@@ -24,13 +23,11 @@ public class LoginResource {
 
         if (dto == null || dto.email == null || dto.password == null ||
                 dto.email.isBlank() || dto.password.isBlank()) {
-
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\":\"Missing login data\"}")
                     .build();
         }
 
-        // 🔥 Używamy TWOJEJ metody repozytorium
         String token = usersRepository.login(dto.email, dto.password);
 
         if (token == null) {
@@ -39,7 +36,6 @@ public class LoginResource {
                     .build();
         }
 
-        // Zwracamy token (frontend go zapisze)
         return Response.ok("{\"token\":\"" + token + "\"}").build();
     }
 }

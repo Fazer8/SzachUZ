@@ -1,26 +1,49 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
 <html>
 <head>
-    <title>Logowanie</title>
+    <title>Login Test</title>
+
+    <script>
+        async function loginUser() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            const body = {
+                email: email,
+                password: password
+            };
+
+            const res = await fetch("<%=request.getContextPath()%>/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+
+            const text = await res.text();
+
+            const resultBox = document.getElementById("result");
+
+            if (!res.ok) {
+                resultBox.className = "error";
+                resultBox.textContent = "Error (" + res.status + "):\n" + text;
+            } else {
+                resultBox.className = "success";
+                resultBox.textContent = "Success:\n" + text;
+            }
+        }
+    </script>
 </head>
+
 <body>
+<div class="container">
+    <h2>Login Test</h2>
 
-<h2>Logowanie</h2>
+    <input type="email" id="email" placeholder="Email"/>
+    <input type="password" id="password" placeholder="Password"/>
 
-<form action="/login" method="post">
+    <button onclick="loginUser()">Login</button>
 
-    Email: <br>
-    <input type="email" name="email" required><br><br>
-
-    Hasło: <br>
-    <input type="password" name="password" required><br><br>
-
-    <button type="submit">Zaloguj się</button>
-</form>
-
-<br>
-<a href="${pageContext.request.contextPath}/users/register.jsp">Rejestracja</a>
-
+    <div id="result"></div>
+</div>
 </body>
 </html>
