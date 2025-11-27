@@ -14,7 +14,8 @@
                 password: password
             };
 
-            const res = await fetch("${pageContext.request.contextPath}/auth/register", {
+            const res = await fetch("${pageContext.request.contextPath}/api/auth/register", {
+
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body)

@@ -31,6 +31,7 @@ services:
       DB_NAME: ${PG_ADMIN_USER}
       DB_USER: ${PG_ADMIN_USER}
       DB_PASSWORD: ${PG_ADMIN_PASSWD}
+
     networks:
       - backend
       - frontend

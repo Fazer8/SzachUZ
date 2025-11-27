@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
-                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_3_1.xsd"
-             version="3.1">
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
 
-    <persistence-unit name="myPU">
+    <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Dodaj swoje klasy encji -->
+         <class>lol.szachuz.db.Entities.Users</class>
+         <class>lol.szachuz.db.Entities.UserPreferences</class>
+         <class>lol.szachuz.db.Entities.Friends</class>
+         <class>lol.szachuz.db.Entities.Leaderboard</class>
+
         <properties>
             <!-- Połączenie do bazy w Dockerze -->
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://postgres:5432/postgres"/>
-            <property name="jakarta.persistence.jdbc.user" value="${env.PG_ADMIN_USER}"/>
-            <property name="jakarta.persistence.jdbc.password" value="${env.PG_ADMIN_PASSWD}"/>
+            <property name="jakarta.persistence.jdbc.user" value="${env.DB_USER}"/>
+            <property name="jakarta.persistence.jdbc.password" value="${env.DB_PASSWORD}"/>
 
             <!-- Ustawienia Hibernate -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>

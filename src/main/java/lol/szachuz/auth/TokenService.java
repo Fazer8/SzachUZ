@@ -24,7 +24,7 @@ public class TokenService {
 
     public TokenService() {
         try {
-            this.privateKey = readPrivateKey(PRIVATE_KEY_LOCATION);
+            this.privateKey = readPrivateKey();
         } catch (Exception e) {
             throw new RuntimeException("Nie udało się załadować klucza prywatnego", e);
         }
@@ -33,25 +33,33 @@ public class TokenService {
     public String generateToken(Users user) {
         Set<String> roles = new HashSet<>();
         roles.add("USER");
-        // Możesz dodać więcej ról, jeśli masz je w systemie, np. "ADMIN"
 
         long now = System.currentTimeMillis() / 1000;
 
         return Jwt.issuer(ISSUER)
-                .subject(String.valueOf(user.getUserId())) // ID użytkownika jako "subject"
-                .upn(user.getEmail()) // User Principal Name
-                .claim("username", user.getUsername()) // Dodatkowa, niestandardowa dana
-                .groups(roles) // Role użytkownika
+                .subject(String.valueOf(user.getUserId()))
+                .upn(user.getEmail())
+                .claim("username", user.getUsername())
+                .groups(roles)
                 .issuedAt(now)
                 .expiresAt(now + EXPIRATION_SECONDS)
                 .sign(privateKey);
     }
 
-    private PrivateKey readPrivateKey(String resourcePath) throws Exception {
-        InputStream is = TokenService.class.getResourceAsStream(resourcePath);
+
+    private PrivateKey readPrivateKey() throws Exception {
+        InputStream is;
+
+        is = Thread.currentThread().getContextClassLoader().getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION.substring(1));
+
         if (is == null) {
-            throw new RuntimeException("Nie znaleziono pliku klucza prywatnego: " + resourcePath);
+            is = TokenService.class.getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION);
         }
+
+        if (is == null) {
+            throw new RuntimeException("Nie znaleziono pliku klucza prywatnego: " + TokenService.PRIVATE_KEY_LOCATION);
+        }
+
         String key = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         String privateKeyPEM = key

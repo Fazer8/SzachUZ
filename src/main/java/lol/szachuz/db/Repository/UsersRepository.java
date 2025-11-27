@@ -8,6 +8,9 @@ import lol.szachuz.db.Entities.Users;
 import lol.szachuz.db.EMF;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject; // Import dla CDI
+
+import java.util.Optional;
+
 import lol.szachuz.auth.TokenService; // Import serwisu
 
 import java.util.List;
@@ -125,9 +128,22 @@ public class UsersRepository {
     }
 
 
-//  ===->====<-===->==<-LOGOWANIE->==<-===->====<-===
+    //  ===->====<-===->==<-LOGOWANIE->==<-===->====<-===
+    public Optional<Users> findUserByEmail(String email) {
+        try (EntityManager em = EMF.get().createEntityManager()) {
+            Users user = em.createQuery(
+                            "SELECT u FROM Users u WHERE u.email = :email", Users.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+
+            return Optional.of(user);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 
     public String login(String email, String password) {
+        // ... (Ten kod jest poprawny, ale użycie nowej metody byłoby lepsze)
         try (EntityManager em = EMF.get().createEntityManager()) {
 
             String hashedPassword;
@@ -144,7 +160,7 @@ public class UsersRepository {
                     )
                     .setParameter("email", email)
                     .setParameter("password", hashedPassword)
-                    .getSingleResult();
+                    .getSingleResult(); // <-- Tutaj ryzyko NoResultException, poprawnie łapane poniżej
 
             // Generowanie tokena JWT
             return tokenService.generateToken(user);
@@ -162,23 +178,26 @@ public class UsersRepository {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
-        try (em) {
+        try {
             String hashedPassword = sha256(password);
 
             tx.begin();
 
-            Query query = em.createNativeQuery("SELECT add_new_user(:username, :email, :password)");
+            Query query = em.createNativeQuery(
+                    "SELECT add_new_user(:username, :email, :password)"
+            );
             query.setParameter("username", username);
             query.setParameter("email", email);
             query.setParameter("password", hashedPassword);
 
-            // funkcja zwraca userId (int)
             Integer userId = (Integer) query.getSingleResult();
             tx.commit();
 
             return "Registration successful (userId = " + userId + ")";
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive()) {
+                tx.rollback();
+            }
 
             String msg = e.getMessage();
             if (msg != null) {
@@ -188,8 +207,13 @@ public class UsersRepository {
 
             System.err.println("Database error: " + msg);
             return "Registration failed";
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
     }
+
 
     public boolean checkPassword(Users user, String rawPassword) {
         try {

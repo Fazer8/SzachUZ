@@ -35,7 +35,11 @@ public class ProfileResource {
     @Inject
     private JsonWebToken jwt;
 
+
     private int getAuthenticatedUserId() {
+        if (jwt == null) {
+            throw new WebApplicationException("Unauthorized", Response.Status.UNAUTHORIZED);
+        }
         return Integer.parseInt(jwt.getSubject());
     }
 
@@ -100,12 +104,10 @@ public class ProfileResource {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        // 2. Weryfikacja starego hasła (UsersRepository musi mieć metodę checkPassword)
         if (!usersRepository.checkPassword(user, dto.oldPassword)) {
             return Response.status(Response.Status.FORBIDDEN).entity("Incorrect old password.").build(); // Używamy FORBIDDEN lub UNAUTHORIZED
         }
 
-        // 3. Aktualizacja hasła (UsersRepository musi mieć metodę do hashowania i aktualizacji)
         usersRepository.updatePassword(user, dto.newPassword);
 
         // 4. Sukces
