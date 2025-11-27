@@ -1,8 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Login Test</title>
-
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<t:layout page_name="Login">
+    <jsp:attribute name="head">
     <script>
         async function loginUser() {
             const email = document.getElementById("email").value.trim();
@@ -13,7 +12,7 @@
                 password: password
             };
 
-            const res = await fetch("<%=request.getContextPath()%>/api/auth/login", {
+            const res = await fetch("${pageContext.request.contextPath}/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body)
@@ -32,18 +31,17 @@
             }
         }
     </script>
-</head>
+    </jsp:attribute>
 
-<body>
-<div class="container">
-    <h2>Login Test</h2>
+    <jsp:attribute name="body">
+    <main class="site-margin border-color border-radius container">
 
-    <input type="email" id="email" placeholder="Email"/>
-    <input type="password" id="password" placeholder="Password"/>
+        <input type="email" id="email" placeholder="Email"/>
+        <input type="password" id="password" placeholder="Password"/>
 
-    <button onclick="loginUser()">Login</button>
+        <button onclick="loginUser()">Login</button>
 
-    <div id="result"></div>
-</div>
-</body>
-</html>
+        <div id="result"></div>
+    </main>
+    </jsp:attribute>
+</t:layout>
