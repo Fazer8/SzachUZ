@@ -1,0 +1,43 @@
+@startuml
+title "Diagram aktywności gry PvP"
+
+|FE| Frontend
+|BE| Backend
+|DB| Database
+
+|FE|
+start
+if (Typ gry?) then (PvE)
+    stop
+else (PvP)
+
+    |DB|
+    :Pobierz listę znajomych;
+
+    |FE|
+    :Zaproś gracza lub wybierz przeciwnika;
+
+    if (Zaproszenie przez e-mail?) then (tak)
+        |BE|
+        :Wyślij powiadomienie e-mail;
+    endif
+
+    |BE|
+    :Uruchom grę PvP;
+
+    repeat
+        |FE|
+        :Wykonaj ruch;
+        |BE|
+        :Zarejestruj ruch;
+    repeat while (Gra zakończona?) is (nie)
+
+    |DB|
+    :Zaktualizuj punkty gracza (Win/Lose);
+
+    |FE|
+    :Wyświetl wynik graczowi;
+    stop
+
+endif
+@enduml

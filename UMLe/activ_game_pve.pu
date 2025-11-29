@@ -1,0 +1,30 @@
+@startuml
+title "Diagram aktywności gry PvE"
+
+|FE| Frontend
+|BE| Backend
+
+|FE|
+start
+if (Typ gry?) then (PvE)
+
+    :Wybierz poziom trudności;
+    |BE|
+    :Uruchom grę PvE;
+
+    repeat
+        |FE|
+        :Wykonaj ruch;
+        |BE|
+        :Zarejestruj ruch;
+    repeat while (Gra zakończona?) is (nie)
+
+    :Zapisz końcowy wynik;
+    stop
+
+else (PvP)
+    |FE|
+    stop
+endif
+
+@enduml

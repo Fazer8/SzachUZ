@@ -1,0 +1,96 @@
+@startuml
+left to right direction
+skinparam monochrome false
+skinparam usecase {
+    BackgroundColor<<core>> LightBlue
+    BorderColor Black
+}
+
+actor "Użytkownik\nniezalogowany" as Guest
+actor "Użytkownik\nzalogowany" as User
+Guest <|- User
+
+
+rectangle "SzachUZ" {
+
+    ' ===== 1. Logowanie =====
+    usecase "Logowanie" as UC_Login <<core>>
+    usecase "Rejestracja\nnowych użytkowników" as UC_Register <<core>> 
+    usecase "Captcha\n(w formularzu)" as UC_Captcha
+
+    ' ===== 2. Wersje językowe =====
+    usecase "Wersje językowe" as UC_Language <<core>>
+    usecase "Manual/Auto" as UC_LangSwitch
+
+    ' ===== 3. Motywy =====
+    usecase "Motywy wizualne" as UC_Theme <<core>>
+    usecase "Manual/Auto" as UC_Themes
+
+
+    usecase "Gra PvE" as UC_PvE <<core>>
+
+    ' ===== 5. Konfiguracja PvE =====
+    usecase "Konfiguracja PvE" as UC_PvE_Config
+
+    ' ===== 6. Eksport PDF =====
+    usecase "Eksport gry do PDF" as UC_ExportPDF <<core>>
+    usecase "Generowanie zapisu ruchów" as UC_ExportGen
+    usecase "Pobieranie PDF" as UC_ExportDownload
+
+    ' ===== 7. Gra PvP =====
+    usecase "Gra PvP" as UC_PvP <<core>>
+    usecase "Zaproszenie gracza" as UC_Invite
+    usecase "Matchmaking" as UC_Matchmaking
+
+    ' ===== 8. Planowanie gry =====
+    usecase "Zaproszenie do gry" as UC_Schedule <<core>>
+    usecase "Powiadomienie\n (e-mail lub na stronie)" as UC_EmailNotify
+
+    ' ===== 9. Ranking =====
+    usecase "System rankingu" as UC_Ranking <<core>>
+    usecase "Lista najlepszych graczy" as UC_RatingPoints
+    usecase "Aktualizacja punktów" as UC_RatingUpdate
+}
+
+' ===== Relacje aktorów =====
+
+Guest --> UC_Login
+Guest --> UC_Register
+Guest --> UC_Language
+Guest --> UC_Theme
+
+User --> UC_PvE
+User --> UC_PvP
+User --> UC_ExportPDF
+User --> UC_Schedule
+User --> UC_Ranking
+
+
+' ===== Include / extend =====
+
+UC_Login ..> UC_Captcha : <<include>>
+UC_Login <. UC_Register : <<extend>>
+UC_Register ..> UC_Captcha : <<include>>
+
+UC_Language ..> UC_LangSwitch : <<include>>
+
+UC_Theme ..> UC_Themes : <<include>>
+
+UC_PvE <.. UC_PvE_Config : <<extend>>
+
+UC_ExportPDF ..> UC_ExportGen : <<include>>
+UC_ExportPDF <.. UC_ExportDownload : <<extend>>
+
+UC_PvP <.. UC_Invite : <<extend>>
+UC_PvP ..> UC_Matchmaking: <<include>>
+
+UC_Schedule ..> UC_EmailNotify : <<include>>
+
+UC_Ranking ..> UC_RatingPoints : <<include>>
+UC_Ranking ..> UC_RatingUpdate : <<include>>
+
+
+
+
+@enduml
+

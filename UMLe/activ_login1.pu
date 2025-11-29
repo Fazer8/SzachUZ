@@ -1,0 +1,39 @@
+@startuml
+|FE| Frontend
+|BE| Backend
+|DB| Database
+
+|FE|
+start
+:Wyświetl ekran logowania;
+
+|DB|
+if (Użytkownik istnieje?) then (nie)
+    |FE|
+    :Wprowadź dane rejestracyjne;
+    :;
+    |DB|
+    :Utwórz konto;
+    :;
+    |BE|
+    :Zaloguj użytkownika;
+    |FE|
+    :Wyświetl ekran główny;
+    stop
+else (tak)
+    |FE|
+    :Wprowadź dane logowania;
+    |BE|
+    :Sprawdź CAPTCHA;
+    if (Dane poprawne?) then (tak)
+        :Zaloguj użytkownika;
+        |FE|
+        :Wyświetl ekran główny;
+        stop
+    else (nie)
+        |FE|
+        :Wyświetl błąd logowania;
+        stop
+    endif
+endif
+@enduml
