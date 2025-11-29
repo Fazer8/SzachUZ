@@ -1,0 +1,20 @@
+@startuml
+|FE| Frontend
+|BE| Backend
+|DB| Database
+
+|BE|
+if (Chcesz pobrać raport gry?) then (tak)
+    :Generuj zapis gry (ruchy, czas, wynik);
+    |FE|
+    :Pobierz raport PDF;
+endif
+
+|BE|
+if (Wyświelić ranking?) then (tak)
+    |DB|
+    :Pobierz aktualny ranking graczy;
+    |BE|
+    :Wyświetl ranking TOP 10;
+endif
+@enduml

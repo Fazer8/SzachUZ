@@ -1,0 +1,60 @@
+@startuml
+start
+
+' ===== 1. Logowanie / Rejestracja =====
+partition Logowanie / Rejestracja {
+    :Wyświetl ekran logowania;
+    if (Użytkownik istnieje?) then (tak)
+        :Wprowadź dane logowania;
+        :Sprawdź captcha;
+        if (Dane poprawne?) then (tak)
+            :Zaloguj użytkownika;
+        else (nie)
+            :Wyświetl błąd logowania;
+            stop
+        endif
+    else (nie)
+        :Wprowadź dane rejestracyjne;
+        :Utwórz konto;
+        :Zaloguj użytkownika;
+    endif
+}
+
+' ===== 2. Gra PvE / PvP =====
+partition Gra {
+    if (Typ gry: PvE/PvP) then (PvE)
+        :Wybierz poziom trudności;
+        :Uruchom grę PvE z API;
+        :Rejestruj ruchy i wynik;
+    else (PvP)
+        :Zaproś gracza lub wybierz przeciwnika;
+        :Zaproś gracza przez stronę lub e-mail;
+        if (Użyto e-mail?) then (tak)
+            :Wyślij powiadomienie e-mail;
+        else (nie)
+        endif
+        :Uruchom grę PvP z własnym silnikiem lub API;
+        :Rejestruj ruchy i wynik;
+        :Zaktualizuj punkty gracza (wygrana/przegrana);
+    endif
+}
+
+' ===== 3. Po zakończeniu gry =====
+partition PostGame {
+    ' --- 3a. Eksport gry do PDF ---
+    if (Chcesz pobrać raport gry?)  then (tak)
+        :Generuj zapis gry (ruchy, czas, wynik);
+        :Pobierz raport PDF;
+    else (nie)
+    endif
+
+    ' --- 3b. Ranking / punkty ---
+    if (Rozgrywka rankingowa?) then (tak)
+
+        :Wyświetl ranking TOP 10;
+    else (nie)
+    endif
+}
+
+stop
+@enduml
