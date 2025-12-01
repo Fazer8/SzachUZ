@@ -148,7 +148,7 @@
     </jsp:attribute>
 
     <jsp:attribute name="body">
-        <main class="site-margin border-color border-radius">
+        <main class="site-margin">
             <div id="avatarContainer"></div>
             <input type="file" id="avatarInput" style="display:none;" accept="image/*"/>
 
