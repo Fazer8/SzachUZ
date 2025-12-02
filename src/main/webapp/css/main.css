@@ -6,7 +6,7 @@
     --dominant-color: var(--light-green);
     --secondary-color: var(--medium-green);
     --accent-color: var(--dark-green);
-    --bar-color: var(--medium-green);
+    --bar-color: var(--accent-color);
 
     --text-color-main: #000000;
     --text-color-accent: #000000;
@@ -16,17 +16,17 @@
 }
 
 :root.dark {
-    --light-green-2: #0e3b23;
+    --dark-green-2: #0e3b23;
     --min-green: #9db0a3;
     --gray-green: #3a4a40;
 
     --text-color-main: #ffffff;
     --text-color-accent: #000000;
 
-    --dominant-color: var(--light-green-2);
+    --dominant-color: var(--dark-green-2);
     --secondary-color: var(--min-green);
     --accent-color: var(--gray-green);
-    --bar-color: var(--light-green-2);
+    --bar-color: var(--accent-color);
 }
 
 * {
@@ -87,9 +87,11 @@ main {
 }
 
 .header-split {
-    border-color: var(--bar-color);
     background-color: var(--bar-color);
+    height: 4px;
+    border-style: 4px solid var(--bar-color);
     margin: 0 2em;
+    border-radius: 2px;
 }
 
 .logo {
