@@ -8,16 +8,18 @@
         <title>${page_name}</title>
         <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/logo_tmp.png">
         <jsp:invoke fragment="head" />
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
         <script>
+            document.addEventListener("DOMContentLoaded", resolveTheme);
             async function resolveTheme() {
                 let theme = null;
 
                 try {
-                    const resp = await fetch("${pageContext.request.contextPath}/profile/me/");
+                    const resp = await fetch("${pageContext.request.contextPath}/profile/me/", {
+                        headers: { Authorization: "Bearer " + token }
+                    });
                     if (resp.ok) {
                         const data = await resp.json();
-                        if (data && (data.darkMode === true || data.theme === false)) {
+                        if (data && (data.darkMode === true || data.darkMode === false)) {
                             theme = data.darkMode ? "dark" : "light";
                         }
                     }
@@ -44,10 +46,8 @@
             function applyTheme(theme) {
                 document.documentElement.classList.toggle("dark", theme === "dark");
             }
-
-            // Run before page finishes loading
-            document.addEventListener("DOMContentLoaded", resolveTheme);
         </script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
     </head>
     <body class="main-bg">
         <header class="border-radius secondary-bg site-margin">
