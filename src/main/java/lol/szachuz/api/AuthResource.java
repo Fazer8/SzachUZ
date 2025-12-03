@@ -7,6 +7,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 
 import lol.szachuz.api.dto.LoginDTO;
@@ -74,7 +75,10 @@ public class AuthResource {
         String token = usersRepository.login(email, password);
 
         if (token != null) {
-            return Response.ok(new TokenResponse(token)).build();
+            NewCookie cookie = new NewCookie("authToken",token,"/",null,null,(3600*24),true,true);
+            return Response.ok(new TokenResponse(token))
+                    .cookie(cookie)
+                    .build();
         } else {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(new MessageResponse("Invalid email or password."))
