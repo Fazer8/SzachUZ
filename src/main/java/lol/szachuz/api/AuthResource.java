@@ -17,6 +17,7 @@ import lol.szachuz.api.dto.TokenResponse;
 import lol.szachuz.api.dto.MessageResponse;
 
 import lol.szachuz.db.Repository.UsersRepository;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
@@ -93,7 +94,15 @@ public class AuthResource {
         String token = usersRepository.login(email, password);
 
         if (token != null) {
-            NewCookie cookie = new NewCookie("authToken",token,"/",null,null,(3600*24),true,true);
+            NewCookie cookie = new NewCookie(
+                    "authToken",
+                    token,
+                    "/",
+                    null,
+                    null,
+                    (3600 * 24),
+                    true,
+                    true);
             return Response.ok(new TokenResponse(token))
                     .cookie(cookie)
                     .build();
@@ -105,6 +114,7 @@ public class AuthResource {
 
 
     }
+
     private boolean verifyCaptcha(String token) {
         try {
             String secretKey = "6Le06h8sAAAAAJsuzvBK91q8T6B8Hmerp6xjgT39";
@@ -131,6 +141,7 @@ public class AuthResource {
             return false;
         }
     }
+
     @POST
     @Path("/check-username")
     @Consumes(MediaType.APPLICATION_JSON)

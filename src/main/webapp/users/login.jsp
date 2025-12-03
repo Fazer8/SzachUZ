@@ -1,19 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<!DOCTYPE html>
 <t:layout page_name="Login">
     <jsp:attribute name="head">
     <script>
         async function loginUser() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
-
             const captchaToken = grecaptcha.getResponse();
 
-            const body = {
-                email: email,
-                password: password,
-                captcha: captchaToken
-            };
+            const body = { email, password, captcha: captchaToken };
 
             const res = await fetch("${pageContext.request.contextPath}/api/auth/login", {
                 method: "POST",
@@ -21,35 +17,33 @@
                 body: JSON.stringify(body)
             });
 
-            const text = await res.text();
             const resultBox = document.getElementById("result");
 
             if (!res.ok) {
+                const text = await res.text();
                 resultBox.className = "error";
                 resultBox.textContent = "Error (" + res.status + "):\n" + text;
             } else {
+                // Backend ustawia ciasteczko HttpOnly → frontend nie rusza tokenu
                 resultBox.className = "success";
-                resultBox.textContent = "Success:\n" + text;
+                resultBox.textContent = "Login successful! Redirecting...";
+
+                // przekierowanie do strony profilu
+                window.location.href = "${pageContext.request.contextPath}/dashboard.jsp";
             }
 
             grecaptcha.reset();
         }
-
     </script>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin border-color border-radius container">
-
         <input type="email" id="email" placeholder="Email"/>
         <input type="password" id="password" placeholder="Password"/>
         <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
-
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
-
         <button onclick="loginUser()">Login</button>
-
         <div id="result"></div>
     </main>
     </jsp:attribute>
