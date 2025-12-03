@@ -7,9 +7,12 @@
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
 
+            const captchaToken = grecaptcha.getResponse();
+
             const body = {
                 email: email,
-                password: password
+                password: password,
+                captcha: captchaToken
             };
 
             const res = await fetch("${pageContext.request.contextPath}/api/auth/login", {
@@ -19,7 +22,6 @@
             });
 
             const text = await res.text();
-
             const resultBox = document.getElementById("result");
 
             if (!res.ok) {
@@ -29,7 +31,10 @@
                 resultBox.className = "success";
                 resultBox.textContent = "Success:\n" + text;
             }
+
+            grecaptcha.reset();
         }
+
     </script>
     </jsp:attribute>
 
@@ -38,6 +43,10 @@
 
         <input type="email" id="email" placeholder="Email"/>
         <input type="password" id="password" placeholder="Password"/>
+        <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
+
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 
         <button onclick="loginUser()">Login</button>
 

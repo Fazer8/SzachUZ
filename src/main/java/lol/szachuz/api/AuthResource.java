@@ -17,6 +17,10 @@ import lol.szachuz.api.dto.TokenResponse;
 import lol.szachuz.api.dto.MessageResponse;
 
 import lol.szachuz.db.Repository.UsersRepository;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 @Path("/auth")
 @RequestScoped
@@ -34,6 +38,13 @@ public class AuthResource {
         String username = request.username;
         String email = request.email;
         String password = request.password;
+
+
+        if (!verifyCaptcha(request.captcha)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MessageResponse("Captcha verification failed."))
+                    .build();
+        }
 
         if (username == null || email == null || password == null || username.isBlank() || email.isBlank() || password.isBlank()) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -56,6 +67,7 @@ public class AuthResource {
                     .entity(new MessageResponse(result))
                     .build();
         }
+
     }
 
     // <<--->> Endpoint: LOGOWANIE <<--->>
@@ -67,6 +79,12 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
+
+        if (!verifyCaptcha(request.captcha)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MessageResponse("Captcha verification failed."))
+                    .build();
+        }
         if (email == null || password == null || email.isBlank() || password.isBlank()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Email and password cannot be empty."))
@@ -84,5 +102,34 @@ public class AuthResource {
                     .entity(new MessageResponse("Invalid email or password."))
                     .build();
         }
+
+
     }
+    private boolean verifyCaptcha(String token) {
+        try {
+            String secretKey = "6Le06h8sAAAAAJsuzvBK91q8T6B8Hmerp6xjgT39";
+            String url = "https://www.google.com/recaptcha/api/siteverify";
+
+            String params = "secret=" + secretKey + "&response=" + token;
+
+            var conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.getOutputStream().write(params.getBytes());
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String input;
+            StringBuilder response = new StringBuilder();
+            while ((input = in.readLine()) != null) {
+                response.append(input);
+            }
+
+            return response.toString().contains("\"success\": true");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
