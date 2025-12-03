@@ -131,5 +131,48 @@ public class AuthResource {
             return false;
         }
     }
+    @POST
+    @Path("/check-username")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response checkUsername(RegisterDTO request) {
+        if (request.username == null || request.username.isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MessageResponse("Username cannot be empty"))
+                    .build();
+        }
+
+        boolean exists = usersRepository.existsByUsername(request.username);
+
+        if (exists) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(new MessageResponse("Username already taken"))
+                    .build();
+        }
+
+        return Response.ok(new MessageResponse("Username available")).build();
+    }
+
+    @POST
+    @Path("/check-email")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response checkEmail(RegisterDTO request) {
+        if (request.email == null || request.email.isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MessageResponse("Email cannot be empty"))
+                    .build();
+        }
+
+        boolean exists = usersRepository.existsByEmail(request.email);
+
+        if (exists) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(new MessageResponse("Email already taken"))
+                    .build();
+        }
+
+        return Response.ok(new MessageResponse("Email available")).build();
+    }
 
 }
