@@ -4,13 +4,19 @@
 <t:layout page_name="NAZWA STRONY">
     <jsp:attribute name="head">
     <script>
-        // skrypty
+        // automatyczne przekierowanie do tymczasowej strony pośredniej
+        window.onload = function() {
+            window.location.href = "${pageContext.request.contextPath}/users/userProfile.jsp";
+        };
     </script>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
-        <!-- HTML -->
+        <p>Trwa przekierowanie do strony użytkownika...</p>
+
+
+
     </main>
     </jsp:attribute>
 </t:layout>

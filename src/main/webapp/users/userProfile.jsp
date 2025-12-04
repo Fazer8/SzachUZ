@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:layout page_name="My Profile">
@@ -13,22 +14,64 @@
                 margin-bottom: 10px;
                 position: relative;
             }
+
             #avatarContainer img {
                 max-width: 100%;
                 max-height: 100%;
             }
+
             #avatarContainer.dragover {
                 border-color: #00f;
             }
         </style>
         <script>
-            const baseUrl = "${pageContext.request.contextPath}/profile";
+            const baseUrl = "${pageContext.request.contextPath}/api/profile";
             let currentAvatar = null;
 
+            // --- Display header info ---
+            function displayHeaderInfo(headerText) {
+                let pre = document.getElementById("profileResult");
+                if (!pre) {
+                    pre = document.createElement("pre");
+                    pre.id = "profileResult";
+                    document.body.prepend(pre);
+                }
+                pre.textContent = headerText;
+            }
+
+            // --- Fetch wrapper z automatycznym JWT (localStorage) ---
+            async function authFetch(url, options = {}) {
+                options = { ...options };
+                options.headers = { ...(options.headers || {}) };
+
+                const token = localStorage.getItem("authToken");
+                console.log("DEBUG TOKEN:", {
+                    val: token,
+                    type: typeof token,
+                    len: token ? token.length : 0,
+                    isTruthy: !!token
+                });
+                if (token) {
+
+                    //   -----------------<Frame of Shame>--------------------
+                    <%--|options.headers["Authorization"] = `Bearer ${token}`;|--%>
+                    //   -----------------<SkurwielJebany>--------------------
+
+                    options.headers["Authorization"] = "Bearer " + token;
+
+                }
+
+                displayHeaderInfo("Sending request to " + url + "\nAuthorization header: " + (options.headers["Authorization"] || "(none)"));
+
+                return fetch(url, options);
+            }
+
+            // --- Profile fetch ---
             async function getMyProfile() {
                 let data = {};
                 try {
-                    const response = await fetch(baseUrl + "/me", { method: "GET", headers: { "Accept": "application/json" } });
+                    const response = await authFetch(baseUrl + "/me", { method: "GET" });
+
                     if (response.ok) {
                         data = await response.json();
                         currentAvatar = data.userAvatar || null;
@@ -41,7 +84,6 @@
                     currentAvatar = null;
                 }
 
-                // Profile fields (opcjonalnie w trybie offline pozostawiamy puste)
                 document.getElementById("emailField").textContent = data.email || "(no email)";
                 document.getElementById("usernameField").textContent = data.username || "(no username)";
                 document.getElementById("languageField").textContent = data.language || "(no language)";
@@ -50,11 +92,11 @@
                 updateAvatarUI();
             }
 
+            // --- Avatar UI ---
             function updateAvatarUI() {
                 const container = document.getElementById("avatarContainer");
                 container.innerHTML = "";
 
-                // zawsze pokazujemy kontener i przyciski, nawet jeśli offline
                 if (currentAvatar) {
                     const img = document.createElement("img");
                     img.src = "/opt/szachuz/avatars/" + currentAvatar;
@@ -102,14 +144,12 @@
                     }
                 });
 
-                // File input change
                 document.getElementById("avatarInput").addEventListener("change", (e) => {
                     if (e.target.files.length > 0) uploadAvatar(e.target.files[0]);
                 });
             });
 
             async function uploadAvatar(file) {
-                // Kontrola formatu
                 if (!file.type.startsWith("image/")) {
                     alert("Only image files are allowed!");
                     return;
@@ -119,10 +159,7 @@
                 formData.append("file", file);
                 formData.append("filename", file.name);
 
-                const response = await fetch(baseUrl + "/me/avatar", {
-                    method: "PUT",
-                    body: formData
-                });
+                const response = await authFetch(baseUrl + "/me/avatar", { method: "PUT", body: formData });
 
                 if (response.ok) {
                     alert("Avatar updated!");
@@ -134,7 +171,7 @@
             }
 
             async function deleteAvatar() {
-                const response = await fetch(baseUrl + "/me/avatar", { method: "DELETE" });
+                const response = await authFetch(baseUrl + "/me/avatar", { method: "DELETE" });
                 if (response.ok) {
                     alert("Avatar reset to default.");
                     getMyProfile();
@@ -143,6 +180,7 @@
                     alert("Error: " + text);
                 }
             }
+
             window.onload = getMyProfile;
         </script>
     </jsp:attribute>
@@ -155,34 +193,34 @@
             <div>
                 <p>Email: <span id="emailField"></span></p>
                 <p>
-                Username: <span id="usernameField"></span>
-                <button onclick="showUsernameInput()">Update Username</button>
-                <span id="usernameResult"></span>
-                <span id="usernameSection" style="display:none;">
-                    <input type="text" id="usernameInput" placeholder="New username"/>
-                    <button onclick="updateUsername()">Confirm</button>
-                </span>
+                    Username: <span id="usernameField"></span>
+                    <button onclick="showUsernameInput()">Update Username</button>
+                    <span id="usernameResult"></span>
+                    <span id="usernameSection" style="display:none;">
+                        <input type="text" id="usernameInput" placeholder="New username"/>
+                        <button onclick="updateUsername()">Confirm</button>
+                    </span>
                 </p>
                 <p>
-                Language: <span id="languageField"></span>
-                <button id="languageButton" onclick="toggleLanguage()">Language</button>
-                <span id="languageResult"></span>
+                    Language: <span id="languageField"></span>
+                    <button id="languageButton" onclick="toggleLanguage()">Language</button>
+                    <span id="languageResult"></span>
                 </p>
                 <p>
-                Dark Mode: <span id="darkModeField"></span>
-                <button id="darkModeButton" onclick="toggleDarkMode()">Dark Mode</button>
-                <span id="darkModeResult"></span>
+                    Dark Mode: <span id="darkModeField"></span>
+                    <button id="darkModeButton" onclick="toggleDarkMode()">Dark Mode</button>
+                    <span id="darkModeResult"></span>
                 </p>
                 <p>
-                Password: ********
-                <button onclick="showPasswordInput()">Update Password</button>
-                <span id="passwordResult"></span>
-                <span id="passwordSection" style="display:none;">
-                    <input type="password" id="oldPasswordInput" placeholder="Old password"/>
-                    <input type="password" id="newPasswordInput" placeholder="New password"/>
-                    <input type="password" id="confirmPasswordInput" placeholder="Confirm new password"/>
-                    <button onclick="updatePassword()">Confirm</button>
-                </span>
+                    Password: ********
+                    <button onclick="showPasswordInput()">Update Password</button>
+                    <span id="passwordResult"></span>
+                    <span id="passwordSection" style="display:none;">
+                        <input type="password" id="oldPasswordInput" placeholder="Old password"/>
+                        <input type="password" id="newPasswordInput" placeholder="New password"/>
+                        <input type="password" id="confirmPasswordInput" placeholder="Confirm new password"/>
+                        <button onclick="updatePassword()">Confirm</button>
+                    </span>
                 </p>
             </div>
             <pre id="profileResult"></pre>
