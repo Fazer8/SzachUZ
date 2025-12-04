@@ -24,7 +24,12 @@
                 resultBox.className = "error";
                 resultBox.textContent = "Error (" + res.status + "):\n" + text;
             } else {
-                // Backend ustawia ciasteczko HttpOnly → frontend nie rusza tokenu
+                // Odczyt tokenu z JSON i zapis w localStorage
+                const data = await res.json();
+                if (data.token) {
+                    localStorage.setItem("authToken", data.token);
+                }
+
                 resultBox.className = "success";
                 resultBox.textContent = "Login successful! Redirecting...";
 

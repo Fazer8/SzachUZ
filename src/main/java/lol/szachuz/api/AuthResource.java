@@ -94,15 +94,15 @@ public class AuthResource {
         String token = usersRepository.login(email, password);
 
         if (token != null) {
-            NewCookie cookie = new NewCookie(
-                    "authToken",
-                    token,
-                    "/",
-                    null,
-                    null,
-                    (3600 * 24),
-                    true,
-                    true);
+            NewCookie cookie = new NewCookie.Builder("authToken")
+                    .value(token)
+                    .path("/")
+                    .maxAge(3600 * 24)
+                    .secure(false)    // lub true jeśli HTTPS
+                    .httpOnly(false)
+                    .sameSite(NewCookie.SameSite.LAX)
+                    .build();
+
             return Response.ok(new TokenResponse(token))
                     .cookie(cookie)
                     .build();

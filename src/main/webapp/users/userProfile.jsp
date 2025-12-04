@@ -28,14 +28,50 @@
             const baseUrl = "${pageContext.request.contextPath}/api/profile";
             let currentAvatar = null;
 
+            // --- Display header info ---
+            function displayHeaderInfo(headerText) {
+                let pre = document.getElementById("profileResult");
+                if (!pre) {
+                    pre = document.createElement("pre");
+                    pre.id = "profileResult";
+                    document.body.prepend(pre);
+                }
+                pre.textContent = headerText;
+            }
+
+            // --- Fetch wrapper z automatycznym JWT (localStorage) ---
+            async function authFetch(url, options = {}) {
+                options = { ...options };
+                options.headers = { ...(options.headers || {}) };
+
+                const token = localStorage.getItem("authToken");
+                console.log("DEBUG TOKEN:", {
+                    val: token,
+                    type: typeof token,
+                    len: token ? token.length : 0,
+                    isTruthy: !!token
+                });
+                if (token) {
+
+                    //   -----------------<Frame of Shame>--------------------
+                    <%--|options.headers["Authorization"] = `Bearer ${token}`;|--%>
+                    //   -----------------<SkurwielJebany>--------------------
+
+                    options.headers["Authorization"] = "Bearer " + token;
+
+                }
+
+                displayHeaderInfo("Sending request to " + url + "\nAuthorization header: " + (options.headers["Authorization"] || "(none)"));
+
+                return fetch(url, options);
+            }
+
+            // --- Profile fetch ---
             async function getMyProfile() {
                 let data = {};
                 try {
-                    const response = await fetch(baseUrl + "/me", {
-                        method: "GET",
-                        headers: { "Accept": "application/json" }
-                        // ciasteczko HttpOnly jest wysyłane automatycznie
-                    });
+                    const response = await authFetch(baseUrl + "/me", { method: "GET" });
+
                     if (response.ok) {
                         data = await response.json();
                         currentAvatar = data.userAvatar || null;
@@ -48,7 +84,6 @@
                     currentAvatar = null;
                 }
 
-                // Profile fields
                 document.getElementById("emailField").textContent = data.email || "(no email)";
                 document.getElementById("usernameField").textContent = data.username || "(no username)";
                 document.getElementById("languageField").textContent = data.language || "(no language)";
@@ -57,6 +92,7 @@
                 updateAvatarUI();
             }
 
+            // --- Avatar UI ---
             function updateAvatarUI() {
                 const container = document.getElementById("avatarContainer");
                 container.innerHTML = "";
@@ -123,11 +159,7 @@
                 formData.append("file", file);
                 formData.append("filename", file.name);
 
-                const response = await fetch(baseUrl + "/me/avatar", {
-                    method: "PUT",
-                    body: formData
-                    // ciasteczko HttpOnly jest wysyłane automatycznie
-                });
+                const response = await authFetch(baseUrl + "/me/avatar", { method: "PUT", body: formData });
 
                 if (response.ok) {
                     alert("Avatar updated!");
@@ -139,10 +171,7 @@
             }
 
             async function deleteAvatar() {
-                const response = await fetch(baseUrl + "/me/avatar", {
-                    method: "DELETE"
-                    // ciasteczko HttpOnly jest wysyłane automatycznie
-                });
+                const response = await authFetch(baseUrl + "/me/avatar", { method: "DELETE" });
                 if (response.ok) {
                     alert("Avatar reset to default.");
                     getMyProfile();

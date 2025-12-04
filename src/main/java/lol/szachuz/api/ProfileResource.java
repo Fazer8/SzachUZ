@@ -3,6 +3,8 @@ package lol.szachuz.api;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
 import lol.szachuz.db.Entities.Users;
@@ -44,6 +46,9 @@ public class ProfileResource {
             throw new WebApplicationException("Invalid subject in JWT", Response.Status.UNAUTHORIZED);
         }
     }
+
+
+
 
     @GET
     @Path("/me")

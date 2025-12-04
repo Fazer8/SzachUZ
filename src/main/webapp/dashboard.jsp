@@ -3,12 +3,12 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:layout page_name="NAZWA STRONY">
     <jsp:attribute name="head">
-<%--    <script>--%>
-<%--        // automatyczne przekierowanie do tymczasowej strony pośredniej--%>
-<%--        window.onload = function() {--%>
-<%--            window.location.href = "${pageContext.request.contextPath}/users/userProfile.jsp";--%>
-<%--        };--%>
-<%--    </script>--%>
+    <script>
+        // automatyczne przekierowanie do tymczasowej strony pośredniej
+        window.onload = function() {
+            window.location.href = "${pageContext.request.contextPath}/users/userProfile.jsp";
+        };
+    </script>
     </jsp:attribute>
 
     <jsp:attribute name="body">
