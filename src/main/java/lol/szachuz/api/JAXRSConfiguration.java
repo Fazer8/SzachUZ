@@ -4,6 +4,8 @@ import jakarta.annotation.security.DeclareRoles;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import org.eclipse.microprofile.auth.LoginConfig;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +19,7 @@ public class JAXRSConfiguration extends Application {
         Set<Class<?>> resources = new HashSet<>();
         resources.add(AuthResource.class);
         resources.add(ProfileResource.class);
+        resources.add(MultiPartFeature.class);
         return resources;
     }
 }
