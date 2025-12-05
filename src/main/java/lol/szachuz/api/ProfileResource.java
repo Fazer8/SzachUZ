@@ -1,32 +1,35 @@
 package lol.szachuz.api;
 
-import jakarta.annotation.security.RolesAllowed;
+import java.io.File;
+import java.util.Base64;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
 import jakarta.ws.rs.*;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.HttpHeaders;
+
 import lol.szachuz.db.Entities.Users;
 import lol.szachuz.api.dto.ProfileDTO;
-import jakarta.enterprise.context.RequestScoped;
-// import org.eclipse.microprofile.jwt.JsonWebToken; // <-- USUWAMY TO, BO TOMCAT TEGO NIE MA
-import jakarta.json.bind.annotation.JsonbProperty;
 import lol.szachuz.api.dto.ChangePasswordDTO;
 import lol.szachuz.db.Entities.UserPreferences;
 import lol.szachuz.db.Repository.UsersRepository;
 import lol.szachuz.db.Repository.UserPreferencesRepository;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import jakarta.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.json.bind.annotation.JsonbProperty;
+
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+
 
 @Path("/profile")
 @RequestScoped
-// @RolesAllowed({"USER"}) // <-- ODKOMENTUJESZ TO, JAK JUŻ ZADZIAŁA POBIERANIE ID
+@RolesAllowed({"USER"})
 public class ProfileResource {
 
     @Inject
@@ -35,50 +38,36 @@ public class ProfileResource {
     @Inject
     private UserPreferencesRepository userPreferencesRepository;
 
-    // USUNIĘTE: @Inject private JsonWebToken jwt;
-    // ZAMIAST TEGO WSTRZYKUJEMY NAGŁÓWKI HTTP:
+
     @Context
     private HttpHeaders headers;
 
     private int getAuthenticatedUserId() {
-        // 1. Pobierz nagłówek
         String authHeader = headers.getHeaderString("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new WebApplicationException("Missing or invalid Authorization header", Response.Status.UNAUTHORIZED);
         }
-
         try {
-            // 2. Wyciągnij token (usuń "Bearer ")
             String token = authHeader.substring(7);
 
-            // 3. Rozbij token na 3 części (Header.Payload.Signature)
             String[] chunks = token.split("\\.");
             if (chunks.length < 2) {
                 throw new WebApplicationException("Invalid JWT format", Response.Status.UNAUTHORIZED);
             }
-
-            // 4. Zdekoduj Payload (środek) z Base64
             Base64.Decoder decoder = Base64.getUrlDecoder();
             String payloadJson = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
-
-            // System.out.println("DEBUG Payload: " + payloadJson); // Możesz odkomentować do debugowania
-
-            // 5. Znajdź "sub" (subject) w JSONie "na piechotę" (bez biblioteki JSON dla uproszczenia)
-            // Szukamy fragmentu "sub":"123"
             String searchKey = "\"sub\"";
             int subIndex = payloadJson.indexOf(searchKey);
 
             if (subIndex != -1) {
-                // Znajdź początek wartości (za dwukropkiem i ewentualnymi spacjami)
                 int startQuote = payloadJson.indexOf("\"", subIndex + searchKey.length());
-                while (payloadJson.charAt(startQuote) != '"' && startQuote < payloadJson.length()) {
+                while (payloadJson.charAt(startQuote) != '"') {
                     startQuote++;
                 }
-                // Znajdź koniec wartości
                 int endQuote = payloadJson.indexOf("\"", startQuote + 1);
 
-                if (startQuote != -1 && endQuote != -1) {
+                if (endQuote != -1) {
                     String subValue = payloadJson.substring(startQuote + 1, endQuote);
                     return Integer.parseInt(subValue);
                 }
@@ -108,7 +97,6 @@ public class ProfileResource {
         return Response.ok(profileDTO).build();
     }
 
-    // --- PONIŻEJ BEZ ZMIAN (tylko upewnij się, że używasz getAuthenticatedUserId w każdej metodzie) ---
 
     public static class UpdateFieldDTO {
         @JsonbProperty("value")
@@ -189,27 +177,45 @@ public class ProfileResource {
     @Path("/me/avatar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAvatar(@FormParam("file") InputStream uploadedInputStream,
-                                 @FormParam("filename") String originalFilename) {
-        if (uploadedInputStream == null || originalFilename == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+    public Response updateAvatar(
+            @FormDataParam("file") InputStream uploadedInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileDetail,
+            @FormDataParam("filename") String manualFilename
+    ) {
+        if (uploadedInputStream == null || fileDetail == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("File is required.").build();
         }
+
         int userId = getAuthenticatedUserId();
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
+        String originalName = (manualFilename != null && !manualFilename.isEmpty())
+                ? manualFilename
+                : fileDetail.getFileName();
+
+        if (originalName == null) originalName = "avatar.png";
+
         String ext = "png";
-        if(originalFilename.toLowerCase().endsWith(".jpg") || originalFilename.toLowerCase().endsWith(".jpeg")) ext = "jpg";
+        if (originalName.toLowerCase().endsWith(".jpg") || originalName.toLowerCase().endsWith(".jpeg")) ext = "jpg";
 
         String avatarsDir = "/opt/szachuz/avatars/";
         new File(avatarsDir).mkdirs();
-        String filename = "avatar_" + userId + "." + ext;
 
-        try (OutputStream out = new FileOutputStream(new File(avatarsDir, filename))) {
-            uploadedInputStream.transferTo(out);
+        String filename = "avatar_" + userId + "." + ext;
+        File targetFile = new File(avatarsDir, filename);
+
+        try {
+            java.nio.file.Files.copy(
+                    uploadedInputStream,
+                    targetFile.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            );
         } catch (Exception e) {
-            return Response.serverError().build();
+            e.printStackTrace();
+            return Response.serverError().entity("Failed to save file: " + e.getMessage()).build();
         }
+
         prefs.setUserAvatar(filename);
         userPreferencesRepository.update(prefs);
         return Response.ok("{\"message\":\"Avatar updated.\"}").build();
@@ -223,11 +229,28 @@ public class ProfileResource {
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
         String current = prefs.getUserAvatar();
-        if (!"default.png".equals(current)) {
+        if (!"default_avatar.png".equals(current)) {
             new File("/opt/szachuz/avatars/", current).delete();
         }
-        prefs.setUserAvatar("default.png");
+        prefs.setUserAvatar("default_avatar.png");
         userPreferencesRepository.update(prefs);
         return Response.ok("{\"message\":\"Avatar reset.\"}").build();
+    }
+
+
+    @GET
+    @Path("/avatars/{filename}")
+    @Produces("image/png")
+    public Response getAvatar(@PathParam("filename") String filename) {
+        if (filename == null || filename.contains("..") || filename.contains("/")) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        java.io.File file = new java.io.File("/opt/szachuz/avatars/" + filename);
+        if (!file.exists()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return Response.ok(file).header("Content-Disposition", "inline; filename=\"" + filename + "\"").build();
     }
 }

@@ -50,6 +50,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.version}</version>
@@ -102,8 +108,6 @@
             <artifactId>smallrye-config</artifactId>
             <version>3.4.2</version>
         </dependency>
-
-
 
 
         <!-- HK2 CDI integration -->
