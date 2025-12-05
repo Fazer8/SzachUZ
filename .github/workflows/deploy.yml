@@ -20,13 +20,14 @@ jobs:
 
     - name: Build WAR
       run: mvn clean package
-
+    
     - name: Upload Project to EC2
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        passphrase: ${{ secrets.EC2_SSH_PASSPHRASE }}
         source: "."
         target: "~/szachuz"
 
@@ -36,9 +37,9 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        passphrase: ${{ secrets.EC2_SSH_PASSPHRASE }}
         script: |
           cd ~/szachuz
-
           docker-compose down || true
           docker-compose build
           docker-compose up -d
