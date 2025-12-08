@@ -334,7 +334,7 @@
 
             // Dark Mode
             async function toggleDarkMode() {
-                const newMode = !(currentUserData.darkMode || false);
+                const newMode = !(currentUserData.darkMode);
                 const res = await authFetch(baseUrl + "/me/darkMode", {
                     method: "PUT",
                     headers: {"Content-Type": "application/json"},
@@ -342,6 +342,9 @@
                 });
                 if (res.ok) {
                     showToast("Tryb ciemny: " + (newMode ? "Włączony" : "Wyłączony"), "info");
+                    const newTheme = newMode ? "light" : "dark";
+                    localStorage.setItem("theme", newTheme);
+                    document.documentElement.classList.toggle("dark", newTheme === "dark");
                     getMyProfile();
                 }
             }

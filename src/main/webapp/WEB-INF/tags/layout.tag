@@ -14,31 +14,33 @@
                 let theme = null;
 
                 try {
-                    const resp = await fetch("${pageContext.request.contextPath}/profile/me/", {
-                        headers: { Authorization: "Bearer " + token }
-                    });
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        if (data && (data.darkMode === true || data.darkMode === false)) {
-                            theme = data.darkMode ? "dark" : "light";
-                        }
+                    const response = await authFetch("${pageContext.request.contextPath}/api/profile/me", {method: "GET"});
+                    if (response.ok) {
+                        let profile = await response.json()
+                        let themeResponse = profile.darkMode
+                        theme = themeResponse ? "dark" : "light";
+                        renderProfile(currentUserData);
+                    } else {
+                        console.warn("Status:", response.status);
+                        if (response.status === 401) showToast("Sesja wygasła. Zaloguj się ponownie.", "error");
                     }
                 } catch (e) {
-                    console.warn("Theme fetch failed.");
+                    console.error("Error:", e);
+                    showToast("Błąd połączenia z serwerem.", "error");
                 }
 
-                if (!theme) {
+                if (theme === null) {
                     const local = localStorage.getItem("theme");
                     if (local === "dark" || local === "light") theme = local;
                 }
 
-                if (!theme) {
+                if (theme === null) {
                     theme = window.matchMedia("(prefers-color-scheme: dark)").matches
                         ? "dark"
                         : "light";
                 }
 
-                if (!theme) theme = "light";
+                if (theme === null) theme = "light";
 
                 applyTheme(theme);
             }
@@ -67,18 +69,22 @@
                         const isDark = root.classList.contains("dark");
                         const newTheme = isDark ? "light" : "dark";
 
-                        applyTheme(newTheme); // update instantly
+                        applyTheme(newTheme);
                         localStorage.setItem("theme", newTheme);
 
-                        // Save to server if user is logged in
                         try {
-                            await fetch("${pageContext.request.contextPath}/profile/me/darkMode", {
+                            const res = await authFetch("${pageContext.request.contextPath}/api/profile/me/darkMode", {
                                 method: "PUT",
                                 headers: {"Content-Type": "application/json"},
-                                body: JSON.stringify({theme: (newTheme === "dark")})
+                                body: JSON.stringify({darkMode: newTheme === "dark"})
                             });
+                            if (res.ok) {
+                                showToast("Tryb ciemny: " + ((newTheme === "dark") ? "Włączony" : "Wyłączony"), "info");
+                                localStorage.setItem("theme", newTheme);
+                                //getMyProfile();
+                            }
                         } catch (e) {
-                            console.warn(e);
+                            showToast("Błąd wysyłania pliku." + e, "error");
                         }
                     }
                 </script>
