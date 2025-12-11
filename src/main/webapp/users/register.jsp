@@ -101,24 +101,42 @@
            window.registerUser = registerUser;
        };
    </script>
+    <style>
+        .center-content {
+            display: grid;
+            place-items: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        form input {
+            margin-bottom: 0.5em;
+        }
+    </style>
 
     </jsp:attribute>
 
     <jsp:attribute name="body">
-    <main class="site-margin border-color border-radius container">
+    <main class="site-margin border-color border-radius container center-content">
+        <form>
+            <label for="username">Nazwa uzytkownika</label>
+            <input type="text" id="username" placeholder="Username"/>
+            <div id="username-status" class="status"></div>
+            <label for="email">E-mail</label>
+            <input type="email" id="email" placeholder="Email"/>
+            <div id="email-status" class="status"></div>
+            <label for="password">Hasło</label>
+            <input type="password" id="password" placeholder="Password"/>
+            <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
 
-        <input type="text" id="username" placeholder="Username"/>
-        <input type="email" id="email" placeholder="Email"/>
-        <input type="password" id="password" placeholder="Password"/>
-        <div id="username-status" class="status"></div>
-        <div id="email-status" class="status"></div>
-        <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
+            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+            <button onclick="registerUser()">Register</button>
 
-        <button onclick="registerUser()">Register</button>
-
-        <div id="result"></div>
+            <div id="result"></div>
+        </form>
     </main>
     </jsp:attribute>
 </t:layout>
