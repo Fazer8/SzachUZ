@@ -31,6 +31,8 @@ services:
       DB_NAME: ${PG_ADMIN_USER}
       DB_USER: ${PG_ADMIN_USER}
       DB_PASSWORD: ${PG_ADMIN_PASSWD}
+      RECAPTCHA_SITE_KEY: 6LeIHigsAAAAAC4-fcb9a6HEROaZFy3qNBlhwJLU
+      RECAPTCHA_SECRET_KEY: 6LeIHigsAAAAAEe90FeforyBb4TFxJ4LYMF9jg7x
     volumes:
       - avatars:/opt/szachuz/avatars
       - ./avatarFiles/default_avatar.png:/opt/szachuz/avatars/default_avatar.png:ro

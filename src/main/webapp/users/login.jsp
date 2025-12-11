@@ -1,9 +1,23 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%-- 1. LOGIKA JAVY NA SAMEJ GÓRZE (Przed layoutem) --%>
+<%
+    // Pobieramy klucz ze zmiennych środowiskowych
+    String envKey = System.getenv("RECAPTCHA_SITE_KEY");
+
+    // Fallback dla localhosta (jeśli zmienna nie jest ustawiona)
+    if (envKey == null || envKey.isEmpty()) {
+        envKey = "6LeIHigsAAAAAC4-fcb9a6HEROaZFy3qNBlhwJLU";
+    }
+
+    // Zapisujemy zmienną tak, aby była widoczna w ${...} wewnątrz layoutu
+    pageContext.setAttribute("recaptchaSiteKey", envKey);
+%>
 <!DOCTYPE html>
 <t:layout page_name="Login">
     <jsp:attribute name="head">
     <script>
+
         async function loginUser() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
@@ -46,7 +60,7 @@
     <main class="site-margin border-color border-radius container">
         <input type="email" id="email" placeholder="Email"/>
         <input type="password" id="password" placeholder="Password"/>
-        <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
+        <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <button onclick="loginUser()">Login</button>
         <div id="result"></div>
