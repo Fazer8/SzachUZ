@@ -117,7 +117,16 @@ public class AuthResource {
 
     private boolean verifyCaptcha(String token) {
         try {
-            String secretKey = "6Le06h8sAAAAAJsuzvBK91q8T6B8Hmerp6xjgT39";
+            // ZAMIAST TEGO:
+            // String secretKey = "6Lc8GigsAAAAAMAKR2ZeX3CZXfwv1f1AZDNBF4FF";
+
+            // ZRÓB TAK:
+            String secretKey = System.getenv("RECAPTCHA_SECRET_KEY");
+
+            if (secretKey == null || secretKey.isEmpty()) {
+                System.out.println("BŁĄD: Brak zmiennej RECAPTCHA_SECRET_KEY!");
+                return false;
+            }
             String url = "https://www.google.com/recaptcha/api/siteverify";
 
             String params = "secret=" + secretKey + "&response=" + token;
