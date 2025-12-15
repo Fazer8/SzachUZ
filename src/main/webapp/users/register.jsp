@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%
+    String envKey = System.getenv("RECAPTCHA_SITE_KEY");
+    if (envKey == null || envKey.isEmpty()) {
+        envKey = "6LeIHigsAAAAAC4-fcb9a6HEROaZFy3qNBlhwJLU"; // fallback
+    }
+    pageContext.setAttribute("recaptchaSiteKey", envKey);
+%>
+
 <t:layout page_name="Register">
     <jsp:attribute name="head">
    <script>
@@ -119,6 +127,7 @@
     </jsp:attribute>
 
     <jsp:attribute name="body">
+
     <main class="site-margin border-color border-radius container center-content">
         <form>
             <label for="username">Nazwa uzytkownika</label>
@@ -129,7 +138,7 @@
             <div id="email-status" class="status"></div>
             <label for="password">Hasło</label>
             <input type="password" id="password" placeholder="Password"/>
-            <div class="g-recaptcha" data-sitekey="6Le06h8sAAAAAOJ3xtyqsTqNgrjlZokjvtPW9yw2"></div>
+            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
 
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
@@ -137,6 +146,7 @@
 
             <div id="result"></div>
         </form>
+
     </main>
     </jsp:attribute>
 </t:layout>
