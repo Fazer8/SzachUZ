@@ -21,8 +21,8 @@ jobs:
     - name: Inject PEM files into META-INF
       run: |
         mkdir -p src/main/resources/META-INF
-        echo "${{ secrets.PRIVATE_KEY_PEM }}" > src/main/resources/META-INF/privateKey.pem
-        echo "${{ secrets.PUBLIC_KEY_PEM }}" > src/main/resources/META-INF/publicKey.pem
+        echo "${{ secrets.PRIVATE_AUTH_KEY_PEM }}" > src/main/resources/META-INF/privateKey.pem
+        echo "${{ secrets.PUBLIC_AUTH_KEY_PEM }}" > src/main/resources/META-INF/publicKey.pem
         chmod 600 src/main/resources/META-INF/*.pem
 
     - name: Build WAR
