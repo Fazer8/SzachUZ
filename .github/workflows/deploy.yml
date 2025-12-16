@@ -18,6 +18,13 @@ jobs:
         distribution: 'temurin'
         java-version: '25'
 
+    - name: Inject PEM files into META-INF
+      run: |
+        mkdir -p src/main/resources/META-INF
+        echo "${{ secrets.PRIVATE_KEY_PEM }}" > src/main/resources/META-INF/privateKey.pem
+        echo "${{ secrets.PUBLIC_KEY_PEM }}" > src/main/resources/META-INF/publicKey.pem
+        chmod 600 src/main/resources/META-INF/*.pem
+
     - name: Build WAR
       run: mvn clean package
     
@@ -31,6 +38,12 @@ jobs:
         source: "."
         target: "~/szachuz"
 
+    - name: Cleanup PEM files
+      if: always()
+      run: |
+        rm -f src/main/resources/META-INF/privateKey.pem
+        rm -f src/main/resources/META-INF/publicKey.pem
+
     - name: Build & Run Containers on EC2
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -40,6 +53,6 @@ jobs:
         passphrase: ${{ secrets.EC2_SSH_PASSPHRASE }}
         script: |
           cd ~/szachuz
-          docker-compose down || true
           docker-compose build
+          docker-compose down || true
           docker-compose up -d
