@@ -33,6 +33,17 @@
             max-height: 70vh;
             max-width: 70vh;
         }
+        .board-b72b1 {
+            border: 20px solid var(--accent-color) !important;
+            border-radius: 10px;
+        }
+        .white-1e1d7 {
+            background-color: var(--dominant-color) !important;
+        }
+
+        .black-3c85d {
+            background-color: var(--secondary-color) !important;
+        }
     </style>
     </jsp:attribute>
 

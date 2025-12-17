@@ -6,14 +6,90 @@
     <script>
         // skrypty
     </script>
+    <style>
+        main {
+            display: grid;
+            grid-template-columns: 1fr;
+            place-items: center;
+            gap: 1em;
+        }
+        main div {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        main div div {
+            padding: 20px;
+            border-radius: 20px;
+        }
+        .left-panel * img {
+            max-width: 80vw;
+        }
+        p {
+            text-align: center;
+        }
+        .left-panel button {
+            margin: 0 10vw;
+        }
+        .right-panel div {
+            width: 80vw;
+        }
+        ol {
+             list-style-position: inside;
+        }
+
+        @media only screen and (min-width: 670px) {
+            main {
+                grid-template-columns: 1fr 1fr;
+            }
+            .left-panel * img {
+                max-width: 40vw;
+            }
+            .right-panel div {
+                width: 30vw;
+            }
+        }
+    </style>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
+        <div class="left-panel">
+            <div class="secondary-bg">
+                <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" alt="Zdjęcie pionków w rzędach, z królem pomiędzy nimi.">
+                <p>Zostań królem SzachUZ</p>
+            </div>
+            <button  type="button" onclick="window.location.href='users/login.jsp'">Zagraj teraz</button>
+        </div>
+        <div class="right-panel">
+            <div class="secondary-bg">
+                <p>Ranking najlepszych graczy</p>
+                <ol>
+                    <li>LoremFox</li>
+                    <li>ipsum_Byte</li>
+                    <li>Dolor-99</li>
+                    <li>SitNova_42</li>
+                    <li>Amet-Core</li>
+                    <li>elitShade</li>
+                    <li>Tempus_One</li>
+                    <li>Magna-Code7</li>
+                    <li>nullAsync</li>
+                    <li>Gravida-X</li>
+                </ol>
+            </div>
+            <div class="secondary-bg">
+                <p>
+                    Rywalizuj ze znajomymi<br>lub<br>Trenuj samemu
+                </p>
+            </div>
+        </div>
+    </main>
+    <footer style="display: flex; gap: 10px;">
+        <p>Development links: </p>
         <a href="hello-servlet">Hello Servlet</a>
         <a href="users/userProfile.jsp">Profil Użytkownika</a>
         <a href="users/login.jsp">Zaloguj Się</a>
         <a href="users/register.jsp">Zarejestruj Się</a>
-    </main>
+    </footer>
     </jsp:attribute>
 </t:layout>
