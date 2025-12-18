@@ -99,7 +99,8 @@
               position: 'start',
               onDragStart: onDragStart,
               onDrop: onDrop,
-              onSnapEnd: onSnapEnd
+              onSnapEnd: onSnapEnd,
+              pieceTheme: '/assets/pieces/{piece}.png'
             }
             board = Chessboard('board', config)
         </script>
