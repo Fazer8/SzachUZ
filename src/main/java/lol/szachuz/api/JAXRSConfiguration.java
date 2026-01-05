@@ -19,6 +19,7 @@ public class JAXRSConfiguration extends Application {
         Set<Class<?>> resources = new HashSet<>();
         resources.add(AuthResource.class);
         resources.add(ProfileResource.class);
+        resources.add(ScoreResource.class);
         resources.add(MultiPartFeature.class);
         return resources;
     }

@@ -1,12 +1,15 @@
 package lol.szachuz.db.Repository;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import lol.szachuz.api.dto.LeaderboardDTO;
 import lol.szachuz.db.EMF;
 import lol.szachuz.db.Entities.Leaderboard;
 
 import java.util.List;
 
+@ApplicationScoped
 public class LeaderboardRepository {
 
     public void save(Leaderboard leaderboard) {
@@ -34,6 +37,16 @@ public class LeaderboardRepository {
                     .getResultList();
         }
     }
+
+    public List<LeaderboardDTO> findTop10() {
+        try (EntityManager em = EMF.get().createEntityManager()) {
+            return em.createQuery(
+                            "SELECT new lol.szachuz.api.dto.LeaderboardDTO(l.user.username, l.mmr, l.matchesWon) FROM Leaderboard l ORDER BY l.mmr DESC", LeaderboardDTO.class)
+                    .setMaxResults(10)
+                    .getResultList();
+        }
+    }
+
 
     public void update(Leaderboard leaderboard) {
         EntityManager em = EMF.get().createEntityManager();
