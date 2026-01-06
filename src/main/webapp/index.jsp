@@ -45,12 +45,14 @@
         }
         .left-panel button {
             margin: 0 10vw;
+            /* Dodałem kursor rączki, żeby było widać, że to przycisk */
+            cursor: pointer;
         }
         .right-panel div {
             width: 80vw;
         }
         ol {
-             list-style-position: inside;
+            list-style-position: inside;
         }
 
         @media only screen and (min-width: 670px) {
@@ -74,7 +76,9 @@
                 <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" alt="Zdjęcie pionków w rzędach, z królem pomiędzy nimi.">
                 <p>Zostań królem SzachUZ</p>
             </div>
-            <button  type="button" onclick="window.location.href='users/login.jsp'">Zagraj teraz</button>
+
+            <button type="button" onclick="handlePlayClick()">Zagraj teraz</button>
+
         </div>
         <div class="right-panel">
             <div class="secondary-bg">
