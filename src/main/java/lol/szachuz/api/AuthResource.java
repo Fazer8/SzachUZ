@@ -153,8 +153,7 @@ public class AuthResource {
             return false;
         }
     }
-
-    // ... reszta metod (check-username itp.) bez zmian ...
+    
     @POST
     @Path("/check-username")
     @Consumes(MediaType.APPLICATION_JSON)
