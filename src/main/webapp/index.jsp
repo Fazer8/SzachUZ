@@ -1,21 +1,4 @@
 <!DOCTYPE html>
-<<<<<<< Updated upstream
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<html>
-<head>
-    <title>JSP - Hello World</title>
-</head>
-<body>
-<h1><%= "Hello World!" %>
-</h1>
-<br/>
-<a href="hello-servlet">Hello Servlet</a>
-<a href="users/userProfile.jsp">Profil Użytkownika</a>
-<a href="users/login.jsp">Zaloguj Się</a>
-<a href="users/register.jsp">Zarejestruj Się</a>
-</body>
-</html>
-=======
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:layout page_name="Strona główna">
@@ -62,14 +45,12 @@
         }
         .left-panel button {
             margin: 0 10vw;
-            /* Dodałem kursor rączki, żeby było widać, że to przycisk */
-            cursor: pointer;
         }
         .right-panel div {
             width: 80vw;
         }
         ol {
-            list-style-position: inside;
+             list-style-position: inside;
         }
 
         @media only screen and (min-width: 670px) {
@@ -93,9 +74,7 @@
                 <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" alt="Zdjęcie pionków w rzędach, z królem pomiędzy nimi.">
                 <p>Zostań królem SzachUZ</p>
             </div>
-
-            <button type="button" onclick="handlePlayClick()">Zagraj teraz</button>
-
+            <button  type="button" onclick="window.location.href='users/login.jsp'">Zagraj teraz</button>
         </div>
         <div class="right-panel">
             <div class="secondary-bg">
@@ -129,4 +108,3 @@
     </footer>
     </jsp:attribute>
 </t:layout>
->>>>>>> Stashed changes
