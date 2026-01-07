@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.*; // <--- WAŻNE IMPORTY
+import java.util.concurrent.*;
+import lol.szachuz.chess.MatchService; // <--- To jest ten serwis, który tworzy grę
+import lol.szachuz.chess.Match;        // <--- Obiekt gry
+import lol.szachuz.chess.HumanPlayer;  // <--- Klasa gracza
+
 
 public class MatchmakingService {
 

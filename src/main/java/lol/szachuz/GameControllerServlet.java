@@ -18,7 +18,8 @@ public class GameControllerServlet extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        long playerId = SessionUtil.getPlayerId(req);
+        //long playerId = SessionUtil.getPlayerId(req);
+        long playerId = 1;
         String from = req.getParameter("from");
         String to = req.getParameter("to");
 

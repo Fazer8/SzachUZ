@@ -45,36 +45,6 @@ public class TokenService {
                 .sign(privateKey);
     }
 
-    // ==========================================
-    // DODAJ TĘ METODĘ:
-    // ==========================================
-    public int getUserIdFromToken(String token) throws Exception {
-        if (token == null || token.isEmpty()) throw new Exception("Token is empty");
-
-        // Token JWT to: HEADER.PAYLOAD.SIGNATURE
-        String[] chunks = token.split("\\.");
-        if (chunks.length < 2) throw new Exception("Invalid JWT format");
-
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        String payloadJson = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
-
-        // Szukamy pola "sub" (czyli userId)
-        String searchKey = "\"sub\"";
-        int subIndex = payloadJson.indexOf(searchKey);
-
-        if (subIndex != -1) {
-            int startQuote = payloadJson.indexOf("\"", subIndex + searchKey.length());
-            // Przesuwamy się do wartości
-            while (payloadJson.charAt(startQuote) != '"') startQuote++;
-
-            int endQuote = payloadJson.indexOf("\"", startQuote + 1);
-            if (endQuote != -1) {
-                String subValue = payloadJson.substring(startQuote + 1, endQuote);
-                return Integer.parseInt(subValue);
-            }
-        }
-        throw new Exception("Token missing 'sub' claim");
-    }
 
     // ... reszta Twojej metody readPrivateKey bez zmian ...
     private PrivateKey readPrivateKey() throws Exception {

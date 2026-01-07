@@ -1,16 +1,23 @@
 package lol.szachuz.matchmaking;
 
+
+import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
-import lol.szachuz.auth.TokenService;
+import lol.szachuz.auth.UserContext;
+import lol.szachuz.db.Entities.Leaderboard;
+import lol.szachuz.db.Repository.LeaderboardRepository;
+
 import java.util.List;
 import java.util.Map;
 
 @ServerEndpoint("/ws/matchmaking")
 public class MatchmakingSocket {
+    @Inject
+    private UserContext userContext;
+    LeaderboardRepository leaderboardRepository;
 
     private final MatchmakingService matchmakingService = MatchmakingService.getInstance();
-    private final TokenService tokenService = new TokenService();
 
     private int userId;
 
@@ -26,11 +33,12 @@ public class MatchmakingSocket {
         }
 
         try {
-            this.userId = tokenService.getUserIdFromToken(tokenList.get(0));
+            this.userId = userContext.getCurrentUserId();
             System.out.println("Gracz połączony: " + userId);
 
             // --- ZMIANA: POBIERANIE MMR Z BAZY ---
-            int mmr = DatabaseService.getUserMMR(this.userId);
+            Leaderboard leaderboard = leaderboardRepository.findByUserId(userId);
+            int mmr = leaderboard.getMmr();
             // -------------------------------------
 
             matchmakingService.addPlayerToQueue(new QueuedPlayer(userId, mmr, session));
