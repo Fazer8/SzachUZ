@@ -5,21 +5,18 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.*;
-import lol.szachuz.chess.MatchService; // <--- To jest ten serwis, który tworzy grę
-import lol.szachuz.chess.Match;        // <--- Obiekt gry
-import lol.szachuz.chess.HumanPlayer;  // <--- Klasa gracza
-
+import lol.szachuz.chess.MatchService;
+import lol.szachuz.chess.Match;
+import lol.szachuz.chess.HumanPlayer;
 
 public class MatchmakingService {
 
     private static MatchmakingService instance;
 
-    // "Serce" matchmakingu - wątek wykonujący zadania cykliczne
+    // Scheduler na jednym wątku jest OK, bo operacje są błyskawiczne (tylko matematyka na liczbach)
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private MatchmakingService() {
-        // URUCHAMIAMY PĘTLĘ: Co 1 sekundę uruchom findMatch()
-        // Dzięku temu system ciągle sprawdza, czy czas oczekiwania już pozwala na połączenie graczy
         scheduler.scheduleAtFixedRate(this::findMatch, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -30,52 +27,42 @@ public class MatchmakingService {
         return instance;
     }
 
+    // Kolejki Concurrent są kluczowe dla wielowątkowości WebSocketów
     private final Queue<QueuedPlayer> queue = new ConcurrentLinkedQueue<>();
     private final Map<String, PendingMatch> pendingMatches = new ConcurrentHashMap<>();
 
     public void addPlayerToQueue(QueuedPlayer player) {
+        // 1. OCHRONA PRZED DUPLIKATAMI
+        // Jeśli ten gracz już jest w kolejce (np. przez odświeżenie strony), usuń go najpierw
+        removePlayer(player.getUserId());
+
+        // 2. Dodaj nową sesję
         queue.add(player);
-        System.out.println("Gracz dodany do kolejki (MMR: " + player.getMmr() + "). Liczba graczy: " + queue.size());
-        // findMatch() wywoła się samo za chwilę dzięki schedulerowi, ale możemy też wywołać ręcznie dla szybkości
+
+        System.out.println("Gracz " + player.getUserId() + " dołączył (MMR: " + player.getMmr() + "). W kolejce: " + queue.size());
+
+        // 3. Szukaj meczu
         findMatch();
     }
 
     public void removePlayer(int userId) {
-        boolean removedFromQueue = queue.removeIf(p -> p.getUserId() == userId);
-
-        if (removedFromQueue) {
-            System.out.println("Gracz usunięty z kolejki ID: " + userId);
-        } else {
-            String matchIdToRemove = null;
-            for (PendingMatch pm : pendingMatches.values()) {
-                if (pm.getPlayer1().getUserId() == userId || pm.getPlayer2().getUserId() == userId) {
-                    matchIdToRemove = pm.getMatchId();
-                    break;
-                }
+        queue.removeIf(p -> p.getUserId() == userId);
+        pendingMatches.values().removeIf(pm -> {
+            if (pm.getPlayer1().getUserId() == userId || pm.getPlayer2().getUserId() == userId) {
+                handleReject(pm.getMatchId(), userId);
+                return true;
             }
-
-            if (matchIdToRemove != null) {
-                System.out.println("Gracz rozłączył się podczas akceptacji. Traktujemy jako ODRZUCENIE.");
-                handleReject(matchIdToRemove, userId);
-            }
-        }
+            return false;
+        });
     }
 
-    // ==========================================
-    // 1. ALGORYTM WYSZUKIWANIA
-    // ==========================================
     public synchronized void findMatch() {
-        // Jeśli w kolejce jest mniej niż 2 graczy, szkoda czasu na pętlę
         if (queue.size() < 2) return;
-
-        // DEBUG: Możesz odkomentować, żeby widzieć, że pętla żyje
-        // System.out.println("Scheduler sprawdza kolejkę... Graczy: " + queue.size());
 
         Iterator<QueuedPlayer> iterator = queue.iterator();
         while (iterator.hasNext()) {
             QueuedPlayer p1 = iterator.next();
 
-            // Czyścimy martwe sesje
             if (p1.getSession() == null || !p1.getSession().isOpen()) {
                 iterator.remove();
                 continue;
@@ -88,47 +75,42 @@ public class MatchmakingService {
                     createPendingMatch(p1, p2);
                     queue.remove(p1);
                     queue.remove(p2);
-                    return; // Znaleziono parę, kończymy ten cykl
+                    return;
                 }
             }
         }
     }
 
     private boolean isGoodMatch(QueuedPlayer p1, QueuedPlayer p2) {
-        long waitTime = System.currentTimeMillis() - p1.getJoinTime();
-        long waitTimeSeconds = waitTime / 1000;
+        // Czas oczekiwania gracza, który czeka dłużej (p1)
+        long waitTime = (System.currentTimeMillis() - p1.getJoinTime()) / 1000;
 
-        // =========================================================
-        // USTAWIENIA (Możesz tu zmienić parametry szybkości)
-        // =========================================================
+        // BAZA: Na start pozwalamy tylko na 20 punktów różnicy
+        int baseDiff = 20;
 
-        // Co 5 sekund zakres rośnie o 10 MMR
-        // Czyli: 1 minuta czekania = poszerzenie o 120 MMR
-        int expansion = (int) (waitTimeSeconds / 5) * 10;
+        // ROZSZERZANIE: Co 5 sekund dodajemy 20 punktów zakresu
+        // 0-5 sek: +/- 20
+        // 5-10 sek: +/- 40
+        // 10-15 sek: +/- 60
+        // itd.
+        int expansion = (int) (waitTime / 5) * 20;
 
-        int allowedDiff = 30 + expansion;
-        // =========================================================
+        int allowedDiff = baseDiff + expansion;
 
         int actualDiff = Math.abs(p1.getMmr() - p2.getMmr());
 
-        // Logujemy postępy co jakiś czas (np. co 10 sekund), żeby nie spamować konsoli
-        if (waitTimeSeconds % 10 == 0) {
-            // System.out.println("Sprawdzam: " + p1.getUserId() + " vs " + p2.getUserId() + " | Diff: " + actualDiff + " | Allowed: " + allowedDiff);
-        }
+        // Opcjonalny DEBUG, żebyś widział w konsoli jak algorytm myśli:
+        // System.out.println("Porównanie: " + actualDiff + " vs Limit: " + allowedDiff + " (Czas: " + waitTime + "s)");
 
         return actualDiff <= allowedDiff;
     }
-
-    // ==========================================
-    // 2. OBSŁUGA AKCEPTACJI
-    // ==========================================
 
     private void createPendingMatch(QueuedPlayer p1, QueuedPlayer p2) {
         String matchId = "match_" + System.currentTimeMillis() + "_" + p1.getUserId();
         PendingMatch pending = new PendingMatch(matchId, p1, p2);
         pendingMatches.put(matchId, pending);
 
-        System.out.println("Propozycja meczu: " + matchId + " (" + p1.getMmr() + " vs " + p2.getMmr() + ")");
+        System.out.println("Znaleziono parę: " + matchId);
         sendJson(p1, "MATCH_PROPOSED", matchId, null);
         sendJson(p2, "MATCH_PROPOSED", matchId, null);
     }
@@ -138,7 +120,7 @@ public class MatchmakingService {
         if (match == null) return;
 
         match.accept(userId);
-        System.out.println("Gracz " + userId + " zaakceptował mecz " + matchId);
+        System.out.println("Gracz " + userId + " zaakceptował.");
 
         if (match.isFullyAccepted()) {
             startGame(match);
@@ -150,41 +132,47 @@ public class MatchmakingService {
         PendingMatch match = pendingMatches.remove(matchId);
         if (match == null) return;
 
-        System.out.println("Mecz " + matchId + " odrzucony przez " + rejectorId);
+        sendJson(match.getOpponent(rejectorId), "MATCH_CANCELLED", matchId, null);
 
         QueuedPlayer opponent = match.getOpponent(rejectorId);
-        QueuedPlayer rejector = (opponent == match.getPlayer1()) ? match.getPlayer2() : match.getPlayer1();
-
-        sendJson(rejector, "MATCH_CANCELLED", matchId, null);
-
         if (opponent != null && opponent.getSession().isOpen()) {
-            System.out.println("Przywracam gracza " + opponent.getUserId() + " do kolejki.");
             queue.add(opponent);
             sendJson(opponent, "OPPONENT_DECLINED", matchId, null);
-            // Scheduler i tak zaraz zadziała, więc nie musimy ręcznie wołać findMatch
         }
     }
 
+    // Tu zostawiamy Twoją logikę (bez Servletu, bezpośrednie tworzenie)
     private void startGame(PendingMatch match) {
-        sendJson(match.getPlayer1(), "GAME_START", match.getMatchId(), "WHITE");
-        sendJson(match.getPlayer2(), "GAME_START", match.getMatchId(), "BLACK");
-        System.out.println("Gra wystartowała: " + match.getMatchId());
+        try {
+            long p1Id = match.getPlayer1().getUserId();
+            long p2Id = match.getPlayer2().getUserId();
+
+            HumanPlayer white = new HumanPlayer(p1Id);
+            HumanPlayer black = new HumanPlayer(p2Id);
+
+            Match game = MatchService.getInstance().createMatch(white, black);
+            String gameUUID = game.getMatchUUID();
+
+            System.out.println("Gra START! UUID: " + gameUUID);
+
+            sendJson(match.getPlayer1(), "GAME_START", gameUUID, "WHITE");
+            sendJson(match.getPlayer2(), "GAME_START", gameUUID, "BLACK");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendJson(QueuedPlayer p, String type, String matchId, String color) {
         try {
             if (p.getSession() != null && p.getSession().isOpen()) {
                 String json = String.format("{\"type\":\"%s\", \"matchId\":\"%s\"", type, matchId);
-                if (color != null) {
-                    json += ", \"color\":\"" + color + "\"";
-                }
+                if (color != null) json += ", \"color\":\"" + color + "\"";
                 json += "}";
                 synchronized (p.getSession()) {
                     p.getSession().getBasicRemote().sendText(json);
                 }
             }
-        } catch (IllegalStateException | IOException e) {
-            // Ignorujemy błędy przy zamykaniu
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }
