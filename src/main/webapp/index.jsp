@@ -45,6 +45,7 @@
         }
         .left-panel button {
             margin: 0 10vw;
+
             /* Dodałem kursor rączki, żeby było widać, że to przycisk */
             cursor: pointer;
         }
@@ -52,7 +53,7 @@
             width: 80vw;
         }
         ol {
-            list-style-position: inside;
+             list-style-position: inside;
         }
 
         @media only screen and (min-width: 670px) {

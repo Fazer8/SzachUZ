@@ -169,16 +169,6 @@
                 }, 4000);
             }
 
-            // --- 2. Fetch Wrapper ---
-            async function authFetch(url, options = {}) {
-                options.headers = {...(options.headers || {})};
-                const token = localStorage.getItem("authToken");
-                if (token) {
-                    options.headers["Authorization"] = "Bearer " + token;
-                }
-                return fetch(url, options);
-            }
-
             // --- 3. Pobieranie Profilu ---
             async function getMyProfile() {
                 try {

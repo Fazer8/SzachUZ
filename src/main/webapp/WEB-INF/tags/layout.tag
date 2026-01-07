@@ -9,7 +9,16 @@
         <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/logo_tmp.png">
         <jsp:invoke fragment="head" />
         <script>
-            document.addEventListener("DOMContentLoaded", resolveTheme);
+            // --- 2. Fetch Wrapper ---
+            async function authFetch(url, options = {}) {
+                options.headers = {...(options.headers || {})};
+                const token = localStorage.getItem("authToken");
+                if (token) {
+                    options.headers["Authorization"] = "Bearer " + token;
+                }
+                return fetch(url, options);
+            }
+
             async function resolveTheme() {
                 let theme = null;
 
@@ -19,10 +28,8 @@
                         let profile = await response.json()
                         let themeResponse = profile.darkMode
                         theme = themeResponse ? "dark" : "light";
-                        renderProfile(currentUserData);
                     } else {
                         console.warn("Status:", response.status);
-                        if (response.status === 401) showToast("Sesja wygasła. Zaloguj się ponownie.", "error");
                     }
                 } catch (e) {
                     console.error("Error:", e);
@@ -44,6 +51,7 @@
 
                 applyTheme(theme);
             }
+            document.addEventListener("DOMContentLoaded", resolveTheme);
 
             function applyTheme(theme) {
                 document.documentElement.classList.toggle("dark", theme === "dark");
@@ -79,12 +87,10 @@
                                 body: JSON.stringify({darkMode: newTheme === "dark"})
                             });
                             if (res.ok) {
-                                showToast("Tryb ciemny: " + ((newTheme === "dark") ? "Włączony" : "Wyłączony"), "info");
-                                localStorage.setItem("theme", newTheme);
-                                //getMyProfile();
+                                console.log("Tryb ciemny: " + ((newTheme === "dark") ? "Włączony" : "Wyłączony"), "info");
                             }
                         } catch (e) {
-                            showToast("Błąd wysyłania pliku." + e, "error");
+                            console.warn("Błąd wysyłania pliku." + e, "error");
                         }
                     }
                 </script>
