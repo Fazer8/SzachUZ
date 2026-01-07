@@ -3,21 +3,24 @@ package lol.szachuz.matchmaking;
 import jakarta.websocket.Session;
 
 public class QueuedPlayer {
-    private int userId;
-    private int mmr;
-    private Session session; // Sesja WebSocket, żeby wysłać info "znalazłem mecz"
-    private long joinTime;
+    private final int userId;
+    private final int mmr;
+    private final String username; // <--- NOWE POLE
+    private final Session session;
+    private final long joinTime;
 
-    public QueuedPlayer(int userId, int mmr, Session session) {
+    // Zaktualizowany konstruktor
+    public QueuedPlayer(int userId, int mmr, String username, Session session) {
         this.userId = userId;
         this.mmr = mmr;
+        this.username = username; // <--- ZAPISUJEMY
         this.session = session;
         this.joinTime = System.currentTimeMillis();
     }
 
-    // Gettery
     public int getUserId() { return userId; }
     public int getMmr() { return mmr; }
+    public String getUsername() { return username; } // <--- GETTER
     public Session getSession() { return session; }
     public long getJoinTime() { return joinTime; }
 }
