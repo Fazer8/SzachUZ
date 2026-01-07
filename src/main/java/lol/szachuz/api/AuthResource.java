@@ -40,6 +40,10 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
+<<<<<<< Updated upstream
+=======
+        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
+>>>>>>> Stashed changes
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
@@ -78,6 +82,10 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
+<<<<<<< Updated upstream
+=======
+        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
+>>>>>>> Stashed changes
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
@@ -153,7 +161,12 @@ public class AuthResource {
             return false;
         }
     }
+<<<<<<< Updated upstream
     
+=======
+
+    // ... reszta metod (check-username itp.) bez zmian ...
+>>>>>>> Stashed changes
     @POST
     @Path("/check-username")
     @Consumes(MediaType.APPLICATION_JSON)
