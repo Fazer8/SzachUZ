@@ -4,7 +4,22 @@
 <t:layout page_name="Strona główna">
     <jsp:attribute name="head">
     <script>
-        // skrypty
+        function handlePlayClick() {
+            // 1. Sprawdzamy, czy w przeglądarce jest zapisany token
+            // Upewnij się, że przy logowaniu zapisujesz go jako "token" (lub zmień tutaj nazwę klucza)
+            const token = localStorage.getItem("authToken");
+
+            console.log("Sprawdzam token:", token ? "Jest token" : "Brak tokena");
+
+            if (token) {
+                // JEST ZALOGOWANY -> Idziemy do poczekalni (queue.jsp)
+                // Używamy contextPath, żeby link był poprawny niezależnie od nazwy pliku .war
+                window.location.href = "${pageContext.request.contextPath}/game/queue.jsp";
+            } else {
+                // NIE JEST ZALOGOWANY -> Idziemy do logowania
+                window.location.href = "${pageContext.request.contextPath}/users/login.jsp";
+            }
+        }
     </script>
     <style>
         main {
@@ -30,6 +45,9 @@
         }
         .left-panel button {
             margin: 0 10vw;
+
+            /* Dodałem kursor rączki, żeby było widać, że to przycisk */
+            cursor: pointer;
         }
         .right-panel div {
             width: 80vw;
@@ -59,7 +77,9 @@
                 <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" alt="Zdjęcie pionków w rzędach, z królem pomiędzy nimi.">
                 <p>Zostań królem SzachUZ</p>
             </div>
-            <button  type="button" onclick="window.location.href='users/login.jsp'">Zagraj teraz</button>
+
+            <button type="button" onclick="handlePlayClick()">Zagraj teraz</button>
+
         </div>
         <div class="right-panel">
             <div class="secondary-bg">
