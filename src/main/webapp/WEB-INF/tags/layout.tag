@@ -2,14 +2,14 @@
 <%@ attribute name="page_name" required="true" %>
 <%@ attribute name="head" fragment="true" required="false" %>
 <%@ attribute name="body" fragment="true" required="true" %>
+<%@ attribute name="block" required="false" %>
+<%@ taglib prefix="guard" tagdir="/WEB-INF/tags" %>
 
 <html>
     <head>
         <title>${page_name}</title>
         <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/logo_tmp.png">
-        <jsp:invoke fragment="head" />
         <script>
-            // --- 2. Fetch Wrapper ---
             async function authFetch(url, options = {}) {
                 options.headers = {...(options.headers || {})};
                 const token = localStorage.getItem("authToken");
@@ -18,7 +18,10 @@
                 }
                 return fetch(url, options);
             }
-
+        </script>
+        <guard:block user="${block}"/>
+        <jsp:invoke fragment="head" />
+        <script>
             async function resolveTheme() {
                 let theme = null;
 

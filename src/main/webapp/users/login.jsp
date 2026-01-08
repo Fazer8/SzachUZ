@@ -9,7 +9,7 @@
     pageContext.setAttribute("recaptchaSiteKey", envKey);
 %>
 <!DOCTYPE html>
-<t:layout page_name="Login">
+<t:layout page_name="Login" block="logged">
     <jsp:attribute name="head">
     <script>
         async function loginUser() {

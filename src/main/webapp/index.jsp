@@ -84,18 +84,7 @@
         <div class="right-panel">
             <div class="secondary-bg">
                 <p>Ranking najlepszych graczy</p>
-                <ol>
-                    <li>LoremFox</li>
-                    <li>ipsum_Byte</li>
-                    <li>Dolor-99</li>
-                    <li>SitNova_42</li>
-                    <li>Amet-Core</li>
-                    <li>elitShade</li>
-                    <li>Tempus_One</li>
-                    <li>Magna-Code7</li>
-                    <li>nullAsync</li>
-                    <li>Gravida-X</li>
-                </ol>
+                <t:leaderboard />
             </div>
             <div class="secondary-bg">
                 <p>
