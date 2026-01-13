@@ -5,6 +5,16 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "userpreferences")
 public class UserPreferences {
+    /**
+     * Represents the unique identifier for a user within the system.
+     *
+     * This field serves as the primary key in the "userpreferences" table
+     * and is linked to the corresponding primary key in the "users" table
+     * through a one-to-one relationship.
+     *
+     * It is automatically generated using the IDENTITY strategy, ensuring
+     * its uniqueness and consistency across the database.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;

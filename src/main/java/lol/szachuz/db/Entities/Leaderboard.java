@@ -5,6 +5,12 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "leaderboard")
 public class Leaderboard {
+    /**
+     * Represents the unique identifier for a user within the leaderboard system.
+     *
+     * This field is the primary key for the "leaderboard" table in the database.
+     * It is automatically generated using the IDENTITY strategy, ensuring its uniqueness.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;

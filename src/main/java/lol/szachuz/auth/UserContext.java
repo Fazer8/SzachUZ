@@ -10,11 +10,17 @@ import java.nio.charset.StandardCharsets;
 
 @RequestScoped
 public class UserContext {
+    /**
+     * Represents HTTP headers associated with the current request context.
+     *
+     * This field is automatically injected by the framework using the {@code @Context} annotation.
+     * It provides access to HTTP header information, such as the Authorization header,
+     * which may be used for authentication or other purposes.
+     */
 
     @Context
     private HttpHeaders headers;
 
-    // Cache'ujemy ID, żeby nie parsować tokena wielokrotnie w ramach jednego zapytania
     private Integer cachedUserId;
 
     public int getCurrentUserId() {
@@ -31,7 +37,6 @@ public class UserContext {
         try {
             String token = authHeader.substring(7);
 
-            // Tutaj przenosimy twoją logikę parsowania
             cachedUserId = parseUserIdFromToken(token);
             return cachedUserId;
         } catch (Exception e) {
@@ -40,7 +45,6 @@ public class UserContext {
     }
 
     private int parseUserIdFromToken(String token) {
-        // TWOJA LOGIKA (przeniesiona z ProfileResource)
         String[] chunks = token.split("\\.");
         if (chunks.length < 2) {
             throw new RuntimeException("Invalid JWT format");

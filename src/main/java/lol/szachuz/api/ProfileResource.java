@@ -32,6 +32,11 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 @RequestScoped
 @RolesAllowed({"USER"})
 public class ProfileResource {
+    /**
+     * Manages data access and operations related to user entities.
+     * This dependency is injected to provide an interface for performing
+     * CRUD operations and other user-related data handling tasks.
+     */
 
     @Inject
     private UsersRepository usersRepository;

@@ -16,6 +16,12 @@ import java.util.List;
 @Path("/")
 @RequestScoped
 public class ScoreResource {
+    /**
+     * Injected instance of LeaderboardRepository used for interacting with the leaderboard data.
+     * This repository provides various methods to perform CRUD operations and other queries
+     * on the leaderboard, such as retrieving the top 10 players or finding players by specific criteria.
+     * It integrates with the database using JPA and EntityManager.
+     */
 
     @Inject
     LeaderboardRepository leaderboardRepository;

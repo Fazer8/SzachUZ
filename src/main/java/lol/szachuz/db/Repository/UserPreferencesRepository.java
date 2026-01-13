@@ -10,7 +10,16 @@ import java.util.List;
 
 @ApplicationScoped
 public class UserPreferencesRepository {
-
+    /**
+     * Persists the provided UserPreferences entity in the database.
+     * This method begins a transaction, attempts to save the provided preferences,
+     * and commits the transaction upon successful operation. If an exception occurs
+     * during the process, the transaction is rolled back.
+     *
+     * @param preferences the UserPreferences entity to be saved to the database; must not be null.
+     * @throws IllegalArgumentException if the provided preferences entity is null.
+     * @throws Exception if there is an error during the persist process or transaction management.
+     */
     public void save(UserPreferences preferences) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
