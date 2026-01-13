@@ -13,7 +13,7 @@ import lol.szachuz.db.Repository.LeaderboardRepository;
 
 import java.util.List;
 
-@Path("/api")
+@Path("/")
 @RequestScoped
 public class ScoreResource {
 

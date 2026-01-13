@@ -9,7 +9,7 @@
     pageContext.setAttribute("recaptchaSiteKey", envKey);
 %>
 
-<t:layout page_name="Register">
+<t:layout page_name="Register" block="logged">
     <jsp:attribute name="head">
    <script>
        window.onload = function() {

@@ -11,7 +11,6 @@ import java.util.List;
 
 @ApplicationScoped
 public class LeaderboardRepository {
-
     public void save(Leaderboard leaderboard) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();

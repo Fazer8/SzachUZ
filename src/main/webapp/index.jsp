@@ -28,12 +28,12 @@
             place-items: center;
             gap: 1em;
         }
-        main div {
+        main > div {
             display: flex;
             flex-direction: column;
             gap: 1em;
         }
-        main div div {
+        main > div > div {
             padding: 20px;
             border-radius: 20px;
         }
@@ -52,9 +52,6 @@
         .right-panel div {
             width: 80vw;
         }
-        ol {
-             list-style-position: inside;
-        }
 
         @media only screen and (min-width: 670px) {
             main {
@@ -63,7 +60,7 @@
             .left-panel * img {
                 max-width: 40vw;
             }
-            .right-panel div {
+            .right-panel > div {
                 width: 30vw;
             }
         }
@@ -84,18 +81,7 @@
         <div class="right-panel">
             <div class="secondary-bg">
                 <p>Ranking najlepszych graczy</p>
-                <ol>
-                    <li>LoremFox</li>
-                    <li>ipsum_Byte</li>
-                    <li>Dolor-99</li>
-                    <li>SitNova_42</li>
-                    <li>Amet-Core</li>
-                    <li>elitShade</li>
-                    <li>Tempus_One</li>
-                    <li>Magna-Code7</li>
-                    <li>nullAsync</li>
-                    <li>Gravida-X</li>
-                </ol>
+                <t:leaderboard />
             </div>
             <div class="secondary-bg">
                 <p>
