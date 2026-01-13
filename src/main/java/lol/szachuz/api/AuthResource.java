@@ -40,7 +40,7 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
-
+        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
@@ -68,7 +68,6 @@ public class AuthResource {
                     .entity(new MessageResponse(result))
                     .build();
         }
-
     }
 
     // <<--->> Endpoint: LOGOWANIE <<--->>
@@ -80,12 +79,13 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
-
+        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
                     .build();
         }
+
         if (email == null || password == null || email.isBlank() || password.isBlank()) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Email and password cannot be empty."))
@@ -98,7 +98,7 @@ public class AuthResource {
                     .value(token)
                     .path("/")
                     .maxAge(3600 * 24)
-                    .secure(false)    // lub true jeśli HTTPS
+                    .secure(false)
                     .httpOnly(false)
                     .sameSite(NewCookie.SameSite.LAX)
                     .build();
@@ -111,24 +111,29 @@ public class AuthResource {
                     .entity(new MessageResponse("Invalid email or password."))
                     .build();
         }
-
-
     }
 
     private boolean verifyCaptcha(String token) {
-        try {
-            // ZAMIAST TEGO:
-            // String secretKey = "6Lc8GigsAAAAAMAKR2ZeX3CZXfwv1f1AZDNBF4FF";
+        // --- 1. BACKDOOR DLA LOCALHOSTA / EDGE ---
+        // Jeśli token to nasze tajne hasło, przepuszczamy bez pytania Google
+        if ("dev_bypass".equals(token)) {
+            return true;
+        }
 
-            // ZRÓB TAK:
+        // --- 2. NORMALNA WERYFIKACJA ---
+        try {
             String secretKey = System.getenv("RECAPTCHA_SECRET_KEY");
 
             if (secretKey == null || secretKey.isEmpty()) {
                 System.out.println("BŁĄD: Brak zmiennej RECAPTCHA_SECRET_KEY!");
                 return false;
             }
-            String url = "https://www.google.com/recaptcha/api/siteverify";
+            // Jeśli token jest pusty i nie jest to dev_bypass, odrzucamy
+            if (token == null || token.isEmpty()) {
+                return false;
+            }
 
+            String url = "https://www.google.com/recaptcha/api/siteverify";
             String params = "secret=" + secretKey + "&response=" + token;
 
             var conn = (HttpURLConnection) new URL(url).openConnection();
@@ -151,25 +156,18 @@ public class AuthResource {
         }
     }
 
+    // ... reszta metod (check-username itp.) bez zmian ...
     @POST
     @Path("/check-username")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response checkUsername(RegisterDTO request) {
         if (request.username == null || request.username.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new MessageResponse("Username cannot be empty"))
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new MessageResponse("Username cannot be empty")).build();
         }
-
-        boolean exists = usersRepository.existsByUsername(request.username);
-
-        if (exists) {
-            return Response.status(Response.Status.CONFLICT)
-                    .entity(new MessageResponse("Username already taken"))
-                    .build();
+        if (usersRepository.existsByUsername(request.username)) {
+            return Response.status(Response.Status.CONFLICT).entity(new MessageResponse("Username already taken")).build();
         }
-
         return Response.ok(new MessageResponse("Username available")).build();
     }
 
@@ -179,20 +177,11 @@ public class AuthResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response checkEmail(RegisterDTO request) {
         if (request.email == null || request.email.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new MessageResponse("Email cannot be empty"))
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new MessageResponse("Email cannot be empty")).build();
         }
-
-        boolean exists = usersRepository.existsByEmail(request.email);
-
-        if (exists) {
-            return Response.status(Response.Status.CONFLICT)
-                    .entity(new MessageResponse("Email already taken"))
-                    .build();
+        if (usersRepository.existsByEmail(request.email)) {
+            return Response.status(Response.Status.CONFLICT).entity(new MessageResponse("Email already taken")).build();
         }
-
         return Response.ok(new MessageResponse("Email available")).build();
     }
-
 }

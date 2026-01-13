@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="My Profile">
+<t:layout page_name="My Profile" block="guest">
     <jsp:attribute name="head">
         <style>
             #avatarContainer {
@@ -167,16 +167,6 @@
                     toast.classList.remove('visible');
                     setTimeout(() => toast.remove(), 300); // Czekamy aż zniknie animacja
                 }, 4000);
-            }
-
-            // --- 2. Fetch Wrapper ---
-            async function authFetch(url, options = {}) {
-                options.headers = {...(options.headers || {})};
-                const token = localStorage.getItem("authToken");
-                if (token) {
-                    options.headers["Authorization"] = "Bearer " + token;
-                }
-                return fetch(url, options);
             }
 
             // --- 3. Pobieranie Profilu ---

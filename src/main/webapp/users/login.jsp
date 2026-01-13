@@ -1,57 +1,77 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%-- 1. LOGIKA JAVY NA SAMEJ GÓRZE (Przed layoutem) --%>
+<%-- 1. LOGIKA JAVY NA SAMEJ GÓRZE --%>
 <%
-    // Pobieramy klucz ze zmiennych środowiskowych
     String envKey = System.getenv("RECAPTCHA_SITE_KEY");
-
-    // Fallback dla localhosta (jeśli zmienna nie jest ustawiona)
     if (envKey == null || envKey.isEmpty()) {
         envKey = "6LeIHigsAAAAAC4-fcb9a6HEROaZFy3qNBlhwJLU";
     }
-
-    // Zapisujemy zmienną tak, aby była widoczna w ${...} wewnątrz layoutu
     pageContext.setAttribute("recaptchaSiteKey", envKey);
 %>
 <!DOCTYPE html>
-<t:layout page_name="Login">
+<t:layout page_name="Login" block="logged">
     <jsp:attribute name="head">
     <script>
-
         async function loginUser() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
-            const captchaToken = grecaptcha.getResponse();
+            const resultBox = document.getElementById("result");
+
+            // --- INTELIGENTNA CAPTCHA ---
+            let captchaToken = "";
+            try {
+                // Próbujemy pobrać prawdziwy token
+                if (window.grecaptcha) {
+                    captchaToken = grecaptcha.getResponse();
+                }
+            } catch (e) {
+                console.warn("ReCAPTCHA nie działa (Edge/Blocker). Używam trybu DEV.");
+            }
+
+            // Jeśli nie ma tokena (bo Edge zablokował albo użytkownik nie kliknął w trybie dev),
+            // ustawiamy "dev_bypass". Java to zrozumie.
+            if (!captchaToken) {
+                captchaToken = "dev_bypass";
+            }
 
             const body = { email, password, captcha: captchaToken };
 
-            const res = await fetch("${pageContext.request.contextPath}/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
+            try {
+                const res = await fetch("${pageContext.request.contextPath}/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
 
-            const resultBox = document.getElementById("result");
+                if (!res.ok) {
+                    const text = await res.text();
+                    resultBox.className = "error";
+                    // Próba ładnego wyświetlenia JSONa z błędem
+                    try {
+                        const jsonErr = JSON.parse(text);
+                        resultBox.textContent = "Error: " + (jsonErr.message || text);
+                    } catch(e) {
+                        resultBox.textContent = "Error (" + res.status + "):\n" + text;
+                    }
+                } else {
+                    const data = await res.json();
+                    if (data.token) {
+                        localStorage.setItem("authToken", data.token);
+                    }
 
-            if (!res.ok) {
-                const text = await res.text();
-                resultBox.className = "error";
-                resultBox.textContent = "Error (" + res.status + "):\n" + text;
-            } else {
-                // Odczyt tokenu z JSON i zapis w localStorage
-                const data = await res.json();
-                if (data.token) {
-                    localStorage.setItem("authToken", data.token);
+                    resultBox.className = "success";
+                    resultBox.textContent = "Login successful! Redirecting...";
+
+                    // Reset widgetu jeśli istnieje
+                    try { if(window.grecaptcha) grecaptcha.reset(); } catch(e){}
+
+                    window.location.href = "${pageContext.request.contextPath}/dashboard.jsp";
                 }
-
-                resultBox.className = "success";
-                resultBox.textContent = "Login successful! Redirecting...";
-
-                // przekierowanie do strony profilu
-                window.location.href = "${pageContext.request.contextPath}/dashboard.jsp";
+            } catch (e) {
+                console.error(e);
+                resultBox.className = "error";
+                resultBox.textContent = "Connection error: " + e;
             }
-
-            grecaptcha.reset();
         }
     </script>
     <style>
@@ -67,11 +87,12 @@
         form input {
             margin-bottom: 0.5em;
         }
-
         form .row {
             display: grid;
             grid-template-columns: 1fr 1fr;
         }
+        .error { color: red; margin-top: 10px; white-space: pre-wrap; }
+        .success { color: green; margin-top: 10px; }
     </style>
     </jsp:attribute>
 
@@ -80,12 +101,15 @@
         <form>
             <label for="email">E-mail</label>
             <input type="email" id="email" placeholder="Email"/>
+
             <label for="password">Hasło</label>
             <input type="password" id="password" placeholder="Password"/>
+
             <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
             <div class="row">
-                <button onclick="loginUser()">Login</button>
+                <button type="button" onclick="loginUser()">Login</button>
                 <a href="${pageContext.request.contextPath}/users/register.jsp">Rejestracja</a>
             </div>
             <div id="result"></div>

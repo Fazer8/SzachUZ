@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.HttpHeaders;
 
+import lol.szachuz.auth.UserContext;
 import lol.szachuz.db.Entities.Users;
 import lol.szachuz.api.dto.ProfileDTO;
 import lol.szachuz.api.dto.ChangePasswordDTO;
@@ -42,49 +43,14 @@ public class ProfileResource {
     @Context
     private HttpHeaders headers;
 
-    private int getAuthenticatedUserId() {
-        String authHeader = headers.getHeaderString("Authorization");
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new WebApplicationException("Missing or invalid Authorization header", Response.Status.UNAUTHORIZED);
-        }
-        try {
-            String token = authHeader.substring(7);
-
-            String[] chunks = token.split("\\.");
-            if (chunks.length < 2) {
-                throw new WebApplicationException("Invalid JWT format", Response.Status.UNAUTHORIZED);
-            }
-            Base64.Decoder decoder = Base64.getUrlDecoder();
-            String payloadJson = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
-            String searchKey = "\"sub\"";
-            int subIndex = payloadJson.indexOf(searchKey);
-
-            if (subIndex != -1) {
-                int startQuote = payloadJson.indexOf("\"", subIndex + searchKey.length());
-                while (payloadJson.charAt(startQuote) != '"') {
-                    startQuote++;
-                }
-                int endQuote = payloadJson.indexOf("\"", startQuote + 1);
-
-                if (endQuote != -1) {
-                    String subValue = payloadJson.substring(startQuote + 1, endQuote);
-                    return Integer.parseInt(subValue);
-                }
-            }
-            throw new WebApplicationException("Token missing 'sub' claim", Response.Status.UNAUTHORIZED);
-
-        } catch (Exception e) {
-            System.err.println("Token parsing error: " + e.getMessage());
-            throw new WebApplicationException("Invalid token", Response.Status.UNAUTHORIZED);
-        }
-    }
+    @Inject
+    private UserContext userContext;
 
     @GET
     @Path("/me")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMyProfile() {
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
 
         Users user = usersRepository.findById(userId);
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
@@ -113,7 +79,7 @@ public class ProfileResource {
         if (dto == null || dto.value == null || dto.value.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         Users user = usersRepository.findById(userId);
         if (user == null) return Response.status(Response.Status.NOT_FOUND).build();
 
@@ -130,7 +96,7 @@ public class ProfileResource {
                 dto.oldPassword.isEmpty() || dto.newPassword.length() < 8) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid password data").build();
         }
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         Users user = usersRepository.findById(userId);
         if (user == null) return Response.status(Response.Status.NOT_FOUND).build();
 
@@ -146,7 +112,7 @@ public class ProfileResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateDarkMode(UpdateFieldDTO dto) {
         if (dto == null || dto.darkMode == null) return Response.status(Response.Status.BAD_REQUEST).build();
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
@@ -160,7 +126,7 @@ public class ProfileResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateLanguage(UpdateFieldDTO dto) {
         if (dto == null || dto.value == null) return Response.status(Response.Status.BAD_REQUEST).build();
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
@@ -186,7 +152,7 @@ public class ProfileResource {
             return Response.status(Response.Status.BAD_REQUEST).entity("File is required.").build();
         }
 
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
@@ -224,7 +190,7 @@ public class ProfileResource {
     @DELETE
     @Path("/me/avatar")
     public Response deleteAvatar() {
-        int userId = getAuthenticatedUserId();
+        int userId = userContext.getCurrentUserId();
         UserPreferences prefs = userPreferencesRepository.findByUserId(userId);
         if (prefs == null) return Response.status(Response.Status.NOT_FOUND).build();
 
