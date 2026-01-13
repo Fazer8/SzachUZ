@@ -1,25 +1,39 @@
 <%@ tag language="java" pageEncoding="UTF-8" %>
 <%@ attribute name="user" required="false" %>
+<%@ tag import="jakarta.servlet.http.Cookie" %>
 
 <%
     /*
       user attribute values:
-        - "logged" -> block logged-in users
-        - "guest"  -> block guests
+        - "logged" -> redirect logged-in users to "/users/userProfile.jsp"
+        - "guest"  -> redirect guests to "/users/login.jsp"
         - null / empty -> do nothing
     */
 
-    // YOU control login detection here
-    boolean isLogged = session.getAttribute("user") != null;
-    // or: Boolean.TRUE.equals(session.getAttribute("isLogged"))
-
-    if ("logged".equals(user) && isLogged) {
-        //response.sendRedirect(request.getContextPath() + "/users/userProfile.jsp");
+    if (user == null || user.isBlank()) {
         return;
     }
 
-    if ("guest".equals(user) && !isLogged) {
-        //response.sendRedirect(request.getContextPath() + "/users/login.jsp");
+    boolean loggedIn = false;
+
+    Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+        for (Cookie c : cookies) {
+            if ("authToken".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                loggedIn = true;
+                break;
+            }
+        }
+    }
+
+    String contextPath = request.getContextPath();
+
+    if ("logged".equals(user) && loggedIn) {
+        response.sendRedirect(contextPath + "/users/userProfile.jsp");
         return;
+    }
+
+    if ("guest".equals(user) && !loggedIn) {
+        response.sendRedirect(contextPath + "/users/login.jsp");
     }
 %>
