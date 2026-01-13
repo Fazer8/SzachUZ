@@ -3,10 +3,15 @@
     <li>Fetching data...</li>
 </ol>
 <style>
+    ol {
+        margin-left: 4ch
+    }
     li div {
         display: flex;
         flex-direction: row;
         padding: 0 !important;
+        width: wrap-content;
+
     }
     li div span {
         width: 4ch;
