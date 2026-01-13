@@ -26,7 +26,7 @@ public class TokenService {
     private static final String ISSUER = "https://szachuz.lol/issuer";
     private static final long EXPIRATION_SECONDS = 3600;
 
-    private PrivateKey privateKey;
+    private final PrivateKey privateKey;
 
     public TokenService() {
         try {

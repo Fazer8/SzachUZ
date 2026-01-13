@@ -1,9 +1,7 @@
 package lol.szachuz.api;
 
 import java.io.File;
-import java.util.Base64;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
