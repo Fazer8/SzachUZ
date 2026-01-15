@@ -21,6 +21,16 @@ import java.util.Base64;
 
 @ApplicationScoped
 public class UsersRepository {
+    /**
+     * Provides access to the TokenService instance, which is used for generating JWT tokens
+     * and managing private key operations related to authentication.
+     *
+     * TokenService handles the creation of secure signed tokens for user authentication,
+     * leveraging the application's private key.
+     *
+     * This field is automatically injected into the UsersRepository class using dependency injection.
+     */
+
     @Inject
     private TokenService tokenService;
 
@@ -143,7 +153,6 @@ public class UsersRepository {
     }
 
     public String login(String email, String password) {
-        // ... (Ten kod jest poprawny, ale użycie nowej metody byłoby lepsze)
         try (EntityManager em = EMF.get().createEntityManager()) {
 
             String hashedPassword;

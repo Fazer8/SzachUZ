@@ -6,6 +6,12 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "users")
 public class Users {
+    /**
+     * Represents the unique identifier for a user in the system.
+     *
+     * This field is auto-generated using the IDENTITY strategy for primary key generation.
+     * It serves as the primary key for the "users" table in the database.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 

@@ -26,6 +26,16 @@ import java.io.InputStreamReader;
 @Path("/auth")
 @RequestScoped
 public class AuthResource {
+    /**
+     * Represents the repository used for managing user-related data operations.
+     * This field is injected with an instance of UsersRepository to facilitate
+     * interactions with the underlying data source, such as retrieving, storing, or
+     * updating user information.
+     *
+     * Used within the AuthResource class to handle core user-related functionalities
+     * including registration, authentication, and validations such as username and
+     * email checks.
+     */
 
     @Inject
     private UsersRepository usersRepository;
@@ -40,7 +50,6 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
-        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
@@ -79,7 +88,6 @@ public class AuthResource {
         String email = request.email;
         String password = request.password;
 
-        // ODKOMENTOWANE - TERAZ SPRAWDZAMY CAPTCHĘ
         if (!verifyCaptcha(request.captcha)) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MessageResponse("Captcha verification failed."))
@@ -114,8 +122,6 @@ public class AuthResource {
     }
 
     private boolean verifyCaptcha(String token) {
-        // --- 1. BACKDOOR DLA LOCALHOSTA / EDGE ---
-        // Jeśli token to nasze tajne hasło, przepuszczamy bez pytania Google
         if ("dev_bypass".equals(token)) {
             return true;
         }
@@ -128,7 +134,6 @@ public class AuthResource {
                 System.out.println("BŁĄD: Brak zmiennej RECAPTCHA_SECRET_KEY!");
                 return false;
             }
-            // Jeśli token jest pusty i nie jest to dev_bypass, odrzucamy
             if (token == null || token.isEmpty()) {
                 return false;
             }
@@ -156,7 +161,6 @@ public class AuthResource {
         }
     }
 
-    // ... reszta metod (check-username itp.) bez zmian ...
     @POST
     @Path("/check-username")
     @Consumes(MediaType.APPLICATION_JSON)

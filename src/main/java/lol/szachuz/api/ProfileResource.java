@@ -1,9 +1,7 @@
 package lol.szachuz.api;
 
 import java.io.File;
-import java.util.Base64;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -32,6 +30,11 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 @RequestScoped
 @RolesAllowed({"USER"})
 public class ProfileResource {
+    /**
+     * Manages data access and operations related to user entities.
+     * This dependency is injected to provide an interface for performing
+     * CRUD operations and other user-related data handling tasks.
+     */
 
     @Inject
     private UsersRepository usersRepository;

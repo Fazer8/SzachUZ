@@ -13,6 +13,13 @@ import java.util.Set;
 @LoginConfig(authMethod = "MP-JWT")
 @DeclareRoles({"USER", "ADMIN"})
 public class JAXRSConfiguration extends Application {
+    /**
+     * Retrieves a set of resource and provider classes to be utilized by the JAX-RS application.
+     * This method adds the classes associated with REST API resources and features to the set
+     * to enable their registration within the application.
+     *
+     * @return a set containing the classes of REST resources and providers registered in the application
+     */
 
     @Override
     public Set<Class<?>> getClasses() {

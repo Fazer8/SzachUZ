@@ -27,12 +27,12 @@
             /* --- Toast Notifications CSS (Prawy Dolny Róg) --- */
             #toast-container {
                 position: fixed;
-                bottom: 20px; /* ZMIANA: Przypinamy do dołu */
-                right: 20px; /* Przypinamy do prawej */
+                bottom: 20px;
+                right: 20px;
                 z-index: 9999;
                 display: flex;
-                flex-direction: column; /* Dymki układają się w pionie */
-                gap: 10px; /* Odstęp między dymkami */
+                flex-direction: column;
+                gap: 10px;
             }
 
             .toast {
@@ -42,12 +42,12 @@
                 border-radius: 8px;
                 color: #fff;
                 font-family: sans-serif;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Nieco mocniejszy cień dla lepszego kontrastu na dole */
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 
                 /* Animacja wejścia */
                 opacity: 0;
-                transform: translateX(100%); /* Wylatują z prawej strony */
-                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Przyjemny efekt "sprężynowania" */
+                transform: translateX(100%);
+                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 
                 /* Formatowanie tekstu */
                 white-space: pre-wrap;
@@ -80,7 +80,7 @@
             /* --- Avatar Section Styles --- */
             .profile-header {
                 display: flex;
-                align-items: center; /* Wyrównanie do środka w pionie */
+                align-items: center;
                 gap: 20px;
                 margin-bottom: 20px;
             }
@@ -88,7 +88,7 @@
             #avatarImage {
                 width: 100px;
                 height: 100px;
-                border-radius: 50%; /* Okrągły awatar */
+                border-radius: 50%;
                 object-fit: cover;
                 border: 3px solid #ddd;
             }
@@ -101,7 +101,7 @@
 
             /* Strefa Drag & Drop (domyślnie ukryta) */
             #avatarUploadZone {
-                display: none; /* Ukryte na start */
+                display: none;
                 margin-top: 10px;
                 padding: 20px;
                 border: 2px dashed #aaa;
@@ -142,7 +142,6 @@
             let currentAvatar = null;
             let currentUserData = {};
 
-            // --- 1. System Powiadomień (Toast) ---
             function showToast(message, type = 'info') {
                 let container = document.getElementById('toast-container');
                 if (!container) {
@@ -157,19 +156,16 @@
 
                 container.appendChild(toast);
 
-                // Animacja wejścia (małe opóźnienie żeby CSS zadziałał)
                 requestAnimationFrame(() => {
                     toast.classList.add('visible');
                 });
 
-                // Usuwanie po 4 sekundach
                 setTimeout(() => {
                     toast.classList.remove('visible');
-                    setTimeout(() => toast.remove(), 300); // Czekamy aż zniknie animacja
+                    setTimeout(() => toast.remove(), 300);
                 }, 4000);
             }
 
-            // --- 3. Pobieranie Profilu ---
             async function getMyProfile() {
                 try {
                     const response = await authFetch(baseUrl + "/me", {method: "GET"});
@@ -197,40 +193,30 @@
 
             const DEFAULT_AVATAR_FILENAME = "default_avatar.png";
 
-            // --- 4. Avatar UI ---
             function updateAvatarUI() {
                 const img = document.getElementById("avatarImage");
                 const toggleBtn = document.getElementById("toggleUploadBtn");
                 const delBtn = document.getElementById("deleteAvatarBtn");
                 const uploadZone = document.getElementById("avatarUploadZone");
 
-                // 1. Ustawienie źródła obrazka
-                // Jeśli currentAvatar jest null, używamy domyślnego
                 const avatarFile = currentAvatar || DEFAULT_AVATAR_FILENAME;
 
-                // Zabezpieczenie: jeśli avatarFile to "default.png" (stara nazwa) traktuj jak domyślny
-                // Zakładamy, że backend serwuje pliki pod /api/profile/avatars/
                 img.src = baseUrl + "/avatars/" + avatarFile;
 
-                // 2. Sprawdzenie czy to domyślny awatar
                 const isDefault = (avatarFile === DEFAULT_AVATAR_FILENAME || avatarFile === "default.png");
 
-                // 3. Konfiguracja przycisku "Zmień / Dodaj"
                 if (isDefault) {
                     toggleBtn.textContent = "Dodaj awatar";
                 } else {
                     toggleBtn.textContent = "Zmień awatar";
                 }
 
-                // 4. Konfiguracja przycisku "Usuń"
                 if (isDefault) {
-                    delBtn.style.display = "none"; // Ukryj, jeśli domyślny
+                    delBtn.style.display = "none";
                 } else {
-                    delBtn.style.display = "block"; // Pokaż, jeśli własny
+                    delBtn.style.display = "block";
                     delBtn.textContent = "Usuń awatar";
                 }
-
-                // Ukryj strefę uploadu po odświeżeniu widoku
                 uploadZone.style.display = "none";
             }
 
@@ -242,8 +228,6 @@
                     zone.style.display = "none";
                 }
             }
-
-            // --- 5. Akcje Użytkownika (z użyciem Toast) ---
 
             async function uploadAvatar(file) {
                 if (!file.type.startsWith("image/")) {
@@ -322,7 +306,6 @@
                 }
             }
 
-            // Dark Mode
             async function toggleDarkMode() {
                 const newMode = !(currentUserData.darkMode);
                 const res = await authFetch(baseUrl + "/me/darkMode", {
@@ -339,7 +322,6 @@
                 }
             }
 
-            // Password
             function showPasswordInput() {
                 document.getElementById("passwordSection").style.display = "block";
             }
@@ -368,20 +350,16 @@
                     document.getElementById("confirmPasswordInput").value = "";
                 } else {
                     const txt = await res.text();
-                    // Tutaj txt to np. "Incorrect old password."
                     showToast(txt, "error");
                 }
             }
 
-            // Init
             window.addEventListener("DOMContentLoaded", () => {
                 const zone = document.getElementById("avatarUploadZone");
                 const input = document.getElementById("avatarInput");
 
-                // Kliknięcie w strefę otwiera wybór plików
                 zone.addEventListener("click", () => input.click());
 
-                // Drag & Drop
                 zone.addEventListener("dragover", (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -403,14 +381,12 @@
                     }
                 });
 
-                // Input change
                 input.addEventListener("change", (e) => {
                     if (e.target.files && e.target.files[0]) {
                         uploadAvatar(e.target.files[0]);
                     }
                 });
 
-                // Pobierz dane na start
                 getMyProfile();
             });
         </script>

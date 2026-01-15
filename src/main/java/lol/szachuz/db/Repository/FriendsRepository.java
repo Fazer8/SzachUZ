@@ -8,7 +8,14 @@ import lol.szachuz.db.Entities.Friends;
 import java.util.List;
 
 public class FriendsRepository {
-
+    /**
+     * Persists a Friends entity into the database.
+     * Ensures the transaction is properly handled by committing on success or rolling back on failure.
+     *
+     * @param friend the Friends entity to be persisted; must not be null
+     * @throws IllegalArgumentException if the argument is not an entity or is not managed
+     * @throws Exception if an error occurs during the transaction
+     */
     public void save(Friends friend) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
