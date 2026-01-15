@@ -1,5 +1,7 @@
 package lol.szachuz.chess;
 
+import lol.szachuz.chess.player.Player;
+
 import java.util.UUID;
 
 public class MatchService {
@@ -28,6 +30,7 @@ public class MatchService {
         repository.save(match);
         return match;
     }
+
     public MoveResult processMove(long playerId, String from, String to) {
         Match match = repository.findByPlayer(playerId);
 
@@ -36,17 +39,18 @@ public class MatchService {
         }
 
         match.applyMove(playerId, from, to);
-        if (match.getStatus() == GameStatus.FINISHED) {
-            repository.remove(match);
-        }
-
-        if (match.isOver()) {
+        if (match.getStatus() == GameStatus.FINISHED || match.isOver()) {
             repository.remove(match);
         }
 
         return MoveResult.from(match);
     }
-    public Match loadMatch(long playerId) {
+
+    public Match loadMatchByPlayerId(long playerId) {
         return repository.findByPlayer(playerId);
+    }
+
+    public Match loadMatchByMatchId(String gameId) {
+        return repository.findById(gameId);
     }
 }

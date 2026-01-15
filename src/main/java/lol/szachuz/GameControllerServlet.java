@@ -9,13 +9,11 @@ import lol.szachuz.chess.MoveResult;
 
 /**
  * Servlet używany do obsługi stanu aktywnej gry.
+ * TODO: Zamienić na WebSocketa
  * @author Rafał Kubacki
  */
 @WebServlet(name = "GameControllerServlet", value = "/chess/move")
 public class GameControllerServlet extends HttpServlet {
-
-    public void init() {
-    }
 
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
         //long playerId = SessionUtil.getPlayerId(req);

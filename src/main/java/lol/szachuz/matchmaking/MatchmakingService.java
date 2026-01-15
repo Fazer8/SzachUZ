@@ -7,7 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.*;
 import lol.szachuz.chess.MatchService;
 import lol.szachuz.chess.Match;
-import lol.szachuz.chess.HumanPlayer;
+import lol.szachuz.chess.player.HumanPlayer;
 
 public class MatchmakingService {
 
