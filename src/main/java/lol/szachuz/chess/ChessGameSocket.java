@@ -29,27 +29,19 @@ public class ChessGameSocket implements SzachuzWebSocket {
             this.playerId = JWTDecoder.parseUserIdFromToken(params.get("token").getFirst());
 
             // For the love of God, why does this one return null, while the other one works and match id is the same???
-            //Match match = MatchService.getInstance().loadMatchById(gameUUID);
-            Match matchCopy = MatchService.getInstance().loadMatchByPlayerId(playerId);
+            Match match = MatchService.getInstance().loadMatchByMatchId(gameUUID);
 
-            //if (match == null) {
-            //    sendError("Invalid session" + this.gameUUID + ". Match is null.", session);
-            //    session.close();
-            //    return;
-            //}
-
-            if (matchCopy == null) {
-                sendError("Invalid session for player" + this.playerId + ". Match is null.", session);
+            if (match == null) {
+                sendError("Invalid session" + this.gameUUID + ". Match is null.", session);
                 session.close();
                 return;
             } else {
-                sendError("Debug message for:" + this.playerId +
-                        " is in match " + matchCopy.getMatchUUID() + " " + this.gameUUID + ". Czy uuid meczu i requestu są takie same?:" + Objects.equals(matchCopy.getMatchUUID(), this.gameUUID)
+                sendError("Debug message for:" + this.playerId + "match is ok."
                         , session);
             }
 
-            if(!matchCopy.hasPlayer(playerId)) {
-                sendError("match.hasPlayer(" + this.playerId + "): " + matchCopy.hasPlayer(playerId), session);
+            if(!match.hasPlayer(playerId)) {
+                sendError("match.hasPlayer(" + this.playerId + "): " + match.hasPlayer(playerId), session);
                 session.close();
                 return;
             }
@@ -59,7 +51,7 @@ public class ChessGameSocket implements SzachuzWebSocket {
             // Send initial state
             ChessSocketRegistry.broadcast(
                     gameUUID,
-                    MoveResult.from(matchCopy).toJson()
+                    MoveResult.from(match).toJson()
             );
 
         } catch (Exception e) {

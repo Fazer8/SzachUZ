@@ -44,11 +44,36 @@
         .black-3c85d {
             background-color: var(--secondary-color) !important;
         }
+        .turn-indicator {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.67);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            z-index: 10;
+        }
+
     </style>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
+            <div id="game-status" style="display:none" class="overlay">
+                <p id="status-text"></p>
+                <button onclick="getHistory()">Pobierz Historie ruchów</button>
+                <button onclick="exitGame()">Wyjdź z gry</button>
+            </div>
+            <div id="turn-indicator" class="turn-indicator"></div>
             <div id="board"></div>
         <script>
             const GAME_ID = "${param.gameId}";
@@ -56,6 +81,40 @@
             const TOKEN   = localStorage.getItem("authToken");
             const COLOR   = "${param.color}".toLowerCase();
             console.log(COLOR);
+
+            function showResult(result) {
+                const overlay = document.getElementById("game-status");
+                const textField = document.getElementById("status-text");
+
+                let text;
+                if (result === "DRAW") {
+                    text = "Draw";
+                } else if (
+                    (result === "WHITE_WON" && COLOR === "white") ||
+                    (result === "BLACK_WON" && COLOR === "black")
+                ) {
+                    text = "You won!";
+                } else {
+                    text = "You lost.";
+                }
+
+                textField.innerText = text;
+                overlay.style.display = "flex";
+            }
+
+            function updateTurnIndicator(sideToMove) {
+                const el = document.getElementById("turn-indicator");
+
+                if (sideToMove.toLowerCase() === COLOR) {
+                    el.innerText = "Twój ruch (" + sideToMove + ")";
+                    el.style.color = "green";
+                    board.draggable = true;
+                } else {
+                    el.innerText = "Ruch przeciwnika (" + sideToMove + ")";
+                    el.style.color = "gray";
+                    board.draggable = false;
+                }
+            }
 
             let socket = null;
             const wsUrl =
@@ -70,8 +129,15 @@
                 console.log("Chess socket connected");
             };
 
+            function exitGame() {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.close(1000, "Player left the game");
+                }
+            }
+
             socket.onclose = function () {
                 alert("Connection closed");
+                window.location.href = "/index.jsp";
             };
 
             socket.onerror = function () {
@@ -83,6 +149,7 @@
 
             socket.onmessage = function (event) {
                 const msg = JSON.parse(event.data);
+                console.log(msg);
 
                 if (msg.type === "ERROR") {
                     alert(msg.message);
@@ -95,8 +162,10 @@
                     board.position(msg.fen);
 
                     if (msg.status === "FINISHED") {
-                        alert("Game over");
+                       showResult(msg.result);
                     }
+
+                    updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;
                 }
             };
@@ -145,6 +214,9 @@
                 pieceTheme: '/assets/pieces/{piece}.png'
             }
             board = Chessboard('board', config)
+
+            function getHistory() {
+            }
         </script>
     </main>
     </jsp:attribute>

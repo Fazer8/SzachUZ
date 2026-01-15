@@ -14,11 +14,14 @@ public class Match {
     private final String matchUUID;
     private GameStatus status = GameStatus.ACTIVE;
 
+    private GameResult gameResult;
+
     public Match(String matchUUID, Player white, Player black) {
         engine = new ChessEngine();
         this.black = black;
         this.white = white;
         this.matchUUID = matchUUID;
+        this.gameResult = GameResult.ONGOING;
     }
 
     public synchronized void applyMove(long playerId, String from, String to) {
@@ -31,7 +34,8 @@ public class Match {
 
         engine.applyMove(from, to);
 
-        if (engine.isGameOver()) {
+        if (engine.isGameOver() != GameResult.ONGOING) {
+            resolveResult();
             status = GameStatus.FINISHED;
         }
     }
@@ -43,7 +47,7 @@ public class Match {
     }
 
     public boolean isOver() {
-        return engine.isGameOver();
+        return engine.isGameOver() != GameResult.ONGOING;
     }
 
     public String getMatchUUID() {
@@ -66,10 +70,22 @@ public class Match {
         return black;
     }
 
+    public GameResult getResult() {
+        return gameResult;
+    }
+
+    public Side getSideToMove() {
+        return engine.getSideToMove();
+    }
+
     public boolean hasPlayer(long playerId) {
         if (white == null || black == null) {
             throw new IllegalStateException("One of players is null!");
         }
         return white.getId() == playerId || black.getId() == playerId;
+    }
+
+    private void resolveResult() {
+        gameResult = engine.isGameOver();
     }
 }
