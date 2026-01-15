@@ -2,15 +2,18 @@ package lol.szachuz.db.Entities;
 
 import jakarta.persistence.*;
 
+
+/**
+ * Represents a leaderboard entry for a user in the system.
+ *
+ * This entity is mapped to the "leaderboard" table in the database, storing information
+ * about a user's matchmaking rating (MMR) and the number of matches they have won.
+ * Each entry is associated with a specific user in the system.
+ */
 @Entity
 @Table(name = "leaderboard")
 public class Leaderboard {
-    /**
-     * Represents the unique identifier for a user within the leaderboard system.
-     *
-     * This field is the primary key for the "leaderboard" table in the database.
-     * It is automatically generated using the IDENTITY strategy, ensuring its uniqueness.
-     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;

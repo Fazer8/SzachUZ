@@ -5,19 +5,25 @@ import jakarta.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The EMF class provides a centralized utility for managing the {@link EntityManagerFactory}
+ * instance, which is utilized for database operations in the application.
+ *
+ * <h2>Key Features:</h2>
+ * - Provides a single shared {@link EntityManagerFactory} instance for the application.
+ * - Handles the configuration of the factory, including reading database credentials
+ *   from environment variables.
+ * - Offers methods to retrieve and close the {@link EntityManagerFactory}.
+ *
+ * This class ensures the proper initialization of the factory and enforces
+ * safe resource handling practices by providing a close method.
+ *
+ * Note that the {@link EntityManagerFactory} is initialized statically during
+ * class loading. If environment variables for database credentials are not set,
+ * the initialization process will fail gracefully with an appropriate error message.
+ */
 public class EMF {
-    /**
-     * A static and final instance of {@link EntityManagerFactory}.
-     * This variable is initialized during class loading and is used to manage
-     * entity manager instances for persistence operations in the application.
-     *
-     * The factory is created using properties populated with database credentials
-     * fetched from environment variables. If these credentials are not provided,
-     * an error is logged, and the factory initialization may fail.
-     *
-     * It is important to ensure that the factory is properly closed when it is
-     * no longer needed to release associated resources.
-     */
+
     private static final EntityManagerFactory emf;
 
     static {

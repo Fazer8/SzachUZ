@@ -1,6 +1,7 @@
 <%@ tag language="java" pageEncoding="UTF-8" %>
 <%@ attribute name="user" required="false" %>
 <%@ tag import="jakarta.servlet.http.Cookie" %>
+<%@ variable name-given="isLoggedIn" variable-class="java.lang.Boolean" scope="AT_END" %>
 
 <%
     /*
@@ -10,30 +11,30 @@
         - null / empty -> do nothing
     */
 
-    if (user == null || user.isBlank()) {
-        return;
-    }
-
-    boolean loggedIn = false;
-
+    boolean status = false;
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
         for (Cookie c : cookies) {
             if ("authToken".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
-                loggedIn = true;
+                status = true;
                 break;
             }
         }
     }
 
-    String contextPath = request.getContextPath();
+    jspContext.setAttribute("isLoggedIn", status);
 
-    if ("logged".equals(user) && loggedIn) {
-        response.sendRedirect(contextPath + "/users/userProfile.jsp");
-        return;
-    }
+    if (user != null && !user.isBlank()) {
+        String contextPath = request.getContextPath();
 
-    if ("guest".equals(user) && !loggedIn) {
-        response.sendRedirect(contextPath + "/users/login.jsp");
+        if ("logged".equals(user) && status) {
+            response.sendRedirect(contextPath + "/users/userProfile.jsp");
+            return;
+        }
+
+        if ("guest".equals(user) && !status) {
+            response.sendRedirect(contextPath + "/users/login.jsp");
+            return;
+        }
     }
 %>

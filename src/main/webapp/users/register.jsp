@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%
     String envKey = System.getenv("RECAPTCHA_SITE_KEY");
@@ -11,114 +11,133 @@
 
 <t:layout page_name="Register" block="logged">
     <jsp:attribute name="head">
-   <script>
-       window.onload = function() {
+    <script>
+        window.onload = function () {
 
-           async function registerUser() {
-               const username = document.getElementById("username").value.trim();
-               const email = document.getElementById("email").value.trim();
-               const password = document.getElementById("password").value.trim();
-               const captchaToken = grecaptcha.getResponse();
+            async function registerUser() {
+                const username = document.getElementById("username").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value.trim();
+                const captchaToken = grecaptcha.getResponse();
+                const resultBox = document.getElementById("result");
 
-               const body = { username, email, password, captcha: captchaToken };
+                if (!username || !email || !password) {
+                    resultBox.className = "error";
+                    resultBox.textContent = "Wypełnij wszystkie pola!";
+                    return;
+                }
 
-               const res = await fetch("${pageContext.request.contextPath}/api/auth/register", {
-                   method: "POST",
-                   headers: { "Content-Type": "application/json" },
-                   body: JSON.stringify(body)
-               });
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    resultBox.className = "error";
+                    resultBox.textContent = "Podaj poprawny adres email!";
+                    return;
+                }
 
-               const text = await res.text();
-               const resultBox = document.getElementById("result");
+                const body = {username, email, password, captcha: captchaToken};
 
-               if (!res.ok) {
-                   resultBox.className = "error";
-                   resultBox.textContent = "Error (" + res.status + "): " + text;
-               } else {
-                   resultBox.className = "success";
-                   resultBox.textContent = "Success: " + text;
-               }
+                try {
+                    const res = await fetch("${pageContext.request.contextPath}/api/auth/register", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(body)
+                    });
 
-               grecaptcha.reset();
-           }
+                    const text = await res.text();
 
-           let usernameTimer;
-           let emailTimer;
+                    if (!res.ok) {
+                        resultBox.className = "error";
+                        resultBox.textContent = "Błąd: " + text;
+                    } else {
+                        resultBox.className = "success";
+                        resultBox.textContent = "Sukces: " + text;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    resultBox.className = "error";
+                    resultBox.textContent = "Wystąpił błąd połączenia z serwerem.";
+                }
 
-           function debounce(func, timeout = 300) {
-               return (...args) => {
-                   clearTimeout(usernameTimer);
-                   usernameTimer = setTimeout(() => func.apply(this, args), timeout);
-               };
-           }
+                grecaptcha.reset();
+            }
 
-           function debounceEmail(func, timeout = 300) {
-               return (...args) => {
-                   clearTimeout(emailTimer);
-                   emailTimer = setTimeout(() => func.apply(this, args), timeout);
-               };
-           }
+            let usernameTimer;
+            let emailTimer;
 
-           async function checkUsername() {
-               const username = document.getElementById("username").value.trim();
-               const box = document.getElementById("username-status");
+            function debounce(func, timeout = 300) {
+                return (...args) => {
+                    clearTimeout(usernameTimer);
+                    usernameTimer = setTimeout(() => func.apply(this, args), timeout);
+                };
+            }
 
-               if (username.length < 1) {
-                   box.textContent = "";
-                   return;
-               }
+            function debounceEmail(func, timeout = 300) {
+                return (...args) => {
+                    clearTimeout(emailTimer);
+                    emailTimer = setTimeout(() => func.apply(this, args), timeout);
+                };
+            }
 
-               const res = await fetch("${pageContext.request.contextPath}/api/auth/check-username", {
-                   method: "POST",
-                   headers: { "Content-Type": "application/json" },
-                   body: JSON.stringify({ username })
-               });
+            async function checkUsername() {
+                const username = document.getElementById("username").value.trim();
+                const box = document.getElementById("username-status");
 
-               const data = await res.json();
+                if (username.length < 1) {
+                    box.textContent = "";
+                    return;
+                }
 
-               box.style.color = res.status === 409 ? "red" : "green";
-               box.textContent = data.message;
-           }
+                const res = await fetch("${pageContext.request.contextPath}/api/auth/check-username", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({username})
+                });
 
-           async function checkEmail() {
-               const email = document.getElementById("email").value.trim();
-               const box = document.getElementById("email-status");
+                const data = await res.json();
 
-               if (email.length < 3) {
-                   box.textContent = "";
-                   return;
-               }
+                box.style.color = res.status === 409 ? "red" : "green";
+                box.textContent = data.message;
+            }
 
-               const res = await fetch("${pageContext.request.contextPath}/api/auth/check-email", {
-                   method: "POST",
-                   headers: { "Content-Type": "application/json" },
-                   body: JSON.stringify({ email })
-               });
+            async function checkEmail() {
+                const email = document.getElementById("email").value.trim();
+                const box = document.getElementById("email-status");
 
-               const data = await res.json();
+                if (email.length < 3) {
+                    box.textContent = "";
+                    return;
+                }
 
-               box.style.color = res.status === 409 ? "red" : "green";
-               box.textContent = data.message;
-           }
+                const res = await fetch("${pageContext.request.contextPath}/api/auth/check-email", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({email})
+                });
 
-           // PODŁĄCZ EVENTY ⇩⇩⇩
-           document.getElementById("username").addEventListener("input", debounce(checkUsername));
-           document.getElementById("email").addEventListener("input", debounceEmail(checkEmail));
+                const data = await res.json();
 
-           // UDOSTĘPNIJ FUNKCJĘ REGISTER DLA PRZYCISKU
-           window.registerUser = registerUser;
-       };
-   </script>
+                box.style.color = res.status === 409 ? "red" : "green";
+                box.textContent = data.message;
+            }
+
+            document.getElementById("username").addEventListener("input", debounce(checkUsername));
+            document.getElementById("email").addEventListener("input", debounceEmail(checkEmail));
+
+            window.registerUser = registerUser;
+        };
+    </script>
     <style>
         .center-content {
             display: grid;
             place-items: center;
         }
+
         form {
             display: flex;
             flex-direction: column;
             align-items: stretch;
         }
+
         form input {
             margin-bottom: 0.5em;
         }
@@ -142,7 +161,7 @@
 
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-            <button onclick="registerUser()">Register</button>
+            <button type="button" onclick="registerUser()">Register</button>
 
             <div id="result"></div>
         </form>

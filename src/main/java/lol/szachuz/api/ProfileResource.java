@@ -26,15 +26,18 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 
 
+/**
+ * A RESTful resource for managing user profiles, including fetching and updating profile details,
+ * preferences, and other related operations.
+ *
+ * Endpoints within this resource are accessible only to authenticated users with the "USER" role.
+ * This class leverages repositories for accessing user and user preference data, and it uses a
+ * contextual user object to fetch details related to the currently logged-in user.
+ */
 @Path("/profile")
 @RequestScoped
 @RolesAllowed({"USER"})
 public class ProfileResource {
-    /**
-     * Manages data access and operations related to user entities.
-     * This dependency is injected to provide an interface for performing
-     * CRUD operations and other user-related data handling tasks.
-     */
 
     @Inject
     private UsersRepository usersRepository;
