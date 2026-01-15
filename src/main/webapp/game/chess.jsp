@@ -16,8 +16,8 @@
             crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
-    <script>
-        // skrypty
+
+
     </script>
     <style>
         main {
@@ -51,56 +51,98 @@
     <main class="site-margin">
             <div id="board"></div>
         <script>
+            const GAME_ID = "${param.gameId}";
+            console.log(GAME_ID);
+            const TOKEN   = localStorage.getItem("authToken");
+            const COLOR   = "${param.color}".toLowerCase();
+            console.log(COLOR);
+
+            let socket = null;
+            const wsUrl =
+                (location.protocol === "https:" ? "wss://" : "ws://") +
+                location.host +
+                "/ws/chess?gameId=" + GAME_ID +
+                "&token=" + TOKEN;
+
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = function () {
+                console.log("Chess socket connected");
+            };
+
+            socket.onclose = function () {
+                alert("Connection closed");
+            };
+
+            socket.onerror = function () {
+                alert("WebSocket error");
+            };
+
             var board = null
             var game = new Chess()
-            
-            function onDragStart (source, piece, position, orientation) {
-              // do not pick up pieces if the game is over
-              if (game.game_over()) return false
-            
-              // only pick up pieces for White
-              if (piece.search(/^b/) !== -1) return false
+
+            socket.onmessage = function (event) {
+                const msg = JSON.parse(event.data);
+
+                if (msg.type === "ERROR") {
+                    alert(msg.message);
+                    awaitingServer = false;
+                    return;
+                }
+
+                if (msg.fen) {
+                    game.load(msg.fen);
+                    board.position(msg.fen);
+
+                    if (msg.status === "FINISHED") {
+                        alert("Game over");
+                    }
+                    awaitingServer = false;
+                }
+            };
+
+            let awaitingServer = false;
+
+            function onDragStart(source, piece) {
+                if (awaitingServer) return false;
+                if (game.game_over()) return false;
+
+                if ((COLOR === 'white' && piece.startsWith('b')) ||
+                    (COLOR === 'black' && piece.startsWith('w'))) {
+                    return false;
+                }
             }
-            
-            function makeRandomMove () {
-              var possibleMoves = game.moves()
-            
-              // game over
-              if (possibleMoves.length === 0) return
-            
-              var randomIdx = Math.floor(Math.random() * possibleMoves.length)
-              game.move(possibleMoves[randomIdx])
-              board.position(game.fen())
-            }
-            
+
             function onDrop (source, target) {
-              // see if the move is legal
-              var move = game.move({
-                from: source,
-                to: target,
-                promotion: 'q' // NOTE: always promote to a queen for example simplicity
-              })
-            
-              // illegal move
-              if (move === null) return 'snapback'
-            
-              // make random legal move for black
-              window.setTimeout(makeRandomMove, 250)
+                var move = game.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q'
+                });
+
+                if (move === null) return 'snapback';
+
+                game.undo();
+                awaitingServer = true;
+
+                socket.send(JSON.stringify({
+                    from: source,
+                    to: target
+                }));
             }
-            
             // update the board position after the piece snap
             // for castling, en passant, pawn promotion
             function onSnapEnd () {
-              board.position(game.fen())
+                board.position(game.fen())
             }
-            
             var config = {
-              draggable: true,
-              position: 'start',
-              onDragStart: onDragStart,
-              onDrop: onDrop,
-              onSnapEnd: onSnapEnd,
-              pieceTheme: '/assets/pieces/{piece}.png'
+                draggable: true,
+                position: 'start',
+                orientation: COLOR,
+                onDragStart: onDragStart,
+                onDrop: onDrop,
+                onSnapEnd: onSnapEnd,
+                pieceTheme: '/assets/pieces/{piece}.png'
             }
             board = Chessboard('board', config)
         </script>

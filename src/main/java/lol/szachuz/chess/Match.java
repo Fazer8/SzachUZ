@@ -1,6 +1,7 @@
 package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
+import lol.szachuz.chess.player.Player;
 
 /**
  * Klasa reprezentująca Sesję Gry (GameSession)
@@ -13,14 +14,14 @@ public class Match {
     private final String matchUUID;
     private GameStatus status = GameStatus.ACTIVE;
 
-    Match(String matchUUID, Player white, Player black) {
+    public Match(String matchUUID, Player white, Player black) {
         engine = new ChessEngine();
         this.black = black;
         this.white = white;
         this.matchUUID = matchUUID;
     }
 
-    public void applyMove(long playerId, String from, String to) {
+    public synchronized void applyMove(long playerId, String from, String to) {
         if (status == GameStatus.FINISHED) {
             throw new IllegalStateException("Game already finished");
         }
@@ -65,4 +66,10 @@ public class Match {
         return black;
     }
 
+    public boolean hasPlayer(long playerId) {
+        if (white == null || black == null) {
+            throw new IllegalStateException("One of players is null!");
+        }
+        return white.getId() == playerId || black.getId() == playerId;
+    }
 }

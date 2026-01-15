@@ -1,6 +1,4 @@
-package lol.szachuz.chess;
-
-import com.github.bhlangonijr.chesslib.Side;
+package lol.szachuz.chess.player;
 
 public abstract class Player {
     private final long id;

@@ -2,16 +2,16 @@ package lol.szachuz.matchmaking;
 
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
+import lol.szachuz.SzachuzWebSocket;
+import lol.szachuz.auth.JWTDecoder;
 import lol.szachuz.db.Entities.Leaderboard;
 import lol.szachuz.db.Repository.LeaderboardRepository;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 @ServerEndpoint("/ws/matchmaking")
-public class MatchmakingSocket {
+public class MatchmakingSocket implements SzachuzWebSocket {
 
     // Tworzymy repozytorium ręcznie, aby uniknąć problemów z wstrzykiwaniem w WebSocket
     private final LeaderboardRepository leaderboardRepository = new LeaderboardRepository();
@@ -32,7 +32,7 @@ public class MatchmakingSocket {
 
         try {
             // 1. Parsowanie ID z tokena
-            this.userId = parseUserIdFromToken(tokenList.get(0));
+            this.userId = JWTDecoder.parseUserIdFromToken(tokenList.getFirst());
 
             // 2. Pobieranie danych z bazy (MMR + Nick)
             int mmr = 1200;
@@ -75,7 +75,7 @@ public class MatchmakingSocket {
                 matchmakingService.handleReject(matchId, this.userId);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            sendError(e.getMessage(), session);
         }
     }
 
@@ -91,30 +91,5 @@ public class MatchmakingSocket {
         if (!(t instanceof java.io.EOFException)) {
             System.err.println("Błąd WebSocket: " + t.getMessage());
         }
-    }
-
-    private void close(Session s) {
-        try { s.close(); } catch (Exception e) {}
-    }
-
-    private int parseUserIdFromToken(String token) {
-        String[] chunks = token.split("\\.");
-        if (chunks.length < 2) throw new RuntimeException("Invalid JWT format");
-
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        String payloadJson = new String(decoder.decode(chunks[1]), StandardCharsets.UTF_8);
-
-        String searchKey = "\"sub\"";
-        int subIndex = payloadJson.indexOf(searchKey);
-
-        if (subIndex != -1) {
-            int startQuote = payloadJson.indexOf("\"", subIndex + searchKey.length());
-            while (payloadJson.charAt(startQuote) != '"') startQuote++;
-            int endQuote = payloadJson.indexOf("\"", startQuote + 1);
-            if (endQuote != -1) {
-                return Integer.parseInt(payloadJson.substring(startQuote + 1, endQuote));
-            }
-        }
-        throw new RuntimeException("Token missing 'sub' claim");
     }
 }
