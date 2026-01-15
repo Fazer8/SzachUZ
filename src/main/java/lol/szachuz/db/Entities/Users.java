@@ -3,15 +3,29 @@ package lol.szachuz.db.Entities;
 
 import jakarta.persistence.*;
 
+/**
+ * Represents a user in the system.
+ *
+ * This entity is mapped to the "users" table in the database and stores
+ * the user's primary details, such as their unique ID, username, email,
+ * and their hashed or plain password. The class provides getter and setter
+ * methods for each field to allow manipulation of a user's data.
+ *
+ * Relationships with other entities:
+ * - This class is referenced in several other entities, such as Friends,
+ *   Leaderboard, and UserPreferences, to establish various associations
+ *   including friendships, leaderboard statistics, and user-specific preferences.
+ *
+ * Fields:
+ * - userId: Unique identifier for the user.
+ * - username: User's chosen name for identification.
+ * - email: User's email address.
+ * - password: User's password (usually hashed for security purposes).
+ */
 @Entity
 @Table(name = "users")
 public class Users {
-    /**
-     * Represents the unique identifier for a user in the system.
-     *
-     * This field is auto-generated using the IDENTITY strategy for primary key generation.
-     * It serves as the primary key for the "users" table in the database.
-     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 

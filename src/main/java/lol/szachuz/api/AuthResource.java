@@ -23,19 +23,17 @@ import java.net.HttpURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+
+/**
+ * AuthResource is a RESTful resource that provides endpoints for user authentication
+ * and registration functionalities. It includes operations for user signup, login,
+ * and checks for username or email availability.
+ * This resource relies on dependency injection for accessing the UsersRepository
+ * for handling user data operations.
+ */
 @Path("/auth")
 @RequestScoped
 public class AuthResource {
-    /**
-     * Represents the repository used for managing user-related data operations.
-     * This field is injected with an instance of UsersRepository to facilitate
-     * interactions with the underlying data source, such as retrieving, storing, or
-     * updating user information.
-     *
-     * Used within the AuthResource class to handle core user-related functionalities
-     * including registration, authentication, and validations such as username and
-     * email checks.
-     */
 
     @Inject
     private UsersRepository usersRepository;

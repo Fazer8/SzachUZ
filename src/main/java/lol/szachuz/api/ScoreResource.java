@@ -4,6 +4,7 @@ package lol.szachuz.api;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -16,12 +17,6 @@ import java.util.List;
 @Path("/")
 @RequestScoped
 public class ScoreResource {
-    /**
-     * Injected instance of LeaderboardRepository used for interacting with the leaderboard data.
-     * This repository provides various methods to perform CRUD operations and other queries
-     * on the leaderboard, such as retrieving the top 10 players or finding players by specific criteria.
-     * It integrates with the database using JPA and EntityManager.
-     */
 
     @Inject
     LeaderboardRepository leaderboardRepository;
@@ -34,4 +29,10 @@ public class ScoreResource {
         List<LeaderboardDTO> result = leaderboardRepository.findTop10();
         return Response.ok(result).build();
     }
+
+//    @POST
+//    @Path("/mmr-update")
+//    public Response updateMmr() {
+//
+//    }
 }

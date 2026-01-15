@@ -19,17 +19,25 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
 
+/**
+ * UsersRepository is responsible for managing CRUD operations and business-related
+ * logic for the Users entity. It serves as an intermediary between the application
+ * and the database layer, allowing secure and reliable interactions with user data.
+ *
+ * This class provides methods for:
+ * - Creating, updating, and deleting user records in the database.
+ * - Authenticating users and handling login-related workflows.
+ * - Verifying user existence by username or email.
+ * - Retrieving user records by ID, email, or all users.
+ * - Registering new users and hashing their passwords securely.
+ * - Managing authentication tokens through integration with TokenService.
+ *
+ * Note: This class leverages JPA (Java Persistence API) for database interactions
+ * and ensures transactions are properly managed to avoid data integrity issues.
+ */
 @ApplicationScoped
 public class UsersRepository {
-    /**
-     * Provides access to the TokenService instance, which is used for generating JWT tokens
-     * and managing private key operations related to authentication.
-     *
-     * TokenService handles the creation of secure signed tokens for user authentication,
-     * leveraging the application's private key.
-     *
-     * This field is automatically injected into the UsersRepository class using dependency injection.
-     */
+
 
     @Inject
     private TokenService tokenService;

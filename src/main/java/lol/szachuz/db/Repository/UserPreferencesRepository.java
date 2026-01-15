@@ -8,18 +8,23 @@ import lol.szachuz.db.Entities.UserPreferences;
 
 import java.util.List;
 
+/**
+ * Manages the persistence and retrieval of {@link UserPreferences} entities in the database.
+ *
+ * This repository provides various methods for CRUD operations on user preferences, allowing
+ * the application to save, update, find, and delete user preferences, as well as perform specific
+ * queries like finding preferences by language.
+ *
+ * All operations involving the database are appropriately managed within transactions to ensure
+ * data consistency and integrity. Transactions are committed upon successful execution or rolled
+ * back in case of errors.
+ *
+ * Note: This class leverages a centralized {@link EntityManagerFactory} for database interactions,
+ * provided by the {@link EMF} utility class.
+ */
 @ApplicationScoped
 public class UserPreferencesRepository {
-    /**
-     * Persists the provided UserPreferences entity in the database.
-     * This method begins a transaction, attempts to save the provided preferences,
-     * and commits the transaction upon successful operation. If an exception occurs
-     * during the process, the transaction is rolled back.
-     *
-     * @param preferences the UserPreferences entity to be saved to the database; must not be null.
-     * @throws IllegalArgumentException if the provided preferences entity is null.
-     * @throws Exception if there is an error during the persist process or transaction management.
-     */
+
     public void save(UserPreferences preferences) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();

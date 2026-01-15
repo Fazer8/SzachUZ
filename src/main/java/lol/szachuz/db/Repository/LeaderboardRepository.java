@@ -9,17 +9,21 @@ import lol.szachuz.db.Entities.Leaderboard;
 
 import java.util.List;
 
+/**
+ * The LeaderboardRepository class provides database access methods for managing
+ * leaderboard entries. It performs operations such as persisting, retrieving,
+ * updating, and deleting leaderboard entries, as well as retrieving specific
+ * subsets of leaderboard data.
+ *
+ * This class utilizes an {@link EntityManager} for transaction management and
+ * database communication, provided through the {@link EMF#get()} method.
+ *
+ * Methods in this class are designed to handle exceptions gracefully, rolling
+ * back transactions in the event of failure to maintain database consistency.
+ */
 @ApplicationScoped
 public class LeaderboardRepository {
-    /**
-     * Persists the provided Leaderboard object into the database. This method uses
-     * an EntityManager to initiate a transaction, persist the entity, and commit the transaction.
-     * If an exception occurs during the process, the transaction is rolled back, and the exception
-     * is propagated to the caller.
-     *
-     * @param leaderboard the Leaderboard object to be persisted in the database
-     * @throws RuntimeException if an error occurs during the persistence process
-     */
+
     public void save(Leaderboard leaderboard) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
