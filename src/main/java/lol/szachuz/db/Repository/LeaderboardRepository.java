@@ -11,6 +11,15 @@ import java.util.List;
 
 @ApplicationScoped
 public class LeaderboardRepository {
+    /**
+     * Persists the provided Leaderboard object into the database. This method uses
+     * an EntityManager to initiate a transaction, persist the entity, and commit the transaction.
+     * If an exception occurs during the process, the transaction is rolled back, and the exception
+     * is propagated to the caller.
+     *
+     * @param leaderboard the Leaderboard object to be persisted in the database
+     * @throws RuntimeException if an error occurs during the persistence process
+     */
     public void save(Leaderboard leaderboard) {
         EntityManager em = EMF.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -76,9 +85,6 @@ public class LeaderboardRepository {
         }
     }
 
-    /**
-     * Znajdź graczy powyżej określonego MMR (przykład prostego zapytania warunkowego)
-     */
     public List<Leaderboard> findAboveMmr(int minMmr) {
         try (EntityManager em = EMF.get().createEntityManager()) {
             return em.createQuery("SELECT l FROM Leaderboard l WHERE l.mmr > :mmr", Leaderboard.class)

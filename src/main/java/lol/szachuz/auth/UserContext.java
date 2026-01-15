@@ -8,6 +8,13 @@ import jakarta.ws.rs.core.Response;
 
 @RequestScoped
 public class UserContext {
+    /**
+     * Represents HTTP headers associated with the current request context.
+     *
+     * This field is automatically injected by the framework using the {@code @Context} annotation.
+     * It provides access to HTTP header information, such as the Authorization header,
+     * which may be used for authentication or other purposes.
+     */
 
     @Context
     private HttpHeaders headers;

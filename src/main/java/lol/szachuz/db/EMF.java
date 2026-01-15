@@ -6,6 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EMF {
+    /**
+     * A static and final instance of {@link EntityManagerFactory}.
+     * This variable is initialized during class loading and is used to manage
+     * entity manager instances for persistence operations in the application.
+     *
+     * The factory is created using properties populated with database credentials
+     * fetched from environment variables. If these credentials are not provided,
+     * an error is logged, and the factory initialization may fail.
+     *
+     * It is important to ensure that the factory is properly closed when it is
+     * no longer needed to release associated resources.
+     */
     private static final EntityManagerFactory emf;
 
     static {

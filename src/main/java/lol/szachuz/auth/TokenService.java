@@ -15,12 +15,18 @@ import java.util.Set;
 
 @ApplicationScoped
 public class TokenService {
+    /**
+     * Represents the file system path where the application's private key is stored.
+     *
+     * This constant is used to locate the private key required for signing tokens or other cryptographic operations.
+     * The key is expected to be in PEM format and located within the application's resources directory.
+     */
 
     private static final String PRIVATE_KEY_LOCATION = "/META-INF/privateKey.pem";
     private static final String ISSUER = "https://szachuz.lol/issuer";
     private static final long EXPIRATION_SECONDS = 3600;
 
-    private PrivateKey privateKey;
+    private final PrivateKey privateKey;
 
     public TokenService() {
         try {
@@ -45,8 +51,6 @@ public class TokenService {
                 .sign(privateKey);
     }
 
-
-    // ... reszta Twojej metody readPrivateKey bez zmian ...
     private PrivateKey readPrivateKey() throws Exception {
         InputStream is;
         is = Thread.currentThread().getContextClassLoader().getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION.substring(1));
