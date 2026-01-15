@@ -26,8 +26,16 @@ public class ChessEngine {
         }
     }
 
-    public synchronized boolean isGameOver() {
-        return board.isMated() || board.isStaleMate();
+    public synchronized GameResult isGameOver() {
+        if (board.isMated()) {
+            return switch (getSideToMove().flip()) {
+                case Side.WHITE -> GameResult.WHITE_WON;
+                case Side.BLACK -> GameResult.BLACK_WON;
+            };
+        } else if (board.isStaleMate() || board.isDraw()) {
+            return GameResult.DRAW;
+        }
+        return GameResult.ONGOING;
     }
 
     public synchronized String getFen() {

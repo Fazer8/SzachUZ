@@ -1,13 +1,22 @@
 package lol.szachuz.chess;
 
+import com.github.bhlangonijr.chesslib.Side;
+
 /**
  * Rekord {@link MoveResult} reprezentujący stan meczu
  *         po ostatnim (poprzednim) ruchu.
  * @param fen Stan szachownicy w notacji FEN powstały w wyniku ruchu gracza
  * @param status Enumeracja będąca stanem gry.
+ * @param result Enumeracja opisująca wynik meczu.
+ * @param sideToMove Enumeracja reprezentująca sronę gry.
  * @author Rafał Kubacki
  */
-public record MoveResult(String fen, GameStatus status) {
+public record MoveResult(
+    String fen,
+    GameStatus status,
+    GameResult result,
+    Side sideToMove
+) {
 
     /**
      * Metoda serializująca, zwraca JSON string reprezentujący ten obiekt.
@@ -15,7 +24,11 @@ public record MoveResult(String fen, GameStatus status) {
      * @author Rafał Kubacki
      */
     public String toJson() {
-        return "{ \"fen\": \"" + fen + "\", \"status\": \"" + status + "\" }";
+        return "{ \"fen\": \"" + fen
+            + "\", \"status\": \"" + status
+            + "\", \"result\": \"" + result
+            + "\", \"sideToMove\": \"" + sideToMove
+        + "\" }";
     }
 
     /**
@@ -27,6 +40,11 @@ public record MoveResult(String fen, GameStatus status) {
      * @author Rafał Kubacki
      */
     public static MoveResult from(Match match) {
-        return new MoveResult(match.getFen(), match.getStatus());
+        return new MoveResult(
+            match.getFen(),
+            match.getStatus(),
+            match.getResult(),
+            match.getSideToMove()
+        );
     }
 }
