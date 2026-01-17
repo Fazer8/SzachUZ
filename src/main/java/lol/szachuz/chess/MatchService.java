@@ -39,8 +39,12 @@ public class MatchService {
         }
 
         match.applyMove(playerId, from, to);
+
         if (match.getStatus() == GameStatus.FINISHED || match.isOver()) {
-            repository.remove(match);
+            // BYŁO: repository.remove(match);  <-- TO PSUŁO PDF
+
+            // JEST:
+            repository.archive(match);
         }
 
         return MoveResult.from(match);

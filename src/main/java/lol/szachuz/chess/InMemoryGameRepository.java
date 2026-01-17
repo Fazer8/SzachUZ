@@ -1,6 +1,8 @@
 package lol.szachuz.chess;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class InMemoryGameRepository {
 
@@ -30,5 +32,18 @@ public class InMemoryGameRepository {
 
     public boolean isPlayerInGame(long playerId) {
         return playerToMatch.containsKey(playerId);
+    }
+    // --- NOWA METODA ---
+    public void archive(Match match) {
+        // 1. Usuwamy tylko powiązanie graczy, żeby mogli zagrać nowy mecz
+        playerToMatch.remove(match.getWhite().getId());
+        playerToMatch.remove(match.getBlack().getId());
+
+        // 2. Mecz zostaje w 'matches', więc PDF zadziała.
+
+        // 3. (Opcjonalnie) Usuń mecz całkowicie po 10 minutach, żeby nie zapchać RAMu
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            matches.remove(match.getMatchUUID());
+        }, 10, TimeUnit.MINUTES);
     }
 }

@@ -1,50 +1,41 @@
 package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
+import java.util.List;
 
-/**
- * Rekord {@link MoveResult} reprezentujący stan meczu
- *         po ostatnim (poprzednim) ruchu.
- * @param fen Stan szachownicy w notacji FEN powstały w wyniku ruchu gracza
- * @param status Enumeracja będąca stanem gry.
- * @param result Enumeracja opisująca wynik meczu.
- * @param sideToMove Enumeracja reprezentująca sronę gry.
- * @author Rafał Kubacki
- */
 public record MoveResult(
-    String fen,
-    GameStatus status,
-    GameResult result,
-    Side sideToMove
+        String fen,
+        GameStatus status,
+        GameResult result,
+        Side sideToMove,
+        List<String> history
 ) {
 
-    /**
-     * Metoda serializująca, zwraca JSON string reprezentujący ten obiekt.
-     * @return {@code String}, będący serializacją obiektu do formatu JSON.
-     * @author Rafał Kubacki
-     */
     public String toJson() {
+        StringBuilder historyJson = new StringBuilder("[");
+        if (history != null) {
+            for (int i = 0; i < history.size(); i++) {
+                historyJson.append("\"").append(history.get(i)).append("\"");
+                if (i < history.size() - 1) historyJson.append(",");
+            }
+        }
+        historyJson.append("]");
+
         return "{ \"fen\": \"" + fen
-            + "\", \"status\": \"" + status
-            + "\", \"result\": \"" + result
-            + "\", \"sideToMove\": \"" + sideToMove
-        + "\" }";
+                + "\", \"status\": \"" + status
+                + "\", \"result\": \"" + result
+                + "\", \"sideToMove\": \"" + sideToMove
+                + "\", \"history\": " + historyJson.toString() // <--- Dodajemy
+                + " }";
     }
 
-    /**
-     * Tworzy obiekt {@link MoveResult} reprezentujący rezultat
-     * ostatniego wykonanego ruchu w podanym meczu.
-     * @param match obiekt meczu, na podstawie którego wyznaczany jest wynik.
-     * @return nowy obiekt {@link MoveResult} odzwierciedlający aktualny stan meczu
-     *         po ostatnim ruchu
-     * @author Rafał Kubacki
-     */
     public static MoveResult from(Match match) {
         return new MoveResult(
-            match.getFen(),
-            match.getStatus(),
-            match.getResult(),
-            match.getSideToMove()
+                match.getFen(),
+                match.getStatus(),
+                match.getResult(),
+                match.getSideToMove(),
+                match.getMoveHistorySan() // <--- Pobieramy z meczu
         );
     }
 }

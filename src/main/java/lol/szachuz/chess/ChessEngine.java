@@ -45,4 +45,5 @@ public class ChessEngine {
     public synchronized Side getSideToMove() {
         return board.getSideToMove();
     }
+    public Board getBoard() {return this.board;}
 }
