@@ -1,9 +1,11 @@
 package lol.szachuz.chess.player.ai;
 
+import lol.szachuz.chess.MoveMessage;
+
 public class AiEngine {
 
-    public static AiMove computeMove(String fen, long skill) {
+    public static MoveMessage computeMove(String fen, long skill) {
         // placeholder – later Stockfish
-        return new AiMove("e7", "e5");
+        return new MoveMessage("e7", "e5");
     }
 }

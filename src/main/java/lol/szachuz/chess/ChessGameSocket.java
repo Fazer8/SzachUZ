@@ -9,11 +9,10 @@ import lol.szachuz.chess.player.ai.AiMoveScheduler;
 import java.io.EOFException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 
 @ServerEndpoint("/ws/chess")
-public class ChessGameSocket implements SzachuzWebSocket {
+public final class ChessGameSocket implements SzachuzWebSocket {
 
     private Session session;
     private long playerId;
@@ -28,7 +27,6 @@ public class ChessGameSocket implements SzachuzWebSocket {
             this.gameUUID = params.get("gameId").getFirst();
             this.playerId = JWTDecoder.parseUserIdFromToken(params.get("token").getFirst());
 
-            // For the love of God, why does this one return null, while the other one works and match id is the same???
             Match match = MatchService.getInstance().loadMatchByMatchId(gameUUID);
 
             if (match == null) {
@@ -48,7 +46,6 @@ public class ChessGameSocket implements SzachuzWebSocket {
 
             ChessSocketRegistry.register(gameUUID, session);
 
-            // Send initial state
             ChessSocketRegistry.broadcast(
                     gameUUID,
                     MoveResult.from(match).toJson()
@@ -67,8 +64,7 @@ public class ChessGameSocket implements SzachuzWebSocket {
 
             MoveResult result = MatchService.getInstance().processMove(
                     playerId,
-                    move.from(),
-                    move.to()
+                    move
             );
 
             ChessSocketRegistry.broadcast(gameUUID, result.toJson());
@@ -86,7 +82,7 @@ public class ChessGameSocket implements SzachuzWebSocket {
         // No immediate game removal
         // AFK logic will handle this later
         // Maybe send code for PDF generation, I don't know
-        sendError("closed my testicles lolz", session);
+        ChessSocketRegistry.unregister(gameUUID, session);
     }
 
     @OnError

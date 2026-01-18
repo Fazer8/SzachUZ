@@ -23,13 +23,13 @@ public class AiMoveScheduler {
                 if (match.getStatus() == GameStatus.FINISHED) return;
 
                 // Very naive placeholder
-                AiMove move = AiEngine.computeMove(
+                MoveMessage move = AiEngine.computeMove(
                         match.getFen(),
                         ai.getSkillLevel()
                 );
 
                 MoveResult result = MatchService.getInstance()
-                        .processMove(ai.getId(), move.from(), move.to());
+                        .processMove(ai.getId(), move);
 
                 ChessSocketRegistry.broadcast(
                         match.getMatchUUID(),

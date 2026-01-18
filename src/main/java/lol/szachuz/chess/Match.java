@@ -16,6 +16,15 @@ public class Match {
 
     private GameResult gameResult;
 
+    /**
+     * Constructor of the {@link Match} object.
+     * @param matchUUID {@code String} with a UUID what will be used to represent a match.
+     * @param white Object representing a Player that will use white pieces
+     *              (either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
+     * @param black Object representing a Player that will use black pieces
+     *              (either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
+     * @author Rafał Kubacki
+     */
     public Match(String matchUUID, Player white, Player black) {
         engine = new ChessEngine();
         this.black = black;
@@ -24,6 +33,14 @@ public class Match {
         this.gameResult = GameResult.ONGOING;
     }
 
+    /**
+     * Method that tries to apply move request sent by player
+     * @param playerId {@code long} ID of a player that wants to move
+     * @param from {@code String} which piece to move, in FEN notation.
+     * @param to {@code String} where to move that piece, in FEN notation.
+     * @throws IllegalStateException if player tried to make an illegal move.
+     * @author Rafał Kubacki
+     */
     public synchronized void applyMove(long playerId, String from, String to) {
         if (status == GameStatus.FINISHED) {
             throw new IllegalStateException("Game already finished");
@@ -40,44 +57,99 @@ public class Match {
         }
     }
 
+    /**
+     * Method that checks if it's player's turn.
+     * @param playerId {@code long} ID of a player to check.
+     * @return a {@code boolean} answering the question.
+     * @author Rafał Kubacki
+     */
     private boolean isPlayersTurn(long playerId) {
         Side side = engine.getSideToMove();
         return  (side ==Side.WHITE &&white.getId()==playerId)
               ||(side ==Side.BLACK &&black.getId()==playerId);
     }
 
+    /**
+     * Method that checks if the match concluded.
+     * @return a {@code boolean} answering the question.
+     * @author Rafał Kubacki
+     */
     public boolean isOver() {
         return engine.isGameOver() != GameResult.ONGOING;
     }
 
+    /**
+     * Method that returns ID of the match.
+     * @return {@code String} with a UUID of this match.
+     * @author Rafał Kubacki
+     */
     public String getMatchUUID() {
         return matchUUID;
     }
 
+    /**
+     * Method that returns FEN representation of the board.
+     * @return {@code String} with a FEN representing current state of the board.
+     * @author Rafał Kubacki
+     */
     public String getFen() {
         return engine.getFen();
     }
 
+    /**
+     * Method that returns status of the match.
+     * @return {@link GameStatus} enumeration representing current status of the board.
+     * @author Rafał Kubacki
+     */
     public GameStatus getStatus() {
         return status;
     }
 
+    /**
+     * Method that returns White Player.
+     * @return either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
+     *         that's controlling white pieces.
+     * @author Rafał Kubacki
+     */
     public Player getWhite() {
         return white;
     }
 
+    /**
+     * Method that returns Black Player.
+     * @return either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
+     *         that's controlling black pieces.
+     * @author Rafał Kubacki
+     */
     public Player getBlack() {
         return black;
     }
 
+    /**
+     * Method that returns result of the match.
+     * @return {@link GameResult} enumeration representing result of the match.
+     * @author Rafał Kubacki
+     */
     public GameResult getResult() {
         return gameResult;
     }
 
+    /**
+     * Method that returns which color should move next.
+     * @return {@link Side} enumeration representing color of player that should move next.
+     * @author Rafał Kubacki
+     */
     public Side getSideToMove() {
         return engine.getSideToMove();
     }
 
+    /**
+     * Checks if a player is part of this match.
+     * @param playerId {@code long} ID of a player to check.
+     * @return an answer to the question.
+     * @throws IllegalStateException if either of the Player objects in the game is null, because this shouldn't happen.
+     * @author Rafał Kubacki
+     */
     public boolean hasPlayer(long playerId) {
         if (white == null || black == null) {
             throw new IllegalStateException("One of players is null!");
@@ -85,6 +157,10 @@ public class Match {
         return white.getId() == playerId || black.getId() == playerId;
     }
 
+    /**
+     * Retrieves {@link GameResult} of a match from the chess engine and assigns it to {@code gameResult} field.
+     * @author Rafał Kubacki
+     */
     private void resolveResult() {
         gameResult = engine.isGameOver();
     }
