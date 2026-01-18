@@ -18,6 +18,7 @@ public final class ChessEngine {
      * Validates if the move is allowed.
      * @param move a {@link Move} to be checked.
      * @return a {@code boolean} anwsering that question.
+     * @author Rafał Kubacki
      */
     public synchronized boolean isLegalMove(Move move) {
         return board.isMoveLegal(move, true);
