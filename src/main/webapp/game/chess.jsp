@@ -74,6 +74,7 @@
                 <button onclick="exitGame()">Wyjdź z gry</button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
+            <button onclick="forfeit()">Poddaj się</button>
             <div id="board"></div>
         <script>
             const GAME_ID = "${param.gameId}";
@@ -82,7 +83,7 @@
             const COLOR   = "${param.color}".toLowerCase();
             console.log(COLOR);
 
-            function showResult(result) {
+            function showResult(result, status) {
                 const overlay = document.getElementById("game-status");
                 const textField = document.getElementById("status-text");
 
@@ -97,6 +98,11 @@
                 } else {
                     text = "You lost.";
                 }
+
+                if (status === "FORFEIT") {
+                    text += "By forfeit";
+                }
+
 
                 textField.innerText = text;
                 overlay.style.display = "flex";
@@ -113,6 +119,13 @@
                     el.innerText = "Ruch przeciwnika (" + sideToMove + ")";
                     el.style.color = "gray";
                     board.draggable = false;
+                }
+            }
+
+            function forfeit() {
+                let res = confirm("Opóścić grę?");
+                if (res) {
+                    socket.send(JSON.stringify({type: "FORFEIT"}));
                 }
             }
 
@@ -162,7 +175,9 @@
                     board.position(msg.fen);
 
                     if (msg.status === "FINISHED") {
-                       showResult(msg.result);
+                       showResult(msg.result, msg.status);
+                    } else if (msg.status == "FORFEIT") {
+                       showResult(msg.result, msg.status);
                     }
 
                     updateTurnIndicator(msg.sideToMove);

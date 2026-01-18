@@ -9,5 +9,7 @@ public enum GameStatus {
     /** Game is still ongoing */
     ACTIVE,
     /** Game has concluded */
-    FINISHED
+    FINISHED,
+    /** Game concluded by player forfeit */
+    FORFEIT
 }

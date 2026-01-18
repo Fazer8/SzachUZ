@@ -63,20 +63,39 @@ public final class MatchService {
      * @author Rafał Kubacki
      */
     public MoveResult processMove(long playerId, MoveMessage move) {
-        Match match = repository.findByPlayer(playerId);
+        Match match = loadMatchByPlayerId(playerId);
 
         if (match == null) {
             throw new IllegalStateException("No active match");
         }
 
         match.applyMove(playerId, move.from(), move.to());
-        if (match.getStatus() == GameStatus.FINISHED || match.isOver()) {
+        if (match.getStatus() != GameStatus.ACTIVE || match.isOver()) {
             repository.remove(match);
         }
 
         return MoveResult.from(match);
     }
 
+    /**
+     * Method that forcefully ends match by forfeit.
+     * @param playerId {@code long} ID of a player that forfeits.
+     * @throws IllegalStateException if match doesnt exist.
+     * @author Rafał Kubacki
+     */
+    public MoveResult forfeit(long playerId) {
+        Match match = loadMatchByPlayerId(playerId);
+
+        if (match == null) {
+            throw new IllegalStateException("No active match");
+        }
+
+        match.forfeit(playerId);
+
+        repository.remove(match);
+
+        return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null);
+    }
 
     /**
      * Finds a match what has a specific player in it.

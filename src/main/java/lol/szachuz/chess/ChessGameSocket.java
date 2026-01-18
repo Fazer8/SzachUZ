@@ -60,12 +60,17 @@ public final class ChessGameSocket implements SzachuzWebSocket {
     @OnMessage
     public void onMessage(String message) {
         try {
-            MoveMessage move = MoveMessage.fromJson(message);
+            MoveResult result;
+            if (message.contains("FORFEIT")) {
+                result = MatchService.getInstance().forfeit(playerId);
+            } else {
+                MoveMessage move = MoveMessage.fromJson(message);
 
-            MoveResult result = MatchService.getInstance().processMove(
-                    playerId,
-                    move
-            );
+                result = MatchService.getInstance().processMove(
+                        playerId,
+                        move
+                );
+            }
 
             ChessSocketRegistry.broadcast(gameUUID, result.toJson());
 

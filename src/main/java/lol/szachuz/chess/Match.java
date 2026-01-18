@@ -42,7 +42,7 @@ public class Match {
      * @author Rafał Kubacki
      */
     public synchronized void applyMove(long playerId, String from, String to) {
-        if (status == GameStatus.FINISHED) {
+        if (status != GameStatus.ACTIVE) {
             throw new IllegalStateException("Game already finished");
         }
         if (!isPlayersTurn(playerId)) {
@@ -54,6 +54,28 @@ public class Match {
         if (engine.isGameOver() != GameResult.ONGOING) {
             resolveResult();
             status = GameStatus.FINISHED;
+        }
+    }
+
+    /**
+     * Method that forcefully ends match by forfeit.
+     * @param playerId {@code long} ID of a player that forfeits.
+     * @throws IllegalStateException if match doesnt exist.
+     * @throws IllegalArgumentException if player ID isn't in the match.
+     * @author Rafał Kubacki
+     */
+    public synchronized void forfeit(long playerId) {
+        if (status != GameStatus.ACTIVE) {
+            throw new IllegalStateException("Game already finished");
+        }
+
+        status = GameStatus.FORFEIT;
+        if (white.getId() == playerId) {
+            gameResult = GameResult.BLACK_WON;
+        } else if (black.getId() == playerId) {
+            gameResult = GameResult.WHITE_WON;
+        } else {
+            throw new IllegalArgumentException("Player not in match");
         }
     }
 
