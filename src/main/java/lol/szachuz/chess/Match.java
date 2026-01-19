@@ -2,6 +2,9 @@ package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
 import lol.szachuz.chess.player.Player;
+import lol.szachuz.chess.player.ai.AiPlayer;
+
+import java.util.Timer;
 
 /**
  * Klasa reprezentująca Sesję Gry (GameSession)
@@ -13,6 +16,15 @@ public class Match {
     private final Player white, black;
     private final String matchUUID;
     private GameStatus status = GameStatus.ACTIVE;
+
+    private static final long MS_IN_SECONDS = 1000;
+    private static final long SECONDS_IN_MINUTES = 60;
+    private static final long MINUTES = 5;
+    private static final long INITIAL_TIME_MS = MINUTES * SECONDS_IN_MINUTES * MS_IN_SECONDS;
+    private long whiteTimeRemaining = INITIAL_TIME_MS;
+
+    private long blackTimeRemaining = INITIAL_TIME_MS;
+    private long lastMoveTimestamp;
 
     private GameResult gameResult;
 
@@ -31,6 +43,7 @@ public class Match {
         this.white = white;
         this.matchUUID = matchUUID;
         this.gameResult = GameResult.ONGOING;
+        this.lastMoveTimestamp = System.currentTimeMillis();
     }
 
     /**
@@ -47,6 +60,17 @@ public class Match {
         }
         if (!isPlayersTurn(playerId)) {
             throw new IllegalStateException("Not your turn");
+        }
+
+        consumeTimeForSide(getSideToMove());
+
+        if (whiteTimeRemaining <= 0) {
+            timeoutWhite();
+            return;
+        }
+        if (blackTimeRemaining <= 0) {
+            timeoutBlack();
+            return;
         }
 
         engine.applyMove(from, to);
@@ -147,6 +171,9 @@ public class Match {
         return black;
     }
 
+    public boolean hasAiPlayer() {
+        return (white instanceof AiPlayer) || (black instanceof AiPlayer);
+    }
     /**
      * Method that returns result of the match.
      * @return {@link GameResult} enumeration representing result of the match.
@@ -186,4 +213,59 @@ public class Match {
     private void resolveResult() {
         gameResult = engine.isGameOver();
     }
+
+    /**
+     * Method that removes used time for one of the sides.
+     * @param side {@link Side} to subtract time for.
+     * @author Rafał Kubacki
+     */
+    void consumeTimeForSide(Side side) {
+        long now = System.currentTimeMillis();
+        long elapsed = now - lastMoveTimestamp;
+
+        if (side == Side.WHITE) {
+            whiteTimeRemaining -= elapsed;
+        } else {
+            blackTimeRemaining -= elapsed;
+        }
+
+        lastMoveTimestamp = now;
+    }
+
+    /**
+     * Method that handles finished timer for white player.
+     * @author Rafał Kubacki
+     */
+    public void timeoutWhite() {
+        status = GameStatus.FINISHED;
+        gameResult = GameResult.BLACK_WON;
+    }
+
+    /**
+     * Method that handles finished timer for black player.
+     * @author Rafał Kubacki
+     */
+    public void timeoutBlack() {
+        status = GameStatus.FINISHED;
+        gameResult = GameResult.WHITE_WON;
+    }
+
+    /**
+     * Method that returns time remaining for black player.
+     * @return remaining time in milliseconds.
+     * @author Rafał Kubacki
+     */
+    public long getBlackTimeRemaining() {
+        return blackTimeRemaining;
+    }
+
+    /**
+     * Method that returns time remaining for white player.
+     * @return remaining time in milliseconds.
+     * @author Rafał Kubacki
+     */
+    public long getWhiteTimeRemaining() {
+        return whiteTimeRemaining;
+    }
+
 }

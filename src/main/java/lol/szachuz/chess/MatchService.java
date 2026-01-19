@@ -1,9 +1,15 @@
 package lol.szachuz.chess;
 
+import com.github.bhlangonijr.chesslib.Side;
 import lol.szachuz.chess.player.Player;
 import lol.szachuz.chess.player.ai.AiPlayer;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service operating matches.
@@ -15,6 +21,16 @@ public final class MatchService {
     private static final MatchService INSTANCE = new MatchService();
 
     private final InMemoryGameRepository repository = new InMemoryGameRepository();
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    //private final List<MatchEventListener> listeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Private constructor.
+     */
+    private MatchService() {
+        scheduler.scheduleAtFixedRate(this::checkClocks, 1, 1, TimeUnit.SECONDS);
+    }
 
     /**
      * Method returning a reference to the instance of the {@link MatchService}.
@@ -94,7 +110,7 @@ public final class MatchService {
 
         repository.remove(match);
 
-        return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null);
+        return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null, -1, -1);
     }
 
     /**
@@ -115,5 +131,41 @@ public final class MatchService {
      */
     public Match loadMatchByMatchId(String matchId) {
         return repository.findById(matchId);
+    }
+
+    /**
+     * Method privided for scheduler.
+     * @author Rafał Kubacki
+     */
+    private void checkClocks() {
+        for (Match match : repository.findAll()) {
+            if (match.getStatus() != GameStatus.ACTIVE) continue;
+
+            Side side = match.getSideToMove();
+            match.consumeTimeForSide(side);
+
+            if (match.getWhiteTimeRemaining() <= 0) {
+                match.timeoutWhite();
+            } else if (match.getBlackTimeRemaining() <= 0) {
+                match.timeoutBlack();
+            } else {
+                String timeTick =
+                        "{ \"type\": \"TIME_TICK\",  \"timeRemaining\": { \"white\": \"" + match.getWhiteTimeRemaining()
+                        + "\", \"black\": \"" + match.getBlackTimeRemaining() + "\"}}";
+                ChessSocketRegistry.broadcast(match.getMatchUUID(), timeTick);
+                continue;
+            }
+
+            repository.remove(match);
+            MoveResult result = new MoveResult(
+                match.getFen(),
+                match.getStatus(),
+                match.getResult(),
+                match.getSideToMove(),
+                match.getWhiteTimeRemaining(),
+                match.getBlackTimeRemaining()
+            );
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
+        }
     }
 }

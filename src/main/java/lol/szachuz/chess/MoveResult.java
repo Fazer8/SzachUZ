@@ -8,13 +8,17 @@ import com.github.bhlangonijr.chesslib.Side;
  * @param status Game state {@link GameStatus} enumeration.
  * @param result Game result {@link GameResult} enumeration representing if and how the game ended.
  * @param sideToMove {@link Side} enumeration representing color of player that is next in line to move.
+ * @param whiteTimeRemaining {@code long} milliseconds representing time remaining for a player.
+ * @param blackTimeRemaining {@code long} milliseconds representing time remaining for a player.
  * @author Rafał Kubacki
  */
 public record MoveResult(
     String fen,
     GameStatus status,
     GameResult result,
-    Side sideToMove
+    Side sideToMove,
+    long whiteTimeRemaining,
+    long blackTimeRemaining
 ) {
 
     /**
@@ -27,7 +31,8 @@ public record MoveResult(
             + "\", \"status\": \"" + status
             + "\", \"result\": \"" + result
             + "\", \"sideToMove\": \"" + sideToMove
-        + "\" }";
+            + "\", \"timeRemaining\": { \"white\": \"" + whiteTimeRemaining + "\", \"black\": \"" + blackTimeRemaining + "\"}"
+        + "}";
     }
 
     /**
@@ -41,7 +46,9 @@ public record MoveResult(
             match.getFen(),
             match.getStatus(),
             match.getResult(),
-            match.getSideToMove()
+            match.getSideToMove(),
+            match.getWhiteTimeRemaining(),
+            match.getBlackTimeRemaining()
         );
     }
 }

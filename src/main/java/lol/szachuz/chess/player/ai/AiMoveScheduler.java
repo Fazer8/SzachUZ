@@ -14,16 +14,17 @@ public class AiMoveScheduler {
 
     public static void scheduleIfNeeded(Match match) {
 
-        //Player black = match.getBlack();
-        Player black = null;
-        if (!(black instanceof AiPlayer ai)) return;
+        if (!match.hasAiPlayer()) {
+            return;
+        }
+
+        AiPlayer ai = (AiPlayer) (match.getBlack() instanceof AiPlayer ? match.getBlack() : match.getWhite());
 
         executor.schedule(() -> {
             try {
                 if (match.getStatus() == GameStatus.FINISHED) return;
 
-                // Very naive placeholder
-                MoveMessage move = AiEngine.computeMove(
+                MoveMessage move = AiEngineBean.computeMove(
                         match.getFen(),
                         ai.getSkillLevel()
                 );
@@ -31,12 +32,9 @@ public class AiMoveScheduler {
                 MoveResult result = MatchService.getInstance()
                         .processMove(ai.getId(), move);
 
-                ChessSocketRegistry.broadcast(
-                        match.getMatchUUID(),
-                        result.toJson()
-                );
+                ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
 
-            } catch (Exception ignored) {}
+            } catch (Exception _) {}
         }, 500, TimeUnit.MILLISECONDS);
     }
 }

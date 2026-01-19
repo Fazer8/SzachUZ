@@ -33,9 +33,6 @@ public final class ChessGameSocket implements SzachuzWebSocket {
                 sendError("Invalid session" + this.gameUUID + ". Match is null.", session);
                 session.close();
                 return;
-            } else {
-                sendError("Debug message for:" + this.playerId + "match is ok."
-                        , session);
             }
 
             if(!match.hasPlayer(playerId)) {
@@ -66,17 +63,14 @@ public final class ChessGameSocket implements SzachuzWebSocket {
             } else {
                 MoveMessage move = MoveMessage.fromJson(message);
 
-                result = MatchService.getInstance().processMove(
-                        playerId,
-                        move
-                );
+                result = MatchService.getInstance().processMove(playerId, move);
             }
 
             ChessSocketRegistry.broadcast(gameUUID, result.toJson());
 
-            //AiMoveScheduler.scheduleIfNeeded(
-            //        MatchService.getInstance().loadMatchByMatchId(gameUUID) // basing on player's color, ai scheduler should receive oposite color
-            //);
+            AiMoveScheduler.scheduleIfNeeded(MatchService.getInstance().loadMatchByMatchId(gameUUID));
+
+
         } catch (Exception e) {
             sendError(e.getMessage(), session);
         }

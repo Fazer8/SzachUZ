@@ -74,6 +74,10 @@
                 <button onclick="exitGame()">Wyjdź z gry</button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
+            <div>
+              Biały czas: <span id="whiteClock"></span>
+              Czarny czas: <span id="blackClock"></span>
+            </div>
             <button onclick="forfeit()">Poddaj się</button>
             <div id="board"></div>
         <script>
@@ -94,14 +98,16 @@
                     (result === "WHITE_WON" && COLOR === "white") ||
                     (result === "BLACK_WON" && COLOR === "black")
                 ) {
-                    text = "You won!";
+                    text = "Wygrałeś";
                 } else {
-                    text = "You lost.";
+                    text = "Przegrałeś";
                 }
 
                 if (status === "FORFEIT") {
-                    text += "By forfeit";
+                    text += "przez walkover";
                 }
+
+                text += "!";
 
 
                 textField.innerText = text;
@@ -120,6 +126,16 @@
                     el.style.color = "gray";
                     board.draggable = false;
                 }
+            }
+
+            function renderClock(ms) {
+                let s = Math.max(0, Math.floor(ms / 1000));
+                return Math.floor(s / 60) + ":" + (s % 60).toString().padStart(2, "0");
+            }
+
+            function updateClock(msg) {
+                document.getElementById("whiteClock").innerText = renderClock(msg.timeRemaining.white);
+                document.getElementById("blackClock").innerText = renderClock(msg.timeRemaining.black);
             }
 
             function forfeit() {
@@ -170,6 +186,10 @@
                     return;
                 }
 
+                if (msg.type === "TIME_TICK") {
+                    updateClock(msg);
+                }
+
                 if (msg.fen) {
                     game.load(msg.fen);
                     board.position(msg.fen);
@@ -179,6 +199,8 @@
                     } else if (msg.status == "FORFEIT") {
                        showResult(msg.result, msg.status);
                     }
+
+                    updateClock(msg);
 
                     updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;

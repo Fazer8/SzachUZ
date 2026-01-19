@@ -6,7 +6,7 @@
     <script>
         // automatyczne przekierowanie do tymczasowej strony pośredniej
         window.onload = function() {
-            window.location.href = "${pageContext.request.contextPath}/users/userProfile.jsp";
+            window.location.href = "${pageContext.request.contextPath}/index.jsp";
         };
     </script>
     </jsp:attribute>

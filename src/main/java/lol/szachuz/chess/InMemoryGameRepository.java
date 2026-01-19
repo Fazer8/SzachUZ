@@ -1,4 +1,6 @@
 package lol.szachuz.chess;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +24,14 @@ public final class InMemoryGameRepository {
         playerToMatch.put(match.getBlack().getId(), match.getMatchUUID());
     }
 
+    /**
+     * Returns all matches.
+     * @return all matches.
+     * @author Rafał Kubacki
+     */
+    public Collection<Match> findAll() {
+        return matches.values();
+    }
     /**
      * Finds a match what has a specific player in it.
      * @param playerId {@code long} ID of a player we're looking for.
