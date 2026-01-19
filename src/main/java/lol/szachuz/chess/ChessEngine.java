@@ -32,15 +32,46 @@ public final class ChessEngine {
      * @author Rafał Kubacki
      */
     public synchronized void applyMove(String from, String to) {
-        Move move = new Move(
-                Square.fromValue(from.toUpperCase()),
-                Square.fromValue(to.toUpperCase())
-        );
+        Move move;
+        Square fromSq = Square.fromValue(from.toUpperCase());
+        Square toSq   = Square.fromValue(to.toUpperCase());
+
+        if (isPromotion(fromSq, toSq)) {
+            move = new Move(fromSq, toSq, defaultPromotionPiece());
+        } else {
+            move = new Move(fromSq, toSq);
+        }
+
         if (isLegalMove(move)) {
             board.doMove(move);
         } else {
             throw new IllegalArgumentException("Illegal move");
         }
+    }
+
+    /**
+     * Detect if promotion is needed.
+     * @param from {@link Square} position of chess position.
+     * @param to {@link Square} where to move.
+     * @return {@code boolean} anwsering the question.
+     * @author Rafał Kubacki
+     */
+    private boolean isPromotion(Square from, Square to) {
+        Piece piece = board.getPiece(from);
+
+        return piece.getPieceType() == PieceType.PAWN &&
+                (to.getRank() == Rank.RANK_8 || to.getRank() == Rank.RANK_1);
+    }
+
+    /**
+     * Determines which piece to promote to.
+     * @return {@link Piece} that got promoted.
+     * @author Rafał Kubacki
+     */
+    private Piece defaultPromotionPiece() {
+        return board.getSideToMove() == Side.WHITE
+                ? Piece.WHITE_QUEEN
+                : Piece.BLACK_QUEEN;
     }
 
     /**

@@ -1,7 +1,6 @@
 package lol.szachuz.chess.player.ai;
 
 import lol.szachuz.chess.*;
-import lol.szachuz.chess.player.Player;
 
 import java.util.concurrent.*;
 
@@ -14,6 +13,9 @@ public class AiMoveScheduler {
 
     public static void scheduleIfNeeded(Match match) {
 
+        if (match == null) {
+            return;
+        }
         if (!match.hasAiPlayer()) {
             return;
         }

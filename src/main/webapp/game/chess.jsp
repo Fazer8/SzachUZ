@@ -165,7 +165,7 @@
             }
 
             socket.onclose = function () {
-                alert("Connection closed");
+                //alert("Connection closed");
                 window.location.href = "/index.jsp";
             };
 
