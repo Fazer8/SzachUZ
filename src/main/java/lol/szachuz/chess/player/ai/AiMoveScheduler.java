@@ -20,6 +20,9 @@ public class AiMoveScheduler {
         try {
             if (match.getStatus() == GameStatus.FINISHED) return;
 
+            String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    match.getFen() + "\" }";
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), err);
             MoveMessage move = AiEngineBean.computeMove(
                     match.getFen(),
                     ai.getSkillLevel()
