@@ -13,8 +13,6 @@ import lol.szachuz.chess.player.ai.AiPlayer;
 import lol.szachuz.chess.player.ai.Difficulty;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet("/sv/training")
@@ -25,7 +23,7 @@ public class AiMatchServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Difficulty difficulty = difficulties.get(req.getParameter("difficulty"));
+        Difficulty difficulty = difficulties.get(req.getParameter("difficulty").toUpperCase());
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

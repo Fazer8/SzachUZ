@@ -1,54 +1,65 @@
 package lol.szachuz.chess.player.ai;
 
-import jakarta.ejb.Stateless;
-import lol.szachuz.chess.MoveMessage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
-import java.io.*;
+import jakarta.ejb.Stateless;
+import lol.szachuz.chess.ChessSocketRegistry;
+import lol.szachuz.chess.MoveMessage;
 
 @Stateless
 public class AiEngineBean {
-    public static MoveMessage computeMove(String fen, Difficulty difficulty) {
+
+    public static MoveMessage computeMove(String fen, String matchUUID, Difficulty difficulty) {
+        String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                "please compute me some move" + "\" }";
+        ChessSocketRegistry.broadcast(matchUUID, err);
         try {
-            Process process = new ProcessBuilder("stockfish").start();
+            int depth = difficulty.depth();
 
-            BufferedWriter in = new BufferedWriter(
-                    new OutputStreamWriter(process.getOutputStream()));
-            BufferedReader out = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
+            String encodedFen = URLEncoder.encode(fen, StandardCharsets.UTF_8);
 
-            send(in, "uci");
-            send(in, "isready");
+            String url = "https://lichess.org/api/cloud-eval?fen=" + encodedFen + "&multiPv=1&depth=" + depth;
 
-            configureDifficulty(in, difficulty);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Accept", "application/json")
+                    .timeout(Duration.ofSeconds(5))
+                    .GET()
+                    .build();
 
-            send(in, "position fen " + fen);
-            send(in, "go movetime " + difficulty.moveTimeMs());
+            err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    "pre-request" + "\" }"; // WORKS UP TO THERE!
 
-            String line;
-            while ((line = out.readLine()) != null) {
-                if (line.startsWith("bestmove")) {
-                    return MoveMessage.fromUCIString(line.split(" ")[1]);
-                }
+            ChessSocketRegistry.broadcast(matchUUID, err);
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String body = response.body();
+
+            err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    body + "\" }";
+            ChessSocketRegistry.broadcast(matchUUID, err);
+
+            int start = body.indexOf("\"bestMove\":\"") + 12;
+            int end = body.indexOf("\"", start);
+            if (start < 12 || end < 0) {
+                throw new IllegalStateException("Failed to parse bestMove from Lichess response: " + body);
             }
+
+            String moveUCI = body.substring(start, end);
+
+            return MoveMessage.fromUCIString(moveUCI);
+
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-
-        throw new IllegalStateException("No move returned");
-    }
-
-    private static void configureDifficulty(BufferedWriter in, Difficulty difficulty) throws IOException {
-
-        send(in, "setoption name Skill Level value " + difficulty.skillLevel());
-
-        if (difficulty == Difficulty.SILLY) {
-            send(in, "setoption name MultiPV value 4");
-        }
-    }
-
-    private static void send(BufferedWriter in, String cmd) throws IOException {
-        in.write(cmd);
-        in.newLine();
-        in.flush();
     }
 }

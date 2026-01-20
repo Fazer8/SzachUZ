@@ -52,6 +52,6 @@ public record MoveMessage(String from, String to) {
             throw new IllegalArgumentException("Invalid MOVE message - invalid format: " + uci);
         }
 
-        return new MoveMessage(uci.substring(0,1), uci.substring(2,3));
+        return new MoveMessage(uci.substring(0,2), uci.substring(2,4));
     }
 }

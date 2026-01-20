@@ -6,11 +6,6 @@ import java.util.concurrent.*;
 
 public class AiMoveScheduler {
 
-    private static final ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor();
-
-    private AiMoveScheduler() {}
-
     public static void scheduleIfNeeded(Match match) {
 
         if (match == null) {
@@ -22,21 +17,24 @@ public class AiMoveScheduler {
 
         AiPlayer ai = (AiPlayer) (match.getBlack() instanceof AiPlayer ? match.getBlack() : match.getWhite());
 
-        executor.schedule(() -> {
-            try {
-                if (match.getStatus() == GameStatus.FINISHED) return;
+        try {
+            if (match.getStatus() == GameStatus.FINISHED) return;
 
-                MoveMessage move = AiEngineBean.computeMove(
-                        match.getFen(),
-                        ai.getSkillLevel()
-                );
+            MoveMessage move = AiEngineBean.computeMove(
+                    match.getFen(),
+                    match.getMatchUUID(),
+                    ai.getSkillLevel()
+            );
 
-                MoveResult result = MatchService.getInstance()
-                        .processMove(ai.getId(), move);
+            MoveResult result = MatchService.getInstance()
+                    .processMove(ai.getId(), move);
 
-                ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
 
-            } catch (Exception _) {}
-        }, 500, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    e.getMessage() + "\" }";
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), err);
+        }
     }
 }

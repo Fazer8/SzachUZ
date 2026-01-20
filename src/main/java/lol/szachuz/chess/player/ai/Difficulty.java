@@ -1,22 +1,18 @@
 package lol.szachuz.chess.player.ai;
 
 public enum Difficulty {
-    SILLY(50,0),
-    PRO(200,5);
+    SILLY(1),
+    // NOVICE(3),
+    // CHALLENGER(9),
+    PRO(15);
 
-    private final int moveTimeMs;
-    private final int skillLevel;
+    private final int depth;
 
-    Difficulty(int moveTimeMs, int skillLevel) {
-        this.moveTimeMs = moveTimeMs;
-        this.skillLevel = skillLevel;
+    Difficulty(int depth) {
+        this.depth = depth;
     }
 
-    public int moveTimeMs() {
-        return moveTimeMs;
-    }
-
-    public int skillLevel() {
-        return skillLevel;
+    public int depth() {
+        return depth;
     }
 }
