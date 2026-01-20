@@ -74,6 +74,11 @@
                 <button onclick="exitGame()">Wyjdź z gry</button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
+            <div>
+              Biały czas: <span id="whiteClock"></span>
+              Czarny czas: <span id="blackClock"></span>
+            </div>
+            <button onclick="forfeit()">Poddaj się</button>
             <div id="board"></div>
         <script>
             const GAME_ID = "${param.gameId}";
@@ -82,7 +87,7 @@
             const COLOR   = "${param.color}".toLowerCase();
             console.log(COLOR);
 
-            function showResult(result) {
+            function showResult(result, status) {
                 const overlay = document.getElementById("game-status");
                 const textField = document.getElementById("status-text");
 
@@ -93,10 +98,17 @@
                     (result === "WHITE_WON" && COLOR === "white") ||
                     (result === "BLACK_WON" && COLOR === "black")
                 ) {
-                    text = "You won!";
+                    text = "Wygrałeś";
                 } else {
-                    text = "You lost.";
+                    text = "Przegrałeś";
                 }
+
+                if (status === "FORFEIT") {
+                    text += "przez walkover";
+                }
+
+                text += "!";
+
 
                 textField.innerText = text;
                 overlay.style.display = "flex";
@@ -113,6 +125,23 @@
                     el.innerText = "Ruch przeciwnika (" + sideToMove + ")";
                     el.style.color = "gray";
                     board.draggable = false;
+                }
+            }
+
+            function renderClock(ms) {
+                let s = Math.max(0, Math.floor(ms / 1000));
+                return Math.floor(s / 60) + ":" + (s % 60).toString().padStart(2, "0");
+            }
+
+            function updateClock(msg) {
+                document.getElementById("whiteClock").innerText = renderClock(msg.timeRemaining.white);
+                document.getElementById("blackClock").innerText = renderClock(msg.timeRemaining.black);
+            }
+
+            function forfeit() {
+                let res = confirm("Opóścić grę?");
+                if (res) {
+                    socket.send(JSON.stringify({type: "FORFEIT"}));
                 }
             }
 
@@ -136,7 +165,7 @@
             }
 
             socket.onclose = function () {
-                alert("Connection closed");
+                //alert("Connection closed");
                 window.location.href = "/index.jsp";
             };
 
@@ -157,13 +186,21 @@
                     return;
                 }
 
+                if (msg.type === "TIME_TICK") {
+                    updateClock(msg);
+                }
+
                 if (msg.fen) {
                     game.load(msg.fen);
                     board.position(msg.fen);
 
                     if (msg.status === "FINISHED") {
-                       showResult(msg.result);
+                       showResult(msg.result, msg.status);
+                    } else if (msg.status == "FORFEIT") {
+                       showResult(msg.result, msg.status);
                     }
+
+                    updateClock(msg);
 
                     updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;

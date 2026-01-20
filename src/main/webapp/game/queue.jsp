@@ -101,7 +101,7 @@
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-        alert("Musisz być zalogowany!");
+        //alert("Musisz być zalogowany!");
         window.location.href = "${pageContext.request.contextPath}/users/login.jsp";
     } else {
         startMatchmaking();

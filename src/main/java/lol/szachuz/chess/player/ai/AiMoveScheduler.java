@@ -1,42 +1,40 @@
 package lol.szachuz.chess.player.ai;
 
 import lol.szachuz.chess.*;
-import lol.szachuz.chess.player.Player;
 
 import java.util.concurrent.*;
 
 public class AiMoveScheduler {
 
-    private static final ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor();
-
-    private AiMoveScheduler() {}
-
     public static void scheduleIfNeeded(Match match) {
 
-        //Player black = match.getBlack();
-        Player black = null;
-        if (!(black instanceof AiPlayer ai)) return;
+        if (match == null) {
+            return;
+        }
+        if (!match.hasAiPlayer()) {
+            return;
+        }
 
-        executor.schedule(() -> {
-            try {
-                if (match.getStatus() == GameStatus.FINISHED) return;
+        AiPlayer ai = (AiPlayer) (match.getBlack() instanceof AiPlayer ? match.getBlack() : match.getWhite());
 
-                // Very naive placeholder
-                AiMove move = AiEngine.computeMove(
-                        match.getFen(),
-                        ai.getSkillLevel()
-                );
+        try {
+            if (match.getStatus() == GameStatus.FINISHED) return;
 
-                MoveResult result = MatchService.getInstance()
-                        .processMove(ai.getId(), move.from(), move.to());
+            MoveMessage move = AiEngineBean.computeMove(
+                    match.getFen(),
+                    match.getMatchUUID(),
+                    ai.getSkillLevel()
+            );
 
-                ChessSocketRegistry.broadcast(
-                        match.getMatchUUID(),
-                        result.toJson()
-                );
+            MoveResult result = MatchService.getInstance()
+                    .processMove(ai.getId(), move);
 
-            } catch (Exception ignored) {}
-        }, 500, TimeUnit.MILLISECONDS);
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
+
+        } catch (Exception e) {
+            String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    e.getMessage() + "\" }";
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), err);
+        }
     }
 }

@@ -3,24 +3,27 @@ package lol.szachuz.chess;
 import com.github.bhlangonijr.chesslib.Side;
 
 /**
- * Rekord {@link MoveResult} reprezentujący stan meczu
- *         po ostatnim (poprzednim) ruchu.
- * @param fen Stan szachownicy w notacji FEN powstały w wyniku ruchu gracza
- * @param status Enumeracja będąca stanem gry.
- * @param result Enumeracja opisująca wynik meczu.
- * @param sideToMove Enumeracja reprezentująca sronę gry.
+ * Record {@link MoveResult} representing match state after the previous move.
+ * @param fen Current chessboard state in FEN notation.
+ * @param status Game state {@link GameStatus} enumeration.
+ * @param result Game result {@link GameResult} enumeration representing if and how the game ended.
+ * @param sideToMove {@link Side} enumeration representing color of player that is next in line to move.
+ * @param whiteTimeRemaining {@code long} milliseconds representing time remaining for a player.
+ * @param blackTimeRemaining {@code long} milliseconds representing time remaining for a player.
  * @author Rafał Kubacki
  */
 public record MoveResult(
     String fen,
     GameStatus status,
     GameResult result,
-    Side sideToMove
+    Side sideToMove,
+    long whiteTimeRemaining,
+    long blackTimeRemaining
 ) {
 
     /**
-     * Metoda serializująca, zwraca JSON string reprezentujący ten obiekt.
-     * @return {@code String}, będący serializacją obiektu do formatu JSON.
+     * Method used to serialize object to JSON.
+     * @return {@code String}, which is an object serialized to JSON.
      * @author Rafał Kubacki
      */
     public String toJson() {
@@ -28,15 +31,14 @@ public record MoveResult(
             + "\", \"status\": \"" + status
             + "\", \"result\": \"" + result
             + "\", \"sideToMove\": \"" + sideToMove
-        + "\" }";
+            + "\", \"timeRemaining\": { \"white\": \"" + whiteTimeRemaining + "\", \"black\": \"" + blackTimeRemaining + "\"}"
+        + "}";
     }
 
     /**
-     * Tworzy obiekt {@link MoveResult} reprezentujący rezultat
-     * ostatniego wykonanego ruchu w podanym meczu.
-     * @param match obiekt meczu, na podstawie którego wyznaczany jest wynik.
-     * @return nowy obiekt {@link MoveResult} odzwierciedlający aktualny stan meczu
-     *         po ostatnim ruchu
+     * Creates {@link MoveResult} object based on current match state.
+     * @param match {@link Match} object based on which to create the {@code MoveResult}.
+     * @return new {@link MoveResult} object representing current match state.
      * @author Rafał Kubacki
      */
     public static MoveResult from(Match match) {
@@ -44,7 +46,9 @@ public record MoveResult(
             match.getFen(),
             match.getStatus(),
             match.getResult(),
-            match.getSideToMove()
+            match.getSideToMove(),
+            match.getWhiteTimeRemaining(),
+            match.getBlackTimeRemaining()
         );
     }
 }

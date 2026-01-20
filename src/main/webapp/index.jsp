@@ -75,7 +75,6 @@
                 <p>Zostań królem SzachUZ</p>
             </div>
 
-            <button type="button" onclick="handlePlayClick()">Zagraj teraz</button>
 
         </div>
         <div class="right-panel">
@@ -84,9 +83,9 @@
                 <t:leaderboard />
             </div>
             <div class="secondary-bg">
-                <p>
-                    Rywalizuj ze znajomymi<br>lub<br>Trenuj samemu
-                </p>
+                <button type="button" onclick="handlePlayClick()">Rywalizuj Online</button>
+                <p>lub</p>
+                <button type="button" onclick="location.href = '${pageContext.request.contextPath}/game/training.jsp'">Trenuj Samemu</button>
             </div>
         </div>
     </main>
