@@ -22,7 +22,6 @@ public class AiMoveScheduler {
 
             MoveMessage move = AiEngineBean.computeMove(
                     match.getFen(),
-                    match.getMatchUUID(),
                     ai.getSkillLevel()
             );
 
