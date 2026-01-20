@@ -17,100 +17,52 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
     <style>
+        /* Układ główny - teraz tylko plansza na środku */
         main {
             display: flex !important;
-            flex-direction: row;
+            flex-direction: column; /* Zmiana na column dla wyśrodkowania */
             justify-content: center;
-            align-items: flex-start;
-            gap: 30px;
+            align-items: center;
             padding: 20px;
             width: 100%;
+            min-height: 80vh;
         }
+
         .game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         #board {
             aspect-ratio: 1 / 1;
-            height: 70vh;
+            height: 70vh; /* Duża plansza */
             width: 70vh;
         }
+
+        /* Kolory planszy i obramowanie */
         .board-b72b1 {
             border: 15px solid var(--accent-color) !important;
             border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .white-1e1d7 { background-color: var(--dominant-color) !important; }
         .black-3c85d { background-color: var(--secondary-color) !important; }
 
-        /* --- STYLIZACJA HISTORII --- */
-        .history-panel {
-            width: 320px;
-            height: 70vh;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--accent-color);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            color: inherit;
-        }
-
-        .players-header {
-            display: flex;
-            justify-content: space-between;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--accent-color);
-            font-size: 0.9rem;
-        }
-        .player-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .history-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        #history-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        #history-table th, #history-table td {
-            padding: 6px;
-            text-align: center;
-        }
-        #history-table tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Ikony w historii */
-        .mini-piece {
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-            margin-right: 4px;
-        }
-        .move-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Inne elementy */
+        /* Wskaźnik tury */
         .turn-indicator {
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-weight: bold;
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            border-radius: 5px;
-            background: rgba(0,0,0,0.2);
+            font-size: 1.5rem;
+            padding: 10px 30px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            text-align: center;
+            min-width: 300px;
         }
+
+        /* Modal (Koniec gry) */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
@@ -120,17 +72,16 @@
         .modal-content {
             background: #222; padding: 40px; border-radius: 15px;
             text-align: center; border: 2px solid var(--accent-color); color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
         }
         .btn-modal {
-            margin: 10px; padding: 10px 20px; font-size: 1rem; border: none;
+            margin: 10px; padding: 12px 24px; font-size: 1.1rem; border: none;
             border-radius: 5px; cursor: pointer; transition: transform 0.2s;
+            font-weight: bold;
         }
         .btn-download { background-color: #2e7d32; color: white; }
         .btn-exit { background-color: #c62828; color: white; }
-        .btn-modal:hover { transform: scale(1.05); }
-
-        .history-list::-webkit-scrollbar { width: 8px; }
-        .history-list::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
+        .btn-modal:hover { transform: scale(1.05); filter: brightness(1.1); }
     </style>
     </jsp:attribute>
 
@@ -138,66 +89,54 @@
     <main class="site-margin">
         <div id="game-status" style="display:none" class="overlay">
             <div class="modal-content">
-                <h2 id="status-text" style="margin-bottom: 20px;">Koniec Gry</h2>
+                <h2 id="status-text" style="margin-bottom: 20px; font-size: 2rem;">Koniec Gry</h2>
                 <button onclick="downloadPdf()" class="btn-modal btn-download">📥 Pobierz Historię (PDF)</button>
-                <br>
-                <button onclick="exitGame()" class="btn-modal btn-exit">Wyjdź z gry</button>
+                <br><br>
+                <button onclick="exitGame()" class="btn-modal btn-exit">🚪 Wyjdź z gry</button>
             </div>
         </div>
 
         <div class="game-container">
-            <div id="turn-indicator" class="turn-indicator">Łączenie...</div>
+            <div id="turn-indicator" class="turn-indicator">Łączenie z serwerem...</div>
             <div id="board"></div>
         </div>
 
-        <div class="history-panel">
-            <div class="players-header">
-                <div class="player-badge">
-                    <img src="${pageContext.request.contextPath}/assets/pieces/wK.png" width="20">
-                    <span>Białe</span>
-                </div>
-                <div class="player-badge">
-                    <span>Czarne</span>
-                    <img src="${pageContext.request.contextPath}/assets/pieces/bK.png" width="20">
-                </div>
-            </div>
-
-            <div class="history-list">
-                <table id="history-table">
-                    <thead>
-                    <tr>
-                        <th style="width: 15%">#</th>
-                        <th style="width: 42%">Białe</th>
-                        <th style="width: 42%">Czarne</th>
-                    </tr>
-                    </thead>
-                    <tbody id="history-body"></tbody>
-                </table>
-            </div>
-        </div>
-
         <script>
+            // Zmienne z JSP
             const GAME_ID = "${param.gameId}";
             const TOKEN   = localStorage.getItem("authToken");
             const COLOR   = "${param.color}".toLowerCase();
+            const CONTEXT_PATH = "${pageContext.request.contextPath}";
 
-            // Strażnik ID
+            // Walidacja ID
             if (!GAME_ID || GAME_ID.trim() === "" || GAME_ID.startsWith("match_")) {
                 alert("Błąd ID gry. Powrót do menu.");
-                window.location.href = "/";
+                window.location.href = CONTEXT_PATH + "/";
             }
 
+            // --- FUNKCJE OBSŁUGI GRY ---
+
             function downloadPdf() {
-                window.location.href = "${pageContext.request.contextPath}/game/pdf?gameId=" + GAME_ID;
+                // To zadziała, bo backend nadal ma historię w bazie
+                window.location.href = CONTEXT_PATH + "/game/pdf?gameId=" + GAME_ID;
+            }
+
+            function exitGame() {
+                // Powrót do strony głównej
+                window.location.href = CONTEXT_PATH + "/";
             }
 
             function showResult(result) {
                 const overlay = document.getElementById("game-status");
                 const textField = document.getElementById("status-text");
                 let text = "Koniec Gry";
-                if (result === "DRAW") text = "Remis!";
-                else if ((result === "WHITE_WON" && COLOR === "white") || (result === "BLACK_WON" && COLOR === "black")) text = "Wygrana! 🎉";
-                else text = "Porażka. 💀";
+
+                if (result === "DRAW") text = "🤝 Remis!";
+                else if ((result === "WHITE_WON" && COLOR === "white") || (result === "BLACK_WON" && COLOR === "black")) {
+                    text = "🏆 Zwycięstwo!";
+                } else {
+                    text = "💀 Porażka";
+                }
 
                 textField.innerText = text;
                 overlay.style.display = "flex";
@@ -206,75 +145,33 @@
             function updateTurnIndicator(sideToMove) {
                 const el = document.getElementById("turn-indicator");
                 let sidePl = sideToMove === "WHITE" ? "Białe" : "Czarne";
+
                 if (sideToMove.toLowerCase() === COLOR) {
                     el.innerText = "Twój ruch (" + sidePl + ")";
-                    el.style.border = "2px solid green";
+                    el.style.border = "2px solid #4CAF50"; // Zielony
+                    el.style.color = "#4CAF50";
                     board.draggable = true;
                 } else {
                     el.innerText = "Ruch przeciwnika (" + sidePl + ")";
-                    el.style.border = "2px solid red";
+                    el.style.border = "2px solid #F44336"; // Czerwony
+                    el.style.color = "#F44336";
                     board.draggable = false;
                 }
             }
 
-            // --- NOWA FUNKCJA RENDERUJĄCA Z IKONAMI ---
-            function getPieceIcon(color, type) {
-                // Konwersja: 'n' -> 'N'
-                const pieceChar = type.toUpperCase();
-                // Ścieżka do obrazka
-                return "${pageContext.request.contextPath}/assets/pieces/" + color + pieceChar + ".png";
-            }
-
-            function renderHistory() {
-                // verbose: true daje nam obiekty { color: 'w', piece: 'n', san: 'Nf3', ... }
-                const historyArray = game.history({ verbose: true });
-                const tbody = document.getElementById("history-body");
-                tbody.innerHTML = "";
-
-                for (let i = 0; i < historyArray.length; i += 2) {
-                    const moveNum = (i / 2) + 1;
-                    const white = historyArray[i];
-                    const black = historyArray[i + 1];
-
-                    const row = document.createElement("tr");
-
-                    let html = "<td>" + moveNum + ".</td>";
-
-                    // Białe
-                    html += "<td>";
-                    if(white) {
-                        html += `<div class="move-content">
-                                    <img src="\${getPieceIcon('w', white.piece)}" class="mini-piece">
-                                    <span>\${white.from} &#8594; \${white.to}</span>
-                                 </div>`;
-                    }
-                    html += "</td>";
-
-                    // Czarne
-                    html += "<td>";
-                    if(black) {
-                        html += `<div class="move-content">
-                                    <img src="\${getPieceIcon('b', black.piece)}" class="mini-piece">
-                                    <span>\${black.from} &#8594; \${black.to}</span>
-                                 </div>`;
-                    }
-                    html += "</td>";
-
-                    row.innerHTML = html;
-                    tbody.appendChild(row);
-                }
-                const container = document.querySelector(".history-list");
-                container.scrollTop = container.scrollHeight;
-            }
-
-            // WebSocket
+            // --- WEBSOCKET ---
             let socket = null;
-            const wsUrl = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws/chess?gameId=" + GAME_ID + "&token=" + TOKEN;
+            // Bezpieczne tworzenie URL socketa
+            const wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
+            const wsUrl = wsProtocol + location.host + CONTEXT_PATH + "/ws/chess?gameId=" + GAME_ID + "&token=" + TOKEN;
+
             socket = new WebSocket(wsUrl);
 
             socket.onopen = function () { console.log("Połączono z grą"); };
             socket.onclose = function (e) {
-                if(e.code !== 1000) alert("Rozłączono z serwerem. Odśwież stronę lub wróć do menu.");
+                if(e.code !== 1000 && !document.getElementById("game-status").style.display === "flex") {
+                    console.log("Rozłączono");
+                }
             };
 
             var board = null;
@@ -283,21 +180,28 @@
 
             socket.onmessage = function (event) {
                 const msg = JSON.parse(event.data);
-                if (msg.type === "ERROR") { alert(msg.message); awaitingServer = false; return; }
+
+                if (msg.type === "ERROR") {
+                    alert(msg.message);
+                    awaitingServer = false;
+                    return;
+                }
 
                 if (msg.fen) {
                     game.load(msg.fen);
                     board.position(msg.fen);
+                    // Tutaj usunęliśmy wywołanie renderHistory(), bo tabela już nie istnieje
 
-                    // Odświeżamy historię (teraz z ikonami)
-                    renderHistory();
+                    if (msg.status === "FINISHED") {
+                        showResult(msg.result);
+                    }
 
-                    if (msg.status === "FINISHED") showResult(msg.result);
                     updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;
                 }
             };
 
+            // --- LOGIKA SZACHOWNICY ---
             function onDragStart(source, piece) {
                 if (awaitingServer || game.game_over()) return false;
                 if ((COLOR === 'white' && piece.startsWith('b')) || (COLOR === 'black' && piece.startsWith('w'))) return false;
@@ -306,10 +210,12 @@
             function onDrop (source, target) {
                 var move = game.move({ from: source, to: target, promotion: 'q' });
                 if (move === null) return 'snapback';
-                game.undo();
+
+                game.undo(); // Cofamy ruch lokalnie, czekamy na potwierdzenie z serwera
                 awaitingServer = true;
                 socket.send(JSON.stringify({ from: source, to: target }));
             }
+
             function onSnapEnd () { board.position(game.fen()) }
 
             var config = {
@@ -319,9 +225,13 @@
                 onDragStart: onDragStart,
                 onDrop: onDrop,
                 onSnapEnd: onSnapEnd,
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+                // Używamy bezpiecznej ścieżki do obrazków
+                pieceTheme: CONTEXT_PATH + '/assets/pieces/{piece}.png'
             }
-            board = Chessboard('board', config)
+            board = Chessboard('board', config);
+
+            // Obsługa zmiany rozmiaru okna
+            window.addEventListener('resize', board.resize);
         </script>
     </main>
     </jsp:attribute>

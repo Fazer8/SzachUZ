@@ -1,7 +1,6 @@
 package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.*;
-import com.github.bhlangonijr.chesslib.move.Move;
 import lol.szachuz.chess.player.Player;
 
 import java.util.ArrayList;
@@ -15,8 +14,8 @@ public class Match {
     private GameStatus status = GameStatus.ACTIVE;
     private GameResult gameResult;
 
-    // Historia ruchów w formacie tekstowym (e4, Nf3)
     private final List<String> moveHistorySan = new ArrayList<>();
+    private final List<MoveLog> moveHistoryDetails = new ArrayList<>();
 
     public Match(String matchUUID, Player white, Player black) {
         engine = new ChessEngine();
@@ -34,15 +33,39 @@ public class Match {
             throw new IllegalStateException("Not your turn");
         }
 
-        // 1. Generujemy nazwę ruchu (SAN) ZANIM go wykonamy
-        // Używamy własnej metody, bo biblioteka ma z tym problemy w tej wersji
+        // 1. Analiza sytuacji PRZED ruchem
+        Square fromSq = Square.fromValue(from.toUpperCase());
+        Square toSq = Square.fromValue(to.toUpperCase());
+        Piece piece = engine.getBoard().getPiece(fromSq);
+        Piece target = engine.getBoard().getPiece(toSq);
+
+        String pieceCode = getPieceCode(piece);
+
+        // Wykrywanie zdarzeń
+        boolean isCapture = (target != Piece.NONE);
+        boolean isCastling = false;
+        boolean isPromotion = false;
+
+        // A. Wykrywanie Roszady (Król przesuwa się o więcej niż 1 pole)
+        if (piece.getPieceType() == PieceType.KING && Math.abs(fromSq.getFile().ordinal() - toSq.getFile().ordinal()) > 1) {
+            isCastling = true;
+        }
+
+        // B. Wykrywanie Promocji (Pionek wchodzi na 1 lub 8 linię)
+        if (piece.getPieceType() == PieceType.PAWN) {
+            if ((piece.getPieceSide() == Side.WHITE && toSq.getRank() == Rank.RANK_8) ||
+                    (piece.getPieceSide() == Side.BLACK && toSq.getRank() == Rank.RANK_1)) {
+                isPromotion = true;
+            }
+        }
+
+        // 2. Generowanie SAN i Ruch
         String san = generateSan(from, to);
-
-        // 2. Wykonujemy ruch na silniku
         engine.applyMove(from, to);
-
-        // 3. Dodajemy nazwę ruchu do historii
         moveHistorySan.add(san);
+
+        // 3. Zapisanie szczegółów
+        moveHistoryDetails.add(new MoveLog(pieceCode, from, to, isCapture, isCastling, isPromotion));
 
         if (engine.isGameOver() != GameResult.ONGOING) {
             resolveResult();
@@ -50,86 +73,39 @@ public class Match {
         }
     }
 
-    /**
-     * Ręczna metoda generująca notację szachową (SAN).
-     * Obsługuje: Pionki, Figury, Bicia (x) i Roszady (O-O, O-O-O).
-     * (Uproszczona: nie obsługuje skrajnych przypadków dwuznaczności jak Raxd1, ale do projektu wystarczy).
-     */
+    private String getPieceCode(Piece piece) {
+        return switch (piece.getPieceType()) {
+            case KNIGHT -> "N";
+            case BISHOP -> "B";
+            case ROOK   -> "R";
+            case QUEEN  -> "Q";
+            case KING   -> "K";
+            default     -> "P";
+        };
+    }
+
+    // (Metoda generateSan bez zmian - skrócona dla czytelności, wklej swoją obecną)
     private String generateSan(String fromStr, String toStr) {
         try {
             Square from = Square.fromValue(fromStr.toUpperCase());
             Square to = Square.fromValue(toStr.toUpperCase());
             Piece piece = engine.getBoard().getPiece(from);
             Piece target = engine.getBoard().getPiece(to);
-
-            // 1. Obsługa Roszady (Krótkiej i Długiej)
-            if (piece.getPieceType() == PieceType.KING) {
-                // Białe
-                if (from == Square.E1 && to == Square.G1) return "O-O";
-                if (from == Square.E1 && to == Square.C1) return "O-O-O";
-                // Czarne
-                if (from == Square.E8 && to == Square.G8) return "O-O";
-                if (from == Square.E8 && to == Square.C8) return "O-O-O";
+            if (piece.getPieceType() == PieceType.KING && Math.abs(from.getFile().ordinal() - to.getFile().ordinal()) > 1) {
+                // Prosta detekcja roszady dla SAN
+                return (to.getFile() == File.FILE_G) ? "O-O" : "O-O-O";
             }
-
             StringBuilder san = new StringBuilder();
-
-            // 2. Litera figury (N, B, R, Q, K). Pionek nie ma litery.
-            if (piece.getPieceType() != PieceType.PAWN) {
-                san.append(getPieceLetter(piece.getPieceType()));
-            }
-
-            // 3. Czy to jest bicie?
-            boolean isCapture = target != Piece.NONE;
-
-            // Specjalny przypadek: bicie w przelocie (en passant) dla pionka
-            // (Jeśli pionek idzie na ukos, a pole docelowe jest puste -> to en passant)
-            if (piece.getPieceType() == PieceType.PAWN && from.getFile() != to.getFile() && target == Piece.NONE) {
-                isCapture = true;
-            }
-
-            if (isCapture) {
-                if (piece.getPieceType() == PieceType.PAWN) {
-                    // Dla pionka przy biciu dodajemy literę kolumny, z której ruszył (np. "exd5")
-                    san.append(from.getFile().getNotation().toLowerCase());
-                }
-                san.append("x");
-            }
-
-            // 4. Pole docelowe
+            if (piece.getPieceType() != PieceType.PAWN) san.append(getPieceCode(piece));
+            if (target != Piece.NONE) san.append("x");
             san.append(to.value().toLowerCase());
-
-            // 5. Opcjonalnie: Szach (+)
-            // Sprawdzenie szacha jest trudne przed wykonaniem ruchu,
-            // więc w tej uproszczonej wersji to pominiemy, żeby nie komplikować kodu.
-
             return san.toString();
-
-        } catch (Exception e) {
-            // Fallback w razie błędu
-            return fromStr + "-" + toStr;
-        }
-    }
-
-    private String getPieceLetter(PieceType type) {
-        return switch (type) {
-            case KNIGHT -> "N";
-            case BISHOP -> "B";
-            case ROOK   -> "R";
-            case QUEEN  -> "Q";
-            case KING   -> "K";
-            default     -> "";
-        };
-    }
-
-    public List<String> getMoveHistorySan() {
-        return Collections.unmodifiableList(moveHistorySan);
+        } catch (Exception e) { return fromStr + "-" + toStr; }
     }
 
     private boolean isPlayersTurn(long playerId) {
         Side side = engine.getSideToMove();
-        return  (side == Side.WHITE && white.getId() == playerId)
-                ||(side == Side.BLACK && black.getId() == playerId);
+        return (side == Side.WHITE && white.getId() == playerId) || (side == Side.BLACK && black.getId() == playerId);
     }
 
     public boolean isOver() { return engine.isGameOver() != GameResult.ONGOING; }
@@ -146,5 +122,27 @@ public class Match {
         return white.getId() == playerId || black.getId() == playerId;
     }
 
+    public List<String> getMoveHistorySan() { return Collections.unmodifiableList(moveHistorySan); }
+    public List<MoveLog> getMoveHistoryDetails() { return Collections.unmodifiableList(moveHistoryDetails); }
+
     private void resolveResult() { gameResult = engine.isGameOver(); }
+
+    // --- ZAKTUALIZOWANA KLASA LOGÓW ---
+    public static class MoveLog {
+        public final String pieceCode;
+        public final String from;
+        public final String to;
+        public final boolean isCapture;
+        public final boolean isCastling;   // Nowe
+        public final boolean isPromotion;  // Nowe
+
+        public MoveLog(String pieceCode, String from, String to, boolean isCapture, boolean isCastling, boolean isPromotion) {
+            this.pieceCode = pieceCode;
+            this.from = from;
+            this.to = to;
+            this.isCapture = isCapture;
+            this.isCastling = isCastling;
+            this.isPromotion = isPromotion;
+        }
+    }
 }

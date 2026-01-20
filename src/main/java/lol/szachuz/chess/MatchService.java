@@ -1,13 +1,15 @@
 package lol.szachuz.chess;
 
 import lol.szachuz.chess.player.Player;
+import lol.szachuz.email.EmailService;
+import lol.szachuz.db.Repository.EmailRepository;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class MatchService {
 
     private static final MatchService INSTANCE = new MatchService();
-
     private final InMemoryGameRepository repository = new InMemoryGameRepository();
 
     public static MatchService getInstance() {
@@ -28,6 +30,39 @@ public class MatchService {
         );
 
         repository.save(match);
+
+        // --- WYSYŁANIE MAILI W TLE (CZYSTA WERSJA) ---
+        CompletableFuture.runAsync(() -> {
+            try {
+                EmailRepository emailRepo = new EmailRepository();
+                EmailService emailService = new EmailService();
+
+                int id1 = (int) p1.getId();
+                int id2 = (int) p2.getId();
+
+                // Pobieramy dane
+                String email1 = emailRepo.getEmailByUserId(id1);
+                String email2 = emailRepo.getEmailByUserId(id2);
+                String name1 = emailRepo.getUsernameByUserId(id1);
+                String name2 = emailRepo.getUsernameByUserId(id2);
+
+                // Wysyłamy, jeśli e-mail istnieje
+                if (email1 != null) {
+                    emailService.sendGameStartEmail(email1, name2, match.getMatchUUID());
+                }
+
+                if (email2 != null) {
+                    emailService.sendGameStartEmail(email2, name1, match.getMatchUUID());
+                }
+
+            } catch (Exception e) {
+                // Wypisujemy błąd tylko na czerwono (err), żeby nie śmiecić, ale wiedzieć o awarii
+                System.err.println("Błąd w procesie wysyłania maili: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        // -----------------------------------------------------------
+
         return match;
     }
 
@@ -41,9 +76,6 @@ public class MatchService {
         match.applyMove(playerId, from, to);
 
         if (match.getStatus() == GameStatus.FINISHED || match.isOver()) {
-            // BYŁO: repository.remove(match);  <-- TO PSUŁO PDF
-
-            // JEST:
             repository.archive(match);
         }
 

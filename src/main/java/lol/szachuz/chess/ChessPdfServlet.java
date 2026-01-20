@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone; // Ważny import
+import java.util.TimeZone;
 
 @WebServlet("/game/pdf")
 public class ChessPdfServlet extends HttpServlet {
@@ -27,7 +27,6 @@ public class ChessPdfServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String gameId = req.getParameter("gameId");
-
         MatchService service = MatchService.getInstance();
         Match match = service.loadMatchByMatchId(gameId);
 
@@ -47,12 +46,18 @@ public class ChessPdfServlet extends HttpServlet {
             PdfWriter.getInstance(document, resp.getOutputStream());
             document.open();
 
-            // Fonty
+            // --- CZCIONKI ---
             BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
             Font titleFont = new Font(bf, 22, Font.BOLD, Color.BLACK);
             Font headerFont = new Font(bf, 12, Font.BOLD, Color.BLACK);
-            Font normalFont = new Font(bf, 12, Font.NORMAL, Color.BLACK);
-            Font smallFont = new Font(bf, 10, Font.ITALIC, Color.GRAY);
+            Font tableHeaderFont = new Font(bf, 10, Font.BOLD, Color.BLACK);
+            Font normalFont = new Font(bf, 10, Font.NORMAL, Color.BLACK);
+            Font smallFont = new Font(bf, 9, Font.ITALIC, Color.GRAY);
+
+            // Kolory specjalne
+            Font captureFont = new Font(bf, 10, Font.BOLD, Color.RED);
+            Font castlingFont = new Font(bf, 10, Font.BOLD, Color.BLUE);
+            Font promoFont = new Font(bf, 10, Font.BOLD, new Color(0, 128, 0)); // Ciemny zielony
 
             // Logo
             String logoPath = getServletContext().getRealPath("/assets/logo_tmp.png");
@@ -61,32 +66,24 @@ public class ChessPdfServlet extends HttpServlet {
                 logo.scaleToFit(150, 80);
                 logo.setAlignment(Element.ALIGN_CENTER);
                 document.add(logo);
-            } catch (Exception e) {
-                System.err.println("Brak logo: " + e.getMessage());
-            }
-
+            } catch (Exception e) {}
             document.add(Chunk.NEWLINE);
 
-            // Tytuł
+            // Tytuł i Data
             Paragraph title = new Paragraph("Raport z meczu", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
 
-            // DATA - FIX STREFY CZASOWEJ
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw")); // Ustawiamy czas polski
-
-            // Jeśli chcesz datę rozpoczęcia meczu, musiałbyś użyć np. match.getStartDate() zamiast new Date()
-            // Tutaj zostawiam datę wygenerowania PDF, ale z poprawną godziną:
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
             Paragraph datePara = new Paragraph("Data wygenerowania: " + sdf.format(new Date()), smallFont);
             datePara.setAlignment(Element.ALIGN_CENTER);
             document.add(datePara);
             document.add(Chunk.NEWLINE);
 
-            // Gracze
+            // Info o graczach
             PdfPTable infoTable = new PdfPTable(2);
             infoTable.setWidthPercentage(100);
-
             PdfPCell whiteInfo = new PdfPCell();
             whiteInfo.setBorder(Rectangle.NO_BORDER);
             whiteInfo.addElement(new Paragraph("BIAŁE:", headerFont));
@@ -103,33 +100,61 @@ public class ChessPdfServlet extends HttpServlet {
             pName.setAlignment(Element.ALIGN_RIGHT);
             blackInfo.addElement(pName);
             infoTable.addCell(blackInfo);
-
             document.add(infoTable);
             document.add(Chunk.NEWLINE);
 
             document.add(new Paragraph("Historia Ruchów:", headerFont));
             document.add(Chunk.NEWLINE);
 
-            // Tabela ruchów
-            PdfPTable table = new PdfPTable(3);
-            table.setWidths(new float[]{1, 4, 4});
+            // --- TABELA ---
+            float[] widths = {0.6f, 1f,1f,1.2f, 1f,1f,1.2f}; // Trochę szersza ostatnia kolumna na napisy
+            PdfPTable table = new PdfPTable(widths);
             table.setWidthPercentage(100);
 
-            addHeaderCell(table, "#", headerFont);
-            addHeaderCell(table, "Białe", headerFont);
-            addHeaderCell(table, "Czarne", headerFont);
+            // Nagłówki
+            PdfPCell cellNr = new PdfPCell(new Phrase("#", tableHeaderFont));
+            cellNr.setRowspan(2);
+            cellNr.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cellNr.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            cellNr.setBackgroundColor(Color.LIGHT_GRAY);
+            table.addCell(cellNr);
 
-            List<String> history = match.getMoveHistorySan();
+            PdfPCell cellWhite = new PdfPCell(new Phrase("Białe", tableHeaderFont));
+            cellWhite.setColspan(3);
+            cellWhite.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cellWhite.setBackgroundColor(new Color(240, 240, 240));
+            table.addCell(cellWhite);
+
+            PdfPCell cellBlack = new PdfPCell(new Phrase("Czarne", tableHeaderFont));
+            cellBlack.setColspan(3);
+            cellBlack.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cellBlack.setBackgroundColor(new Color(220, 220, 220));
+            table.addCell(cellBlack);
+
+            addHeaderCell(table, "Fig.", tableHeaderFont);
+            addHeaderCell(table, "Z pola", tableHeaderFont);
+            addHeaderCell(table, "Na pole", tableHeaderFont);
+            addHeaderCell(table, "Fig.", tableHeaderFont);
+            addHeaderCell(table, "Z pola", tableHeaderFont);
+            addHeaderCell(table, "Na pole", tableHeaderFont);
+
+            // --- DANE ---
+            List<Match.MoveLog> history = match.getMoveHistoryDetails();
             String piecesPath = getServletContext().getRealPath("/assets/pieces/");
 
             int moveNum = 1;
             for (int i = 0; i < history.size(); i += 2) {
+                // Numer
                 addCell(table, moveNum + ".", normalFont);
-                addMoveCell(table, history.get(i), "w", piecesPath, normalFont);
+
+                // Ruch Białych
+                addMoveDetails(table, history.get(i), "w", piecesPath, normalFont, captureFont, castlingFont, promoFont);
+
+                // Ruch Czarnych
                 if (i + 1 < history.size()) {
-                    addMoveCell(table, history.get(i + 1), "b", piecesPath, normalFont);
+                    addMoveDetails(table, history.get(i + 1), "b", piecesPath, normalFont, captureFont, castlingFont, promoFont);
                 } else {
-                    addCell(table, "", normalFont);
+                    table.addCell(""); table.addCell(""); table.addCell("");
                 }
                 moveNum++;
             }
@@ -142,43 +167,40 @@ public class ChessPdfServlet extends HttpServlet {
         }
     }
 
-    private void addMoveCell(PdfPTable table, String san, String colorPrefix, String basePath, Font font) {
-        PdfPCell cell = new PdfPCell();
-        cell.setPadding(6);
-        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+    // --- NOWA METODA DO WYŚWIETLANIA SZCZEGÓŁÓW RUCHU ---
+    private void addMoveDetails(PdfPTable table, Match.MoveLog move, String colorPrefix, String basePath,
+                                Font normalF, Font captureF, Font castleF, Font promoF) {
 
-        String pieceCode = getPieceCodeFromSan(san);
-        String iconFilename = colorPrefix + pieceCode + ".png";
+        // 1. Ikona Figury
+        addPieceCell(table, move.pieceCode, colorPrefix, basePath);
 
-        Phrase content = new Phrase();
-        try {
-            Image img = Image.getInstance(basePath + java.io.File.separator + iconFilename);
-            img.scaleToFit(14, 14); // Nieco mniejsze w PDF żeby nie rozwalały wierszy
-            content.add(new Chunk(img, 0, -2));
-            content.add(new Chunk("  "));
-        } catch (Exception e) {}
+        // 2. Skąd
+        addCell(table, move.from, normalF);
 
-        content.add(new Chunk(san, font));
-        cell.addElement(content);
-        table.addCell(cell);
-    }
-
-    private String getPieceCodeFromSan(String san) {
-        if (san.startsWith("O-O")) return "K";
-        char firstChar = san.charAt(0);
-        return Character.isUpperCase(firstChar) ? String.valueOf(firstChar) : "P";
-    }
-
-    private String resolveName(long playerId) {
-        String username = leaderboardRepository.findUsernameByUserId((int) playerId);
-        return username != null ? username : "Gracz " + playerId;
+        // 3. Dokąd (Z logiką specjalną)
+        if (move.isCastling) {
+            // Jeśli roszada -> Niebieski napis "Roszada"
+            addCell(table, "Roszada", castleF);
+        }
+        else if (move.isPromotion) {
+            // Jeśli promocja -> Zielony napis "pole=D"
+            addCell(table, move.to + "=D", promoF);
+        }
+        else if (move.isCapture) {
+            // Jeśli bicie -> Czerwony napis
+            addCell(table, move.to, captureF);
+        }
+        else {
+            // Zwykły ruch
+            addCell(table, move.to, normalF);
+        }
     }
 
     private void addHeaderCell(PdfPTable table, String text, Font font) {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
-        cell.setBackgroundColor(new Color(230, 230, 230));
+        cell.setBackgroundColor(new Color(245, 245, 245));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setPadding(6);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(cell);
     }
 
@@ -186,6 +208,28 @@ public class ChessPdfServlet extends HttpServlet {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setPadding(4);
         table.addCell(cell);
+    }
+
+    private void addPieceCell(PdfPTable table, String pieceCode, String colorPrefix, String basePath) {
+        PdfPCell cell = new PdfPCell();
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setPadding(4);
+        String iconFilename = colorPrefix + pieceCode + ".png";
+        try {
+            Image img = Image.getInstance(basePath + java.io.File.separator + iconFilename);
+            img.scaleToFit(18, 18);
+            cell.addElement(img);
+        } catch (Exception e) {
+            cell.setPhrase(new Phrase(pieceCode));
+        }
+        table.addCell(cell);
+    }
+
+    private String resolveName(long playerId) {
+        String username = leaderboardRepository.findUsernameByUserId((int) playerId);
+        return username != null ? username : "Gracz " + playerId;
     }
 }
