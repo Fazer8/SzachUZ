@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="Szachy">
+<t:layout page_name="game.title">
     <jsp:attribute name="head">
     <link rel="stylesheet"
           href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
@@ -70,15 +70,15 @@
     <main class="site-margin">
             <div id="game-status" style="display:none" class="overlay">
                 <p id="status-text"></p>
-                <button onclick="getHistory()">Pobierz Historie ruchów</button>
-                <button onclick="exitGame()">Wyjdź z gry</button>
+                <button onclick="getHistory()" data-i18n="game.history"></button>
+                <button onclick="exitGame()" data-i18n="game.exit"></button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
             <div>
-              Biały czas: <span id="whiteClock"></span>
-              Czarny czas: <span id="blackClock"></span>
+              <span data-i18n="game.whiteTime"></span>: <span id="whiteClock"></span>
+              <span data-i18n="game.blackTime"></span>: <span id="blackClock"></span>
             </div>
-            <button onclick="forfeit()">Poddaj się</button>
+            <button onclick="forfeit()" data-i18n="game.forfeit"></button>
             <div id="board"></div>
         <script>
             const GAME_ID = "${param.gameId}";
@@ -93,22 +93,21 @@
 
                 let text;
                 if (result === "DRAW") {
-                    text = "Draw";
+                    text = translations["game.result.draw"] || "Draw";
                 } else if (
                     (result === "WHITE_WON" && COLOR === "white") ||
                     (result === "BLACK_WON" && COLOR === "black")
                 ) {
-                    text = "Wygrałeś";
+                    text = translations["game.result.win"] || "Wygrałeś";
                 } else {
-                    text = "Przegrałeś";
+                    text = translations["game.result.lose"] || "Przegrałeś";
                 }
 
                 if (status === "FORFEIT") {
-                    text += "przez walkover";
+                    text += " " + (translations["game.result.forfeit"] || "przez walkower");
                 }
 
                 text += "!";
-
 
                 textField.innerText = text;
                 overlay.style.display = "flex";
@@ -118,11 +117,15 @@
                 const el = document.getElementById("turn-indicator");
 
                 if (sideToMove.toLowerCase() === COLOR) {
-                    el.innerText = "Twój ruch (" + sideToMove + ")";
+                    el.innerText =
+                        (translations["game.turn.yours"] || "Twój ruch") +
+                        " (" + sideToMove + ")";
                     el.style.color = "green";
                     board.draggable = true;
                 } else {
-                    el.innerText = "Ruch przeciwnika (" + sideToMove + ")";
+                    el.innerText =
+                        (translations["game.turn.enemy"] || "Ruch przeciwnika") +
+                        " (" + sideToMove + ")";
                     el.style.color = "gray";
                     board.draggable = false;
                 }
@@ -139,7 +142,9 @@
             }
 
             function forfeit() {
-                let res = confirm("Opóścić grę?");
+                let res = confirm(
+                    translations["game.confirm.forfeit"] || "Opuścić grę?"
+                );
                 if (res) {
                     socket.send(JSON.stringify({type: "FORFEIT"}));
                 }
@@ -255,6 +260,7 @@
             function getHistory() {
             }
         </script>
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </main>
     </jsp:attribute>
 </t:layout>

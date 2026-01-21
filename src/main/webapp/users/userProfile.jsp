@@ -175,7 +175,7 @@
                         renderProfile(currentUserData);
                     } else {
                         console.warn("Status:", response.status);
-                        if (response.status === 401) showToast("Sesja wygasła. Zaloguj się ponownie.", "error");
+                        if (response.status === 401) showToast(translations["profile.session.expired"] || "Sesja wygasła.", "error");
                     }
                 } catch (e) {
                     console.error("Error:", e);
@@ -254,7 +254,7 @@
 
             async function deleteAvatar(e) {
                 e.stopPropagation();
-                if (!confirm("Czy na pewno usunąć awatar?")) return;
+                if (!confirm(translations["profile.avatar.confirm"] || "Czy na pewno?")) return;
 
                 const res = await authFetch(baseUrl + "/me/avatar", {method: "DELETE"});
                 if (res.ok) {
@@ -332,7 +332,7 @@
                 const confirmPass = document.getElementById("confirmPasswordInput").value;
 
                 if (newPass !== confirmPass) {
-                    showToast("Hasła nie są identyczne!", "error");
+                    showToast(translations["profile.password.mismatch"] || "Hasła nie są identyczne!", "error");
                     return;
                 }
 
@@ -394,59 +394,64 @@
 
     <jsp:attribute name="body">
         <main class="site-margin">
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:15px;">
+                <button type="button" onclick="setLang('pl')">PL</button>
+                <button type="button" onclick="setLang('en')">EN</button>
+            </div>
             <div class="profile-header">
                 <img id="avatarImage" src="" alt="Avatar"/>
 
                 <div class="avatar-actions">
                     <button id="toggleUploadBtn" class="btn-primary" onclick="toggleUploadZone()">
-                        Zmień awatar
+                        <span data-i18n="profile.avatar.change"></span>
                     </button>
 
                     <button id="deleteAvatarBtn" class="btn-danger" onclick="deleteAvatar()" style="display:none;">
-                        Usuń awatar
+                        <span data-i18n="profile.avatar.delete"></span>
                     </button>
                 </div>
             </div>
 
             <div id="avatarUploadZone">
-                <p>Przeciągnij zdjęcie tutaj lub kliknij, aby wybrać</p>
+                <p data-i18n="profile.avatar.upload"></p>
                 <input type="file" id="avatarInput" style="display:none;" accept="image/*"/>
             </div>
 
             <div>
-                <p>Email: <span id="emailField"></span></p>
+                <p><span data-i18n="profile.email"></span>: <span id="emailField"></span></p>
                 <p>
-                    Username: <span id="usernameField"></span>
-                    <button onclick="showUsernameInput()">Update Username</button>
+                    <span data-i18n="profile.username"></span> <span id="usernameField"></span>
+                    <button onclick="showUsernameInput()" data-i18n="profile.username.update"></button>
                     <span id="usernameResult"></span>
                     <span id="usernameSection" style="display:none;">
-                        <input type="text" id="usernameInput" placeholder="New username"/>
-                        <button onclick="updateUsername()">Confirm</button>
+                        <input type="text" id="usernameInput" data-i18n-placeholder="profile.username.new"/>
+                        <button onclick="updateUsername()" data-i18n="common.confirm"></button>
                     </span>
                 </p>
                 <p>
-                    Language: <span id="languageField"></span>
-                    <button id="languageButton" onclick="toggleLanguage()">Language</button>
+                    <span data-i18n="profile.language"></span> <span id="languageField"></span>
+                    <button id="languageButton" onclick="toggleLanguage()" data-i18n="profile.language.toggle"></button>
                     <span id="languageResult"></span>
                 </p>
                 <p>
-                    Dark Mode: <span id="darkModeField"></span>
-                    <button id="darkModeButton" onclick="toggleDarkMode()">Dark Mode</button>
+                    <span data-i18n="profile.darkmode"></span> <span id="darkModeField"></span>
+                    <button id="darkModeButton" onclick="toggleDarkMode()" data-i18n="profile.darkmode.toggle"></button>
                     <span id="darkModeResult"></span>
                 </p>
                 <p>
-                    Password: ********
-                    <button onclick="showPasswordInput()">Update Password</button>
+                    <span data-i18n="profile.password"></span> ********
+                    <button onclick="showPasswordInput()" data-i18n="profile.password.update"></button>
                     <span id="passwordResult"></span>
                     <span id="passwordSection" style="display:none;">
-                        <input type="password" id="oldPasswordInput" placeholder="Old password"/>
-                        <input type="password" id="newPasswordInput" placeholder="New password"/>
-                        <input type="password" id="confirmPasswordInput" placeholder="Confirm new password"/>
-                        <button onclick="updatePassword()">Confirm</button>
+                        <input type="password" id="oldPasswordInput" data-i18n-placeholder="profile.password.old"/>
+                        <input type="password" id="newPasswordInput" data-i18n-placeholder="profile.password.new"/>
+                        <input type="password" id="confirmPasswordInput" data-i18n-placeholder="profile.password.confirm"/>
+                        <button onclick="updatePassword()" data-i18n="common.confirm"></button>
                     </span>
                 </p>
             </div>
             <pre id="profileResult"></pre>
+            <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
         </main>
     </jsp:attribute>
 </t:layout>
