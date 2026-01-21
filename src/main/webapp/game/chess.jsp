@@ -70,7 +70,7 @@
     <main class="site-margin">
             <div id="game-status" style="display:none" class="overlay">
                 <p id="status-text"></p>
-                <button onclick="getHistory()">Pobierz Historie ruchów</button>
+                <button onclick="getHistory()">Pobierz Historię Ruchów</button>
                 <button onclick="exitGame()">Wyjdź z gry</button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
@@ -104,7 +104,7 @@
                 }
 
                 if (status === "FORFEIT") {
-                    text += "przez walkover";
+                    text += " przez walkover";
                 }
 
                 text += "!";
@@ -139,7 +139,7 @@
             }
 
             function forfeit() {
-                let res = confirm("Opóścić grę?");
+                let res = confirm("Opuścić grę?");
                 if (res) {
                     socket.send(JSON.stringify({type: "FORFEIT"}));
                 }

@@ -226,7 +226,7 @@
     <h1>${page_name}</h1>
 
     <div class="header-actions">
-        <button onClick="toggleTheme()" class="nav-btn">theme</button>
+        <button onClick="toggleTheme()" class="nav-btn">Motyw</button>
         <div><p style="margin: 0; line-height: 1.2;">🇵🇱<br/>🇬🇧</p></div>
 
         <div id="guest-view" class="${isLoggedIn ? 'hidden' : ''}">
