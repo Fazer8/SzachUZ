@@ -98,10 +98,12 @@
 
     <jsp:attribute name="body">
     <main class="site-margin border-color border-radius container center-content">
+
         <div style="align-self: flex-end; margin-bottom: 10px;">
                 <button type="button" onclick="setLang('pl')">PL</button>
                 <button type="button" onclick="setLang('en')">EN</button>
             </div>
+      <div class="secondary-bg-1 container center-content" style="border-radius: 50px;padding: 20px 20px 20px 20px">
         <form>
             <label for="email" data-i18n="login.email"></label>
             <input type="email"
@@ -113,9 +115,9 @@
                    id="password"
                    data-i18n-placeholder="login.password.placeholder"/>
 
-            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
+                <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
             <div class="row">
                 <button type="button"
                         onclick="loginUser()"
@@ -127,6 +129,7 @@
             </div>
             <div id="result"></div>
         </form>
+      </div>
         <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
 
     </main>

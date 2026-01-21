@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lol.szachuz.db.EMF;
 import lol.szachuz.db.Entities.Friends;
+import jakarta.persistence.EntityManagerFactory;
+
 
 import java.util.List;
 

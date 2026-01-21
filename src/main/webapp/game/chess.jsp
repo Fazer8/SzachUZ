@@ -181,12 +181,12 @@
             var board = null
             var game = new Chess()
 
-            socket.onmessage = function (event) {
+            socket.onmessage = function (event) { try {
                 const msg = JSON.parse(event.data);
-                console.log(msg);
+
 
                 if (msg.type === "ERROR") {
-                    alert(msg.message);
+                    console.log(msg.message);
                     awaitingServer = false;
                     return;
                 }
@@ -210,7 +210,9 @@
                     updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;
                 }
-            };
+            } catch (error) {
+                console.log(event);
+            }};
 
             let awaitingServer = false;
 

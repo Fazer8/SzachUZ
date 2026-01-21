@@ -154,10 +154,12 @@
     <jsp:attribute name="body">
 
     <main class="site-margin border-color border-radius container center-content">
+
         <div style="align-self: flex-end; margin-bottom: 10px;">
             <button type="button" onclick="setLang('pl')">PL</button>
             <button type="button" onclick="setLang('en')">EN</button>
         </div>
+      <div class="secondary-bg-1 container center-content" style="border-radius: 50px;padding: 20px 20px 20px 20px">
         <form>
             <label for="username" data-i18n="register.username"></label>
             <input type="text"
@@ -184,6 +186,7 @@
 
             <div id="result"></div>
         </form>
+      </div>
         <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </main>
     </jsp:attribute>

@@ -83,11 +83,12 @@
                 <p data-i18n="home.leaderboard"></p>
                 <t:leaderboard />
             </div>
-            <div class="secondary-bg">
-                <button type="button" onclick="handlePlayClick()" data-i18n="button.playOnline"></button>
+            <div class="secondary-bg-1">
+                <button type="button" onclick="handlePlayClick()" data-i18n="button.playOnline" style="padding:15px 32px"></button>
                 <p data-i18n="common.or"></p>
                 <button type="button"
                         onclick="location.href = '${pageContext.request.contextPath}/game/training.jsp'"
+                        style="padding:15px 32px"
                         data-i18n="button.train">
                 </button>
             </div>

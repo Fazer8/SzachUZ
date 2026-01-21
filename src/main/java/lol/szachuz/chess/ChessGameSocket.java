@@ -5,12 +5,16 @@ import jakarta.websocket.server.ServerEndpoint;
 import lol.szachuz.SzachuzWebSocket;
 import lol.szachuz.auth.JWTDecoder;
 import lol.szachuz.chess.player.ai.AiMoveScheduler;
+import lol.szachuz.chess.player.ai.AiPlayer;
 
 import java.io.EOFException;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * WebSocket responsible for the chess game.
+ * @see jakarta.websocket
+ */
 @ServerEndpoint("/ws/chess")
 public final class ChessGameSocket implements SzachuzWebSocket {
 
@@ -18,6 +22,10 @@ public final class ChessGameSocket implements SzachuzWebSocket {
     private long playerId;
     private String gameUUID;
 
+    /**
+     * Standard WebSocket onOpen.
+     * @param session opened session.
+     */
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
@@ -48,12 +56,20 @@ public final class ChessGameSocket implements SzachuzWebSocket {
                     MoveResult.from(match).toJson()
             );
 
+            if (match.getWhite() instanceof AiPlayer) {
+                AiMoveScheduler.scheduleIfNeeded(MatchService.getInstance().loadMatchByMatchId(gameUUID));
+            }
+
         } catch (Exception e) {
             sendError(e.getMessage(), session);
             close(session);
         }
     }
 
+    /**
+     * Standard WebSocket onMessage.
+     * @param message message received.
+     */
     @OnMessage
     public void onMessage(String message) {
         try {
@@ -76,6 +92,9 @@ public final class ChessGameSocket implements SzachuzWebSocket {
         }
     }
 
+    /**
+     * Standard WebSocket onClose.
+     */
     @OnClose
     public void onClose() {
         // No immediate game removal
@@ -84,6 +103,11 @@ public final class ChessGameSocket implements SzachuzWebSocket {
         ChessSocketRegistry.unregister(gameUUID, session);
     }
 
+    /**
+     * Standard WebSocket onError.
+     * @param session Session with error.
+     * @param t error.
+     */
     @OnError
     public void onError(Session session, Throwable t) {
         if (! (t instanceof EOFException)) {

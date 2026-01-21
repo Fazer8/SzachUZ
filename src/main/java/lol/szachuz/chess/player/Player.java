@@ -1,19 +1,26 @@
 package lol.szachuz.chess.player;
 
+/**
+ * Abstract class representing player.
+ * @author Rafał Kubacki
+ */
 public abstract class Player {
     private final long id;
-    //private final Side side;
 
-    public Player(long id/*, Side side*/) {
+    /**
+     * Player constructor.
+     * @param id {@code long} player id.
+     */
+    public Player(long id) {
         this.id = id;
-        //this.side = side;
     }
 
+    /**
+     * ID getter.
+     * @return {@code long} player id.
+     */
     public long getId() {
         return id;
     }
 
-//    public Side getSide() {
-//        return side;
-//    }
 }

@@ -19,7 +19,6 @@ public record MoveMessage(String from, String to) {
      * @param json a JSON {@code String} representing this object.
      * @return an instance of {@link MoveMessage}.
      * @throws IllegalArgumentException in case of an incorrect JSON String.
-     * @author Rafał Kubacki
      */
     public static MoveMessage fromJson(String json) {
         try {
@@ -34,7 +33,6 @@ public record MoveMessage(String from, String to) {
      * @param uci a UCI {@code String} representing this object.
      * @return an instance of {@link MoveMessage}.
      * @throws IllegalArgumentException in case of an incorrect JSON String.
-     * @author Rafał Kubacki
      */
     public static MoveMessage fromUCIString(String uci) {
         if (uci.length() != 4) {

@@ -98,19 +98,18 @@
 
     <jsp:attribute name="body">
         <main class="site-margin border-color border-radius container center-content">
-            <div class="menu">
-
+            <div class="menu secondary-bg-1 border-radius">
+                <p>AI SETTINGS</p>
                 <div class="section">
-                    <strong data-i18n="training.selectSide"></strong>
+                    <p data-i18n="training.selectSide"></p>
                     <div class="side-picker">
                         <button id="whiteBtn" class="selected" onclick="pickSide('white')" data-i18n="training.side.white"></button>
 
                         <button id="blackBtn" onclick="pickSide('black')" data-i18n="training.side.black"></button>
                     </div>
                 </div>
-
-                <div class="section">
-                    <strong data-i18n="training.difficulty"></strong>
+                <div class="secttion1 section">
+                    <p data-i18n="training.difficulty"></p>
                     <button onclick="startTraining('easy')" data-i18n="training.easy"></button>
 
                     <button onclick="startTraining('hard')" data-i18n="training.hard"></button>
