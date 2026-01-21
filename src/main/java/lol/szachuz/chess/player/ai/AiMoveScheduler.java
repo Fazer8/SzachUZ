@@ -4,8 +4,17 @@ import lol.szachuz.chess.*;
 
 import java.util.concurrent.*;
 
+/**
+ * Class used for generating AI moves.
+ * @author Rafał Kubacki
+ */
 public class AiMoveScheduler {
 
+    /**
+     * Static method, that checks if game has an AI player, and generates move acordingly.
+     * @param match {@link Match} to check and generate for.
+     * @author Rafał Kubacki
+     */
     public static void scheduleIfNeeded(Match match) {
 
         if (match == null) {

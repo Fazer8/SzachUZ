@@ -5,26 +5,51 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ejb.Stateless;
 import lol.szachuz.chess.MoveMessage;
 
+/**
+ * Stateless Bean responsible for creating AI moves.
+ * @author Rafał Kubacki
+ */
 @Stateless
 public class AiEngineBean {
 
+    /**
+     * Method that's requesting move evaluation at chess-api.com and returns move.
+     * @param fen {@code String} of current board state.
+     * @param difficulty {@link Difficulty} of the AI (configuration of the engine).
+     * @throws IllegalStateException if something unexpected happens.
+     * @return {@link MoveMessage} of the moves AI decided to make.
+     */
     public static MoveMessage computeMove(String fen, Difficulty difficulty) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = null;
         try {
             String url = "https://chess-api.com/v1";
+            String json;
+            for (int i = 0; i < 2; i++) {
+                if (i == 1) {
+                    Pattern fenPatternRegret = Pattern.compile("^([a-zA-Z0-9/]+ [a-zA-Z0-9/]+ [a-zA-Z0-9/]+ )[a-zA-Z0-9/]+( [a-zA-Z0-9/]+ [a-zA-Z0-9/]+)");
+                    Matcher regretMatcher = fenPatternRegret.matcher(fen);
 
-            String json = String.format(
-                    "{\"fen\":\"%s\", \"depth\":%d, \"maxThinkingTime\":%d}",
-                    fen, difficulty.depth(), difficulty.thinkingTime()
-            );
-            for (int i = 0; i < 3; i++) {
+                    String resultString = regretMatcher.replaceAll("$1-$2");
+
+                    json = String.format(
+                            "{\"fen\":\"%s\", \"depth\":%d, \"maxThinkingTime\":%d}",
+                            resultString, difficulty.depth(), difficulty.thinkingTimeMs()
+                    );
+                } else {
+                    json = String.format(
+                            "{\"fen\":\"%s\", \"depth\":%d, \"maxThinkingTime\":%d}",
+                            fen, difficulty.depth(), difficulty.thinkingTimeMs()
+                    );
+                }
                 Thread.sleep(1000);
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(url))
