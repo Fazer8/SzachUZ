@@ -11,7 +11,6 @@ public interface SzachuzWebSocket {
      * Tries to send a JSON with an Error Message to a WebSocket Session.
      * @param message a {@code String} which is the message we want to send.
      * @param session the open Session object we want to send the message to.
-     * @author Rafał Kubacki
      */
     default void sendError(String message, Session session) {
         try {
@@ -28,7 +27,6 @@ public interface SzachuzWebSocket {
     /**
      * Closes a WebSocket Session.
      * @param s the Session we want to close.
-     * @author Rafał Kubacki
      */
     default void close(Session s) {
         try { s.close(); } catch (Exception e) {e.printStackTrace();}

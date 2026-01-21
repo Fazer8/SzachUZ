@@ -15,6 +15,11 @@ import lol.szachuz.chess.player.ai.Difficulty;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Servlet responsible for creating trining matches.
+ * @see jakarta.servlet.http.HttpServlet
+ * @author Rafał Kubacki
+ */
 @WebServlet("/sv/training")
 public class AiMatchServlet extends HttpServlet {
     private static final Map<String, Difficulty> difficulties;
@@ -22,6 +27,12 @@ public class AiMatchServlet extends HttpServlet {
         difficulties = Map.of("EASY", Difficulty.SILLY, "HARD", Difficulty.PRO);
     }
 
+    /**
+     * Standard HttpServlet doPostmethod
+     * @param req http request
+     * @param resp http response
+     * @throws IOException if something went wrong.
+     */
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Difficulty difficulty = difficulties.get(req.getParameter("difficulty").toUpperCase());
         String authHeader = req.getHeader("Authorization");

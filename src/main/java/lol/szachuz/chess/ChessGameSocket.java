@@ -11,7 +11,10 @@ import java.io.EOFException;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * WebSocket responsible for the chess game.
+ * @see jakarta.websocket
+ */
 @ServerEndpoint("/ws/chess")
 public final class ChessGameSocket implements SzachuzWebSocket {
 
@@ -19,6 +22,10 @@ public final class ChessGameSocket implements SzachuzWebSocket {
     private long playerId;
     private String gameUUID;
 
+    /**
+     * Standard WebSocket onOpen.
+     * @param session opened session.
+     */
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
@@ -59,6 +66,10 @@ public final class ChessGameSocket implements SzachuzWebSocket {
         }
     }
 
+    /**
+     * Standard WebSocket onMessage.
+     * @param message message received.
+     */
     @OnMessage
     public void onMessage(String message) {
         try {
@@ -81,6 +92,9 @@ public final class ChessGameSocket implements SzachuzWebSocket {
         }
     }
 
+    /**
+     * Standard WebSocket onClose.
+     */
     @OnClose
     public void onClose() {
         // No immediate game removal
@@ -89,6 +103,11 @@ public final class ChessGameSocket implements SzachuzWebSocket {
         ChessSocketRegistry.unregister(gameUUID, session);
     }
 
+    /**
+     * Standard WebSocket onError.
+     * @param session Session with error.
+     * @param t error.
+     */
     @OnError
     public void onError(Session session, Throwable t) {
         if (! (t instanceof EOFException)) {

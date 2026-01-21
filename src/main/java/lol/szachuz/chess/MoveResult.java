@@ -24,7 +24,6 @@ public record MoveResult(
     /**
      * Method used to serialize object to JSON.
      * @return {@code String}, which is an object serialized to JSON.
-     * @author Rafał Kubacki
      */
     public String toJson() {
         return "{ \"fen\": \"" + fen
@@ -39,7 +38,6 @@ public record MoveResult(
      * Creates {@link MoveResult} object based on current match state.
      * @param match {@link Match} object based on which to create the {@code MoveResult}.
      * @return new {@link MoveResult} object representing current match state.
-     * @author Rafał Kubacki
      */
     public static MoveResult from(Match match) {
         return new MoveResult(

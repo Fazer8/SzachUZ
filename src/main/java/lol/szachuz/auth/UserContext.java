@@ -20,6 +20,10 @@ public class UserContext {
 
     private Integer cachedUserId;
 
+    /**
+     * Returns user's ID
+     * @return user's ID
+     */
     public int getCurrentUserId() {
         if (cachedUserId != null) {
             return cachedUserId;
@@ -41,6 +45,11 @@ public class UserContext {
         }
     }
 
+    /**
+     * Retrieves ID from token
+     * @param token to retreive ID from
+     * @return ID
+     */
     private int parseUserIdFromToken(String token) {
         return JWTDecoder.parseUserIdFromToken(token);
     }

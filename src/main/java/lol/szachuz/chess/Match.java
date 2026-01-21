@@ -8,7 +8,6 @@ import java.util.Timer;
 
 /**
  * Klasa reprezentująca Sesję Gry (GameSession)
- *
  * @author Rafał Kubacki
  */
 public class Match {
@@ -35,7 +34,6 @@ public class Match {
      *              (either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
      * @param black Object representing a Player that will use black pieces
      *              (either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
-     * @author Rafał Kubacki
      */
     public Match(String matchUUID, Player white, Player black) {
         engine = new ChessEngine();
@@ -52,7 +50,6 @@ public class Match {
      * @param from {@code String} which piece to move, in FEN notation.
      * @param to {@code String} where to move that piece, in FEN notation.
      * @throws IllegalStateException if player tried to make an illegal move.
-     * @author Rafał Kubacki
      */
     public synchronized void applyMove(long playerId, String from, String to) {
         if (status != GameStatus.ACTIVE) {
@@ -86,7 +83,6 @@ public class Match {
      * @param playerId {@code long} ID of a player that forfeits.
      * @throws IllegalStateException if match doesnt exist.
      * @throws IllegalArgumentException if player ID isn't in the match.
-     * @author Rafał Kubacki
      */
     public synchronized void forfeit(long playerId) {
         if (status != GameStatus.ACTIVE) {
@@ -107,7 +103,6 @@ public class Match {
      * Method that checks if it's player's turn.
      * @param playerId {@code long} ID of a player to check.
      * @return a {@code boolean} answering the question.
-     * @author Rafał Kubacki
      */
     private boolean isPlayersTurn(long playerId) {
         Side side = engine.getSideToMove();
@@ -118,7 +113,6 @@ public class Match {
     /**
      * Method that checks if the match concluded.
      * @return a {@code boolean} answering the question.
-     * @author Rafał Kubacki
      */
     public boolean isOver() {
         return engine.isGameOver() != GameResult.ONGOING;
@@ -127,7 +121,6 @@ public class Match {
     /**
      * Method that returns ID of the match.
      * @return {@code String} with a UUID of this match.
-     * @author Rafał Kubacki
      */
     public String getMatchUUID() {
         return matchUUID;
@@ -136,7 +129,6 @@ public class Match {
     /**
      * Method that returns FEN representation of the board.
      * @return {@code String} with a FEN representing current state of the board.
-     * @author Rafał Kubacki
      */
     public String getFen() {
         return engine.getFen();
@@ -145,7 +137,6 @@ public class Match {
     /**
      * Method that returns status of the match.
      * @return {@link GameStatus} enumeration representing current status of the board.
-     * @author Rafał Kubacki
      */
     public GameStatus getStatus() {
         return status;
@@ -155,7 +146,6 @@ public class Match {
      * Method that returns White Player.
      * @return either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
      *         that's controlling white pieces.
-     * @author Rafał Kubacki
      */
     public Player getWhite() {
         return white;
@@ -165,7 +155,6 @@ public class Match {
      * Method that returns Black Player.
      * @return either {@link lol.szachuz.chess.player.HumanPlayer} or {@link lol.szachuz.chess.player.ai.AiPlayer}
      *         that's controlling black pieces.
-     * @author Rafał Kubacki
      */
     public Player getBlack() {
         return black;
@@ -177,7 +166,6 @@ public class Match {
     /**
      * Method that returns result of the match.
      * @return {@link GameResult} enumeration representing result of the match.
-     * @author Rafał Kubacki
      */
     public GameResult getResult() {
         return gameResult;
@@ -186,7 +174,6 @@ public class Match {
     /**
      * Method that returns which color should move next.
      * @return {@link Side} enumeration representing color of player that should move next.
-     * @author Rafał Kubacki
      */
     public Side getSideToMove() {
         return engine.getSideToMove();
@@ -197,7 +184,6 @@ public class Match {
      * @param playerId {@code long} ID of a player to check.
      * @return an answer to the question.
      * @throws IllegalStateException if either of the Player objects in the game is null, because this shouldn't happen.
-     * @author Rafał Kubacki
      */
     public boolean hasPlayer(long playerId) {
         if (white == null || black == null) {
@@ -208,7 +194,6 @@ public class Match {
 
     /**
      * Retrieves {@link GameResult} of a match from the chess engine and assigns it to {@code gameResult} field.
-     * @author Rafał Kubacki
      */
     private void resolveResult() {
         gameResult = engine.isGameOver();
@@ -217,7 +202,6 @@ public class Match {
     /**
      * Method that removes used time for one of the sides.
      * @param side {@link Side} to subtract time for.
-     * @author Rafał Kubacki
      */
     void consumeTimeForSide(Side side) {
         long now = System.currentTimeMillis();
@@ -234,7 +218,6 @@ public class Match {
 
     /**
      * Method that handles finished timer for white player.
-     * @author Rafał Kubacki
      */
     public void timeoutWhite() {
         status = GameStatus.FINISHED;
@@ -243,7 +226,6 @@ public class Match {
 
     /**
      * Method that handles finished timer for black player.
-     * @author Rafał Kubacki
      */
     public void timeoutBlack() {
         status = GameStatus.FINISHED;
@@ -253,7 +235,6 @@ public class Match {
     /**
      * Method that returns time remaining for black player.
      * @return remaining time in milliseconds.
-     * @author Rafał Kubacki
      */
     public long getBlackTimeRemaining() {
         return blackTimeRemaining;
@@ -262,7 +243,6 @@ public class Match {
     /**
      * Method that returns time remaining for white player.
      * @return remaining time in milliseconds.
-     * @author Rafał Kubacki
      */
     public long getWhiteTimeRemaining() {
         return whiteTimeRemaining;

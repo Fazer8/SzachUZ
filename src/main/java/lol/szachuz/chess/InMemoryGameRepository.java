@@ -16,7 +16,6 @@ public final class InMemoryGameRepository {
     /**
      * Adds a match to the repository.
      * @param match a {@link Match} object to save.
-     * @author Rafał Kubacki
      */
     public void save(Match match) {
         matches.put(match.getMatchUUID(), match);
@@ -27,7 +26,6 @@ public final class InMemoryGameRepository {
     /**
      * Returns all matches.
      * @return all matches.
-     * @author Rafał Kubacki
      */
     public Collection<Match> findAll() {
         return matches.values();
@@ -36,7 +34,6 @@ public final class InMemoryGameRepository {
      * Finds a match what has a specific player in it.
      * @param playerId {@code long} ID of a player we're looking for.
      * @return Match with that player. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match findByPlayer(long playerId) {
         String matchId = playerToMatch.get(playerId);
@@ -47,7 +44,6 @@ public final class InMemoryGameRepository {
      * Finds a match basing on it's UUID.
      * @param matchId {@code String} UUID of a match we're looking for.
      * @return Match with that UUID. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match findById(String matchId) {
         return matches.get(matchId);
@@ -56,7 +52,6 @@ public final class InMemoryGameRepository {
     /**
      * Removes a match from the registry.
      * @param match a {@link Match} to be removed.
-     * @author Rafał Kubacki
      */
     public void remove(Match match) {
         matches.remove(match.getMatchUUID());
@@ -68,7 +63,6 @@ public final class InMemoryGameRepository {
      * Checks if a player is in game.
      * @param playerId {@code long} ID of a player we want to check.
      * @return an anwser to this question.
-     * @author Rafał Kubacki
      */
     public boolean isPlayerInGame(long playerId) {
         return playerToMatch.containsKey(playerId);

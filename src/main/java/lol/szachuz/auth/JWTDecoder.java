@@ -4,15 +4,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Klasa zawierająca dekoder JWT.
- * @author Rafał kubacki
+ * Class with a JWT decoder.
+ * @author Marcin Dudyński
  */
 public class JWTDecoder {
     /**
-     * Funkcja dekodująca token JWT, w celu wyciągnięcia ID gracza.
-     * @param token Token JWT użytkownika.
-     * @return liczbę całkowitą reprezentującą ID użytkownika.
-     * @author Marcin Dudyński
+     * Decodes the JWT.
+     * @param token token to decode.
+     * @return user's ID.
      */
     public static int parseUserIdFromToken(String token) {
         String[] chunks = token.split("\\.");
