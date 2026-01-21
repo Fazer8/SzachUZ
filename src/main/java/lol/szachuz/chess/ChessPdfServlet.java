@@ -46,7 +46,6 @@ public class ChessPdfServlet extends HttpServlet {
             PdfWriter.getInstance(document, resp.getOutputStream());
             document.open();
 
-            // --- CZCIONKI ---
             BaseFont bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
             Font titleFont = new Font(bf, 22, Font.BOLD, Color.BLACK);
             Font headerFont = new Font(bf, 12, Font.BOLD, Color.BLACK);
@@ -54,12 +53,10 @@ public class ChessPdfServlet extends HttpServlet {
             Font normalFont = new Font(bf, 10, Font.NORMAL, Color.BLACK);
             Font smallFont = new Font(bf, 9, Font.ITALIC, Color.GRAY);
 
-            // Kolory specjalne
             Font captureFont = new Font(bf, 10, Font.BOLD, Color.RED);
             Font castlingFont = new Font(bf, 10, Font.BOLD, Color.BLUE);
             Font promoFont = new Font(bf, 10, Font.BOLD, new Color(0, 128, 0)); // Ciemny zielony
 
-            // Logo
             String logoPath = getServletContext().getRealPath("/assets/logo_tmp.png");
             try {
                 Image logo = Image.getInstance(logoPath);
@@ -69,7 +66,6 @@ public class ChessPdfServlet extends HttpServlet {
             } catch (Exception e) {}
             document.add(Chunk.NEWLINE);
 
-            // Tytuł i Data
             Paragraph title = new Paragraph("Raport z meczu", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
@@ -81,7 +77,6 @@ public class ChessPdfServlet extends HttpServlet {
             document.add(datePara);
             document.add(Chunk.NEWLINE);
 
-            // Info o graczach
             PdfPTable infoTable = new PdfPTable(2);
             infoTable.setWidthPercentage(100);
             PdfPCell whiteInfo = new PdfPCell();
@@ -106,12 +101,10 @@ public class ChessPdfServlet extends HttpServlet {
             document.add(new Paragraph("Historia Ruchów:", headerFont));
             document.add(Chunk.NEWLINE);
 
-            // --- TABELA ---
-            float[] widths = {0.6f, 1f,1f,1.2f, 1f,1f,1.2f}; // Trochę szersza ostatnia kolumna na napisy
+            float[] widths = {0.6f, 1f,1f,1.2f, 1f,1f,1.2f};
             PdfPTable table = new PdfPTable(widths);
             table.setWidthPercentage(100);
 
-            // Nagłówki
             PdfPCell cellNr = new PdfPCell(new Phrase("#", tableHeaderFont));
             cellNr.setRowspan(2);
             cellNr.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -138,19 +131,15 @@ public class ChessPdfServlet extends HttpServlet {
             addHeaderCell(table, "Z pola", tableHeaderFont);
             addHeaderCell(table, "Na pole", tableHeaderFont);
 
-            // --- DANE ---
             List<Match.MoveLog> history = match.getMoveHistoryDetails();
             String piecesPath = getServletContext().getRealPath("/assets/pieces/");
 
             int moveNum = 1;
             for (int i = 0; i < history.size(); i += 2) {
-                // Numer
                 addCell(table, moveNum + ".", normalFont);
 
-                // Ruch Białych
                 addMoveDetails(table, history.get(i), "w", piecesPath, normalFont, captureFont, castlingFont, promoFont);
 
-                // Ruch Czarnych
                 if (i + 1 < history.size()) {
                     addMoveDetails(table, history.get(i + 1), "b", piecesPath, normalFont, captureFont, castlingFont, promoFont);
                 } else {
@@ -167,31 +156,23 @@ public class ChessPdfServlet extends HttpServlet {
         }
     }
 
-    // --- NOWA METODA DO WYŚWIETLANIA SZCZEGÓŁÓW RUCHU ---
     private void addMoveDetails(PdfPTable table, Match.MoveLog move, String colorPrefix, String basePath,
                                 Font normalF, Font captureF, Font castleF, Font promoF) {
 
-        // 1. Ikona Figury
         addPieceCell(table, move.pieceCode, colorPrefix, basePath);
 
-        // 2. Skąd
         addCell(table, move.from, normalF);
 
-        // 3. Dokąd (Z logiką specjalną)
         if (move.isCastling) {
-            // Jeśli roszada -> Niebieski napis "Roszada"
             addCell(table, "Roszada", castleF);
         }
         else if (move.isPromotion) {
-            // Jeśli promocja -> Zielony napis "pole=D"
             addCell(table, move.to + "=D", promoF);
         }
         else if (move.isCapture) {
-            // Jeśli bicie -> Czerwony napis
             addCell(table, move.to, captureF);
         }
         else {
-            // Zwykły ruch
             addCell(table, move.to, normalF);
         }
     }

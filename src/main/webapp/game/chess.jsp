@@ -17,10 +17,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
     <style>
-        /* Układ główny - teraz tylko plansza na środku */
+
         main {
             display: flex !important;
-            flex-direction: column; /* Zmiana na column dla wyśrodkowania */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -36,11 +36,11 @@
 
         #board {
             aspect-ratio: 1 / 1;
-            height: 70vh; /* Duża plansza */
+            height: 70vh;
             width: 70vh;
         }
 
-        /* Kolory planszy i obramowanie */
+
         .board-b72b1 {
             border: 15px solid var(--accent-color) !important;
             border-radius: 8px;
@@ -49,7 +49,7 @@
         .white-1e1d7 { background-color: var(--dominant-color) !important; }
         .black-3c85d { background-color: var(--secondary-color) !important; }
 
-        /* Wskaźnik tury */
+
         .turn-indicator {
             margin-bottom: 20px;
             font-weight: bold;
@@ -62,7 +62,7 @@
             min-width: 300px;
         }
 
-        /* Modal (Koniec gry) */
+
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
@@ -102,27 +102,22 @@
         </div>
 
         <script>
-            // Zmienne z JSP
             const GAME_ID = "${param.gameId}";
             const TOKEN   = localStorage.getItem("authToken");
             const COLOR   = "${param.color}".toLowerCase();
             const CONTEXT_PATH = "${pageContext.request.contextPath}";
 
-            // Walidacja ID
             if (!GAME_ID || GAME_ID.trim() === "" || GAME_ID.startsWith("match_")) {
                 alert("Błąd ID gry. Powrót do menu.");
                 window.location.href = CONTEXT_PATH + "/";
             }
 
-            // --- FUNKCJE OBSŁUGI GRY ---
 
             function downloadPdf() {
-                // To zadziała, bo backend nadal ma historię w bazie
                 window.location.href = CONTEXT_PATH + "/game/pdf?gameId=" + GAME_ID;
             }
 
             function exitGame() {
-                // Powrót do strony głównej
                 window.location.href = CONTEXT_PATH + "/";
             }
 
@@ -148,20 +143,19 @@
 
                 if (sideToMove.toLowerCase() === COLOR) {
                     el.innerText = "Twój ruch (" + sidePl + ")";
-                    el.style.border = "2px solid #4CAF50"; // Zielony
+                    el.style.border = "2px solid #4CAF50";
                     el.style.color = "#4CAF50";
                     board.draggable = true;
                 } else {
                     el.innerText = "Ruch przeciwnika (" + sidePl + ")";
-                    el.style.border = "2px solid #F44336"; // Czerwony
+                    el.style.border = "2px solid #F44336";
                     el.style.color = "#F44336";
                     board.draggable = false;
                 }
             }
 
-            // --- WEBSOCKET ---
+
             let socket = null;
-            // Bezpieczne tworzenie URL socketa
             const wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
             const wsUrl = wsProtocol + location.host + CONTEXT_PATH + "/ws/chess?gameId=" + GAME_ID + "&token=" + TOKEN;
 
@@ -190,7 +184,6 @@
                 if (msg.fen) {
                     game.load(msg.fen);
                     board.position(msg.fen);
-                    // Tutaj usunęliśmy wywołanie renderHistory(), bo tabela już nie istnieje
 
                     if (msg.status === "FINISHED") {
                         showResult(msg.result);
@@ -201,7 +194,6 @@
                 }
             };
 
-            // --- LOGIKA SZACHOWNICY ---
             function onDragStart(source, piece) {
                 if (awaitingServer || game.game_over()) return false;
                 if ((COLOR === 'white' && piece.startsWith('b')) || (COLOR === 'black' && piece.startsWith('w'))) return false;
@@ -211,7 +203,7 @@
                 var move = game.move({ from: source, to: target, promotion: 'q' });
                 if (move === null) return 'snapback';
 
-                game.undo(); // Cofamy ruch lokalnie, czekamy na potwierdzenie z serwera
+                game.undo();
                 awaitingServer = true;
                 socket.send(JSON.stringify({ from: source, to: target }));
             }
@@ -225,12 +217,11 @@
                 onDragStart: onDragStart,
                 onDrop: onDrop,
                 onSnapEnd: onSnapEnd,
-                // Używamy bezpiecznej ścieżki do obrazków
+
                 pieceTheme: CONTEXT_PATH + '/assets/pieces/{piece}.png'
             }
             board = Chessboard('board', config);
 
-            // Obsługa zmiany rozmiaru okna
             window.addEventListener('resize', board.resize);
         </script>
     </main>

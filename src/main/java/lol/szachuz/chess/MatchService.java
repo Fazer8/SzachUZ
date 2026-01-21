@@ -31,7 +31,6 @@ public class MatchService {
 
         repository.save(match);
 
-        // --- WYSYŁANIE MAILI W TLE (CZYSTA WERSJA) ---
         CompletableFuture.runAsync(() -> {
             try {
                 EmailRepository emailRepo = new EmailRepository();
@@ -61,7 +60,7 @@ public class MatchService {
                 e.printStackTrace();
             }
         });
-        // -----------------------------------------------------------
+
 
         return match;
     }

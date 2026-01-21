@@ -34,8 +34,7 @@
 
         #timer { font-size: 2rem; font-weight: bold; margin-top: 10px; }
         .status-msg { margin-top: 10px; font-size: 1.2rem; }
-
-        /* Modal */
+        
         #match-modal {
             display: none;
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -121,7 +120,6 @@
             console.log("Data:", data);
 
             if (data.type === "MATCH_PROPOSED") {
-                // Przekazujemy nick do funkcji modala
                 showAcceptModal(data.matchId, data.opponentName);
             }
             else if (data.type === "GAME_START") {
@@ -141,7 +139,7 @@
     function showAcceptModal(matchId, opponentName) {
         currentMatchId = matchId;
 
-        // Wyświetlamy nick przeciwnika
+
         const nameElement = document.getElementById("opponent-name");
         nameElement.innerText = opponentName ? opponentName : "Nieznany Przeciwnik";
 

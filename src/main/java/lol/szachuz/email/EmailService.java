@@ -7,7 +7,6 @@ import java.util.Properties;
 
 public class EmailService {
 
-    // Konfiguracja serwera
     private final String username = "szachuz044@gmail.com";
     private final String password = "eckv mdmv ckwr wftp";
     private final String host = "smtp.gmail.com";
@@ -149,6 +148,6 @@ public class EmailService {
             </div>
         </body>
         </html>
-        """.formatted(opponentName, matchId, matchId); // matchId jest tu przekazywany, ale nieużywany w URL, bo jest zakomentowany. To nie generuje błędu.
+        """.formatted(opponentName, matchId, matchId);
     }
 }

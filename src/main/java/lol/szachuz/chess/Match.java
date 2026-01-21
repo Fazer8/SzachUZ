@@ -33,7 +33,6 @@ public class Match {
             throw new IllegalStateException("Not your turn");
         }
 
-        // 1. Analiza sytuacji PRZED ruchem
         Square fromSq = Square.fromValue(from.toUpperCase());
         Square toSq = Square.fromValue(to.toUpperCase());
         Piece piece = engine.getBoard().getPiece(fromSq);
@@ -41,17 +40,14 @@ public class Match {
 
         String pieceCode = getPieceCode(piece);
 
-        // Wykrywanie zdarzeń
         boolean isCapture = (target != Piece.NONE);
         boolean isCastling = false;
         boolean isPromotion = false;
 
-        // A. Wykrywanie Roszady (Król przesuwa się o więcej niż 1 pole)
         if (piece.getPieceType() == PieceType.KING && Math.abs(fromSq.getFile().ordinal() - toSq.getFile().ordinal()) > 1) {
             isCastling = true;
         }
 
-        // B. Wykrywanie Promocji (Pionek wchodzi na 1 lub 8 linię)
         if (piece.getPieceType() == PieceType.PAWN) {
             if ((piece.getPieceSide() == Side.WHITE && toSq.getRank() == Rank.RANK_8) ||
                     (piece.getPieceSide() == Side.BLACK && toSq.getRank() == Rank.RANK_1)) {
@@ -59,12 +55,11 @@ public class Match {
             }
         }
 
-        // 2. Generowanie SAN i Ruch
         String san = generateSan(from, to);
         engine.applyMove(from, to);
         moveHistorySan.add(san);
 
-        // 3. Zapisanie szczegółów
+
         moveHistoryDetails.add(new MoveLog(pieceCode, from, to, isCapture, isCastling, isPromotion));
 
         if (engine.isGameOver() != GameResult.ONGOING) {
@@ -84,7 +79,7 @@ public class Match {
         };
     }
 
-    // (Metoda generateSan bez zmian - skrócona dla czytelności, wklej swoją obecną)
+
     private String generateSan(String fromStr, String toStr) {
         try {
             Square from = Square.fromValue(fromStr.toUpperCase());
@@ -92,7 +87,7 @@ public class Match {
             Piece piece = engine.getBoard().getPiece(from);
             Piece target = engine.getBoard().getPiece(to);
             if (piece.getPieceType() == PieceType.KING && Math.abs(from.getFile().ordinal() - to.getFile().ordinal()) > 1) {
-                // Prosta detekcja roszady dla SAN
+
                 return (to.getFile() == File.FILE_G) ? "O-O" : "O-O-O";
             }
             StringBuilder san = new StringBuilder();
@@ -127,14 +122,13 @@ public class Match {
 
     private void resolveResult() { gameResult = engine.isGameOver(); }
 
-    // --- ZAKTUALIZOWANA KLASA LOGÓW ---
     public static class MoveLog {
         public final String pieceCode;
         public final String from;
         public final String to;
         public final boolean isCapture;
-        public final boolean isCastling;   // Nowe
-        public final boolean isPromotion;  // Nowe
+        public final boolean isCastling;
+        public final boolean isPromotion;
 
         public MoveLog(String pieceCode, String from, String to, boolean isCapture, boolean isCastling, boolean isPromotion) {
             this.pieceCode = pieceCode;
