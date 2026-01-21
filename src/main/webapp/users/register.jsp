@@ -148,23 +148,25 @@
     <jsp:attribute name="body">
 
     <main class="site-margin border-color border-radius container center-content">
-        <form>
-            <label for="username">Nazwa uzytkownika</label>
-            <input type="text" id="username" placeholder="Username"/>
-            <div id="username-status" class="status"></div>
-            <label for="email">E-mail</label>
-            <input type="email" id="email" placeholder="Email"/>
-            <div id="email-status" class="status"></div>
-            <label for="password">Hasło</label>
-            <input type="password" id="password" placeholder="Password"/>
-            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+        <div class="secondary-bg-1 container center-content" style="border-radius: 50px;padding: 20px 20px 20px 20px">
+            <form>
+                <label for="username">Nazwa uzytkownika</label>
+                <input type="text" id="username" placeholder="Username"/>
+                <div id="username-status" class="status"></div>
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="Email"/>
+                <div id="email-status" class="status"></div>
+                <label for="password">Hasło</label>
+                <input type="password" id="password" placeholder="Password"/>
+                <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
 
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-            <button type="button" onclick="registerUser()">Register</button>
+                <button type="button" onclick="registerUser()">Register</button>
 
-            <div id="result"></div>
-        </form>
+                <div id="result"></div>
+            </form>
+        </div>
 
     </main>
     </jsp:attribute>

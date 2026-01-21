@@ -82,10 +82,10 @@
                 <p>Ranking najlepszych graczy</p>
                 <t:leaderboard />
             </div>
-            <div class="secondary-bg">
-                <button type="button" onclick="handlePlayClick()">Rywalizuj Online</button>
+            <div class="secondary-bg-1">
+                <button type="button" onclick="handlePlayClick()" style="padding:15px 32px">Rywalizuj Online</button>
                 <p>lub</p>
-                <button type="button" onclick="location.href = '${pageContext.request.contextPath}/game/training.jsp'">Trenuj Samemu</button>
+                <button onclick="location.href = '${pageContext.request.contextPath}/game/training.jsp'" type="button" style="padding:15px 32px">Trenuj Samemu</button>
             </div>
         </div>
     </main>

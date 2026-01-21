@@ -5,6 +5,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import lol.szachuz.SzachuzWebSocket;
 import lol.szachuz.auth.JWTDecoder;
 import lol.szachuz.chess.player.ai.AiMoveScheduler;
+import lol.szachuz.chess.player.ai.AiPlayer;
 
 import java.io.EOFException;
 import java.util.List;
@@ -47,6 +48,10 @@ public final class ChessGameSocket implements SzachuzWebSocket {
                     gameUUID,
                     MoveResult.from(match).toJson()
             );
+
+            if (match.getWhite() instanceof AiPlayer) {
+                AiMoveScheduler.scheduleIfNeeded(MatchService.getInstance().loadMatchByMatchId(gameUUID));
+            }
 
         } catch (Exception e) {
             sendError(e.getMessage(), session);
