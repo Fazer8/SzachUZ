@@ -98,22 +98,24 @@
 
     <jsp:attribute name="body">
     <main class="site-margin border-color border-radius container center-content">
-        <form>
-            <label for="email">E-mail</label>
-            <input type="email" id="email" placeholder="Email"/>
+        <div class="secondary-bg-1 container center-content" style="border-radius: 50px;padding: 20px 20px 20px 20px">
+            <form>
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="Email"/>
 
-            <label for="password">Hasło</label>
-            <input type="password" id="password" placeholder="Password"/>
+                <label for="password">Hasło</label>
+                <input type="password" id="password" placeholder="Password"/>
 
-            <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-            <div class="row">
-                <button type="button" onclick="loginUser()">Login</button>
-                <a href="${pageContext.request.contextPath}/users/register.jsp">Rejestracja</a>
-            </div>
-            <div id="result"></div>
-        </form>
+                <div class="row">
+                    <button type="button" onclick="loginUser()">Login</button>
+                    <a href="${pageContext.request.contextPath}/users/register.jsp">Rejestracja</a>
+                </div>
+                <div id="result"></div>
+            </form>
+        </div>
     </main>
     </jsp:attribute>
 </t:layout>
