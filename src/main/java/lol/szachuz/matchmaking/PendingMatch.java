@@ -26,7 +26,6 @@ public class PendingMatch {
                 acceptedUserIds.contains(player2.getUserId());
     }
 
-    // NOWE: Metoda pomocnicza, żeby znaleźć przeciwnika
     public QueuedPlayer getOpponent(int userId) {
         if (player1.getUserId() == userId) return player2;
         if (player2.getUserId() == userId) return player1;

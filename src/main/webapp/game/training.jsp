@@ -2,7 +2,7 @@
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
-<t:layout page_name="Training" block="guest">
+<t:layout page_name="training.title" block="guest">
 
     <jsp:attribute name="head">
         <style>
@@ -98,34 +98,28 @@
 
     <jsp:attribute name="body">
         <main class="site-margin border-color border-radius container center-content">
-            <div class="menu">
-
+            <div class="menu secondary-bg-1 border-radius">
+                <p>AI SETTINGS</p>
                 <div class="section">
-                    <strong>Select side</strong>
+                    <p data-i18n="training.selectSide"></p>
                     <div class="side-picker">
-                        <button id="whiteBtn" class="selected" onclick="pickSide('white')">
-                            White
-                        </button>
-                        <button id="blackBtn" onclick="pickSide('black')">
-                            Black
-                        </button>
+                        <button id="whiteBtn" class="selected" onclick="pickSide('white')" data-i18n="training.side.white"></button>
+
+                        <button id="blackBtn" onclick="pickSide('black')" data-i18n="training.side.black"></button>
                     </div>
                 </div>
+                <div class="secttion1 section">
+                    <p data-i18n="training.difficulty"></p>
+                    <button onclick="startTraining('easy')" data-i18n="training.easy"></button>
 
-                <div class="section">
-                    <strong>Training difficulty</strong>
-                    <button onclick="startTraining('easy')">
-                        Easy Training
-                    </button>
-                    <button onclick="startTraining('hard')">
-                        Hard Training
-                    </button>
+                    <button onclick="startTraining('hard')" data-i18n="training.hard"></button>
                 </div>
 
-                <button onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'">
-                    Return to menu
+                <button onclick="window.location.href='${pageContext.request.contextPath}/index.jsp'"
+                        data-i18n="common.return">
                 </button>
             </div>
+            <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
         </main>
     </jsp:attribute>
 </t:layout>

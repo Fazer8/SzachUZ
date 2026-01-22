@@ -24,6 +24,7 @@ import java.util.Set;
  * The private key used for signing is loaded from a predefined location during service
  * initialization. The location and format of the key are critical to the proper functioning
  * of the service.
+ * @author Marcin Dudyński
  */
 @ApplicationScoped
 public class TokenService {
@@ -34,6 +35,9 @@ public class TokenService {
 
     private final PrivateKey privateKey;
 
+    /**
+     * Constructor.
+     */
     public TokenService() {
         try {
             this.privateKey = readPrivateKey();
@@ -42,6 +46,11 @@ public class TokenService {
         }
     }
 
+    /**
+     * Generates token
+     * @param user that will have token generated.
+     * @return token.
+     */
     public String generateToken(Users user) {
         Set<String> roles = new HashSet<>();
         roles.add("USER");
@@ -57,6 +66,11 @@ public class TokenService {
                 .sign(privateKey);
     }
 
+    /**
+     * Reads private key.
+     * @return private key.
+     * @throws Exception if something went wrong.
+     */
     private PrivateKey readPrivateKey() throws Exception {
         InputStream is;
         is = Thread.currentThread().getContextClassLoader().getResourceAsStream(TokenService.PRIVATE_KEY_LOCATION.substring(1));

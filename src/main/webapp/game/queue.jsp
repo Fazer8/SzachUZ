@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <title>Szukanie Przeciwnika - SzachUZ</title>
+    <title data-i18n="queue.title"></title>
     <meta charset="UTF-8">
     <style>
         body {
@@ -35,7 +35,6 @@
         #timer { font-size: 2rem; font-weight: bold; margin-top: 10px; }
         .status-msg { margin-top: 10px; font-size: 1.2rem; }
 
-        /* Modal */
         #match-modal {
             display: none;
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -70,25 +69,29 @@
 <body>
 
 <div id="queue-container">
-    <h1>Szukanie przeciwnika...</h1>
+    <h1 data-i18n="queue.searching"></h1>
     <div class="loader"></div>
     <div id="timer">00:00</div>
-    <div class="status-msg">Zakres MMR: <span id="mmr-range">+/- 20</span></div>
-    <div class="status-msg" style="font-size: 0.9em; color: #666;">Proszę nie odświeżać strony.</div>
+    <div class="status-msg"><span data-i18n="queue.mmr"></span>: <span id="mmr-range">+/- 20</span></div>
+    <div class="status-msg" style="font-size: 0.9em; color: #666;"><span data-i18n="queue.noRefresh"></span></div>
     <div id="error-msg"></div>
-    <button onclick="leaveQueue()" class="btn btn-decline" style="margin-top: 30px;">Anuluj</button>
+    <button onclick="leaveQueue()"
+            class="btn btn-decline"
+            style="margin-top: 30px;"
+            data-i18n="queue.cancel">
+    </button>
 </div>
 
 <div id="match-modal">
     <div class="modal-box">
-        <h2>Mecz Znaleziony!</h2>
-        <p>Twoim przeciwnikiem jest:</p>
+        <h2 data-i18n="queue.matchFound"></h2>
+        <p data-i18n="queue.opponent"></p>
 
         <div id="opponent-name">???</div>
 
-        <p>Masz 10 sekund na akceptację.</p>
-        <button onclick="acceptMatch()" class="btn btn-accept">GRAJ</button>
-        <button onclick="leaveQueue()" class="btn btn-decline">ODRZUĆ</button>
+        <p data-i18n="queue.acceptTime"></p>
+        <button onclick="acceptMatch()" class="btn btn-accept" data-i18n="queue.play"></button>
+        <button onclick="leaveQueue()" class="btn btn-decline" data-i18n="queue.decline"></button>
     </div>
 </div>
 
@@ -121,7 +124,6 @@
             console.log("Data:", data);
 
             if (data.type === "MATCH_PROPOSED") {
-                // Przekazujemy nick do funkcji modala
                 showAcceptModal(data.matchId, data.opponentName);
             }
             else if (data.type === "GAME_START") {
@@ -132,7 +134,7 @@
         socket.onclose = function(e) {
             stopTimer();
             if (e.code !== 1000) {
-                document.getElementById("error-msg").innerText = "Rozłączono z serwerem. Spróbuj ponownie.";
+                document.getElementById("error-msg").innerText = translations["queue.disconnected"] || "Rozłączono z serwerem. Spróbuj ponownie.";
                 document.getElementById("error-msg").style.display = "block";
             }
         };
@@ -141,9 +143,11 @@
     function showAcceptModal(matchId, opponentName) {
         currentMatchId = matchId;
 
-        // Wyświetlamy nick przeciwnika
+
         const nameElement = document.getElementById("opponent-name");
-        nameElement.innerText = opponentName ? opponentName : "Nieznany Przeciwnik";
+        nameElement.innerText =
+            opponentName ? opponentName :
+            (translations["queue.unknown"] || "Nieznany przeciwnik");
 
         document.getElementById("match-modal").style.display = "flex";
     }
@@ -151,7 +155,8 @@
     function acceptMatch() {
         if (socket && currentMatchId) {
             socket.send("ACCEPT:" + currentMatchId);
-            document.querySelector(".btn-accept").innerText = "Czekanie...";
+            document.querySelector(".btn-accept").innerText =
+                translations["queue.waiting"] || "Czekanie...";
             document.querySelector(".btn-accept").disabled = true;
         }
     }
@@ -170,11 +175,13 @@
 
             if (seconds > 5) document.getElementById("mmr-range").innerText = "+/- 40";
             if (seconds > 10) document.getElementById("mmr-range").innerText = "+/- 60";
-            if (seconds > 15) document.getElementById("mmr-range").innerText = "SZEROKI";
+            if (seconds > 15) document.getElementById("mmr-range").innerText =
+                                  translations["queue.mmr.wide"] || "SZEROKI";
         }, 1000);
     }
 
     function stopTimer() { clearInterval(timerInt); }
 </script>
+<script src="${pageContext.request.contextPath}/js/i18n.js"></script>
 </body>
 </html>

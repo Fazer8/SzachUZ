@@ -19,7 +19,6 @@ public final class ChessSocketRegistry {
      * Add a new session.
      * @param gameUUID {@code String} UUID of a match related to the session.
      * @param session the {@link Session} to add.
-     * @author Rafał Kubacki
      */
     public static void register(String gameUUID, Session session) {
         gameSessions
@@ -31,7 +30,6 @@ public final class ChessSocketRegistry {
      * Remove session from the registry.
      * @param gameUUID {@code String} UUID of a match related to the session.
      * @param session the {@link Session} to remove.
-     * @author Rafał Kubacki
      */
     public static void unregister(String gameUUID, Session session) {
         Set<Session> sessions = gameSessions.get(gameUUID);
@@ -47,7 +45,6 @@ public final class ChessSocketRegistry {
      * Send a message JSON object to be sent to the session.
      * @param gameUUID a {@code String} UUID of a game that has message to bradcast.
      * @param message a JSON {@code String} with a message we want to send.
-     * @author Rafał Kubacki
      */
     public static void broadcast(String gameUUID, String message) {
         Set<Session> sessions = gameSessions.get(gameUUID);

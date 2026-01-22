@@ -27,7 +27,6 @@ public class MatchmakingService {
     private final Map<String, PendingMatch> pendingMatches = new ConcurrentHashMap<>();
 
     public void addPlayerToQueue(QueuedPlayer player) {
-        // Ochrona przed duplikatami
         removePlayer(player.getUserId());
 
         queue.add(player);
@@ -73,7 +72,7 @@ public class MatchmakingService {
 
     private boolean isGoodMatch(QueuedPlayer p1, QueuedPlayer p2) {
         long waitTime = (System.currentTimeMillis() - p1.getJoinTime()) / 1000;
-        // Baza: +/- 20, co 5 sekund poszerzamy o 20
+
         int expansion = (int) (waitTime / 5) * 20;
         int allowedDiff = 20 + expansion;
         return Math.abs(p1.getMmr() - p2.getMmr()) <= allowedDiff;
@@ -86,7 +85,6 @@ public class MatchmakingService {
 
         System.out.println("Mecz: " + p1.getUsername() + " vs " + p2.getUsername());
 
-        // Przesyłamy sobie nawzajem Nicki przeciwników
         sendJson(p1, "MATCH_PROPOSED", matchId, null, p2.getUsername());
         sendJson(p2, "MATCH_PROPOSED", matchId, null, p1.getUsername());
     }
@@ -107,10 +105,8 @@ public class MatchmakingService {
         PendingMatch match = pendingMatches.remove(matchId);
         if (match == null) return;
 
-        // Powiadom drugiego gracza (nick = null)
         sendJson(match.getOpponent(rejectorId), "MATCH_CANCELLED", matchId, null, null);
 
-        // Przywróć drugiego gracza do kolejki
         QueuedPlayer opponent = match.getOpponent(rejectorId);
         if (opponent != null && opponent.getSession().isOpen()) {
             queue.add(opponent);
@@ -126,7 +122,6 @@ public class MatchmakingService {
             Match game = MatchService.getInstance().createMatch(white, black);
             String gameUUID = game.getMatchUUID();
 
-            // Start gry - nick nie jest tu już potrzebny, bo gra ma swoje mechanizmy
             sendJson(match.getPlayer1(), "GAME_START", gameUUID, "WHITE", null);
             sendJson(match.getPlayer2(), "GAME_START", gameUUID, "BLACK", null);
         } catch (Exception e) {
@@ -134,7 +129,6 @@ public class MatchmakingService {
         }
     }
 
-    // Zaktualizowana metoda pomocnicza
     private void sendJson(QueuedPlayer p, String type, String matchId, String color, String opponentName) {
         try {
             if (p.getSession() != null && p.getSession().isOpen()) {

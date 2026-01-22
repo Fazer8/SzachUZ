@@ -96,4 +96,17 @@ public class LeaderboardRepository {
                     .getResultList();
         }
     }
+    public String findUsernameByUserId(int userId) {
+        try (EntityManager em = EMF.get().createEntityManager()) {
+            // Bezpieczne zapytanie o samą nazwę użytkownika
+            try {
+                return em.createQuery("SELECT l.user.username FROM Leaderboard l WHERE l.user.id = :uid", String.class)
+                        .setParameter("uid", userId)
+                        .getSingleResult();
+            } catch (Exception e) {
+                // Jeśli nie znajdzie gracza, zwróć null (obsłużymy to w PDF)
+                return null;
+            }
+        }
+    }
 }

@@ -2,12 +2,20 @@ package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
 import lol.szachuz.chess.player.Player;
+
+import lol.szachuz.email.EmailService;
+import lol.szachuz.db.Repository.EmailRepository;
+
 import lol.szachuz.chess.player.ai.AiPlayer;
 import lol.szachuz.db.Repository.LeaderboardRepository;
 import lol.szachuz.db.Entities.Leaderboard;
 import lol.szachuz.util.EloCalculator;
 
 import java.util.UUID;
+
+import java.util.concurrent.CompletableFuture;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,9 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @author Rafał Kubacki
  */
 public final class MatchService {
-
     private static final MatchService INSTANCE = new MatchService();
-
     private final InMemoryGameRepository repository = new InMemoryGameRepository();
 
     private final LeaderboardRepository leaderboardRepository = new LeaderboardRepository();
@@ -29,9 +35,6 @@ public final class MatchService {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     //private final List<MatchEventListener> listeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Private constructor.
-     */
     private MatchService() {
         scheduler.scheduleAtFixedRate(this::checkClocks, 1, 1, TimeUnit.SECONDS);
     }
@@ -40,7 +43,6 @@ public final class MatchService {
      * Method returning a reference to the instance of the {@link MatchService}.
      *
      * @return {@link MatchService} refenrence.
-     * @author Rafał Kubacki
      */
     public static MatchService getInstance() {
         return INSTANCE;
@@ -54,7 +56,6 @@ public final class MatchService {
      * @param p1 one of the two players taking part in this match. Doesn't matter which one.
      * @param p2 other one the two players taking part in this match.
      * @return a new {@link Match} object.
-     * @author Rafał Kubacki
      */
     public Match createMatch(Player p1, Player p2) {
 
@@ -74,6 +75,35 @@ public final class MatchService {
         );
 
         repository.save(match);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                EmailRepository emailRepo = new EmailRepository();
+                EmailService emailService = new EmailService();
+
+                int id1 = (int) p1.getId();
+                int id2 = (int) p2.getId();
+
+                String email1 = emailRepo.getEmailByUserId(id1);
+                String email2 = emailRepo.getEmailByUserId(id2);
+                String name1 = emailRepo.getUsernameByUserId(id1);
+                String name2 = emailRepo.getUsernameByUserId(id2);
+
+                if (email1 != null) {
+                    emailService.sendGameStartEmail(email1, name2, match.getMatchUUID());
+                }
+
+                if (email2 != null) {
+                    emailService.sendGameStartEmail(email2, name1, match.getMatchUUID());
+                }
+
+            } catch (Exception e) {
+                System.err.println("Błąd w procesie wysyłania maili: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+
         return match;
     }
 
@@ -83,7 +113,6 @@ public final class MatchService {
      * @param playerId {@code long} ID of a player that wants to move
      * @param move     {@link MoveMessage} record with move data.
      * @throws IllegalStateException if player tried to make an illegal move or match doesn't exist.
-     * @author Rafał Kubacki
      */
     public MoveResult processMove(long playerId, MoveMessage move) {
         Match match = loadMatchByPlayerId(playerId);
@@ -106,7 +135,6 @@ public final class MatchService {
      *
      * @param playerId {@code long} ID of a player that forfeits.
      * @throws IllegalStateException if match doesnt exist.
-     * @author Rafał Kubacki
      */
     public MoveResult forfeit(long playerId) {
         Match match = loadMatchByPlayerId(playerId);
@@ -127,7 +155,6 @@ public final class MatchService {
      *
      * @param playerId {@code long} ID of a player we're looking for.
      * @return Match with that player. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match loadMatchByPlayerId(long playerId) {
         return repository.findByPlayer(playerId);
@@ -138,7 +165,6 @@ public final class MatchService {
      *
      * @param matchId {@code String} UUID of a match we're looking for.
      * @return Match with that UUID. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match loadMatchByMatchId(String matchId) {
         return repository.findById(matchId);
@@ -146,8 +172,6 @@ public final class MatchService {
 
     /**
      * Method privided for scheduler.
-     *
-     * @author Rafał Kubacki
      */
     private void checkClocks() {
         for (Match match : repository.findAll()) {

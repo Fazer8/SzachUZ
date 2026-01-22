@@ -1,6 +1,7 @@
 package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
+import java.util.List;
 
 /**
  * Record {@link MoveResult} representing match state after the previous move.
@@ -18,15 +19,24 @@ public record MoveResult(
     GameResult result,
     Side sideToMove,
     long whiteTimeRemaining,
-    long blackTimeRemaining
+    long blackTimeRemaining,
+    List<String> history
 ) {
 
     /**
      * Method used to serialize object to JSON.
      * @return {@code String}, which is an object serialized to JSON.
-     * @author Rafał Kubacki
      */
     public String toJson() {
+        StringBuilder historyJson = new StringBuilder("[");
+        if (history != null) {
+            for (int i = 0; i < history.size(); i++) {
+                historyJson.append("\"").append(history.get(i)).append("\"");
+                if (i < history.size() - 1) historyJson.append(",");
+            }
+        }
+        historyJson.append("]");
+
         return "{ \"fen\": \"" + fen
             + "\", \"status\": \"" + status
             + "\", \"result\": \"" + result
@@ -39,7 +49,6 @@ public record MoveResult(
      * Creates {@link MoveResult} object based on current match state.
      * @param match {@link Match} object based on which to create the {@code MoveResult}.
      * @return new {@link MoveResult} object representing current match state.
-     * @author Rafał Kubacki
      */
     public static MoveResult from(Match match) {
         return new MoveResult(
@@ -48,7 +57,8 @@ public record MoveResult(
             match.getResult(),
             match.getSideToMove(),
             match.getWhiteTimeRemaining(),
-            match.getBlackTimeRemaining()
+            match.getBlackTimeRemaining(),
+            match.getMoveHistorySan()
         );
     }
 }
