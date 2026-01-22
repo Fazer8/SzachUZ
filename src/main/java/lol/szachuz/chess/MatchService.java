@@ -123,8 +123,9 @@ public final class MatchService {
 
         match.applyMove(playerId, move.from(), move.to());
         if (match.getStatus() != GameStatus.ACTIVE || match.isOver()) {
+
             updateMmr(match);
-            repository.remove(match);
+            repository.archive(match);
         }
 
         return MoveResult.from(match);
