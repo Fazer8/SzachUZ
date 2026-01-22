@@ -9,7 +9,7 @@
 
 <html>
 <head>
-    <title>${page_name}</title>
+    <title data-i18n=${page_name}></title>
     <link rel="icon" type="image/x-icon" href="${pageContext.request.contextPath}/assets/logo_tmp.png">
 
     <style>
@@ -223,17 +223,21 @@
     <a href="${pageContext.request.contextPath}/" class="logo">
         <img src="${pageContext.request.contextPath}/assets/logo_tmp.png" alt="SzachUZ logo" class="logo">
     </a>
-    <h1>${page_name}</h1>
+    <h1 data-i18n=${page_name}></h1>
 
     <div class="header-actions">
-        <button onClick="toggleTheme()" class="nav-btn">Motyw</button>
-        <div><p style="margin: 0; line-height: 1.2;">🇵🇱<br/>🇬🇧</p></div>
+        <button onClick="toggleTheme()" class="nav-btn" data-i18n="profile.darkmode.toggle"></button>
+        <div>
+            <button onclick="setLang('pl')">PL</button>
+            <button onclick="setLang('en')">EN</button>
+        </div>
 
         <div id="guest-view" class="${isLoggedIn ? 'hidden' : ''}">
             <button
                     class="nav-btn"
-                    onclick="window.location.href='${pageContext.request.contextPath}/users/login.jsp'">
-                Zaloguj się
+                    onclick="window.location.href='${pageContext.request.contextPath}/users/login.jsp'"
+                    data-i18n="login.submit"
+            >
             </button>
         </div>
 

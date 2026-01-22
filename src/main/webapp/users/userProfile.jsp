@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="My Profile" block="guest">
+<t:layout page_name="profile.title" block="guest">
     <jsp:attribute name="head">
         <style>
             #avatarContainer {

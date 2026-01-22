@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="Strona główna">
+<t:layout page_name="main.title">
     <jsp:attribute name="head">
     <script>
         function handlePlayClick() {
@@ -101,8 +101,6 @@
         <a href="users/login.jsp"data-i18n="footer.login"></a>
         <a href="users/register.jsp"data-i18n="footer.register"></a>
 
-        <button onclick="setLang('pl')">PL</button>
-        <button onclick="setLang('en')">EN</button>
     </footer>
     </jsp:attribute>
 </t:layout>
