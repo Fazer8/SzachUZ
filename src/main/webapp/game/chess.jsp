@@ -16,61 +16,82 @@
             crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
-
-
-    </script>
     <style>
+
         main {
-            display: grid;
-            place-items: center;
-            flex: 1 1 auto !important;
-            align-content: stretch;
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+            min-height: 80vh;
         }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         #board {
             aspect-ratio: 1 / 1;
             height: 70vh;
             width: 70vh;
-            max-height: 70vh;
-            max-width: 70vh;
-        }
-        .board-b72b1 {
-            border: 20px solid var(--accent-color) !important;
-            border-radius: 10px;
-        }
-        .white-1e1d7 {
-            background-color: var(--dominant-color) !important;
         }
 
-        .black-3c85d {
-            background-color: var(--secondary-color) !important;
+
+        .board-b72b1 {
+            border: 15px solid var(--accent-color) !important;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        .white-1e1d7 { background-color: var(--dominant-color) !important; }
+        .black-3c85d { background-color: var(--secondary-color) !important; }
+
+
         .turn-indicator {
-            margin-top: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            padding: 10px 30px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            text-align: center;
+            min-width: 300px;
+        }
+
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #222; padding: 40px; border-radius: 15px;
+            text-align: center; border: 2px solid var(--accent-color); color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+        .btn-modal {
+            margin: 10px; padding: 12px 24px; font-size: 1.1rem; border: none;
+            border-radius: 5px; cursor: pointer; transition: transform 0.2s;
             font-weight: bold;
         }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.67);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            z-index: 10;
-        }
-
+        .btn-download { background-color: #2e7d32; color: white; }
+        .btn-exit { background-color: #c62828; color: white; }
+        .btn-modal:hover { transform: scale(1.05); filter: brightness(1.1); }
     </style>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
+
+        <div class="game-container">
             <div id="game-status" style="display:none" class="overlay">
                 <p id="status-text"></p>
-                <button onclick="getHistory()" data-i18n="game.history"></button>
+                <button onclick="downloadPdf()" data-i18n="game.history"></button>
                 <button onclick="exitGame()" data-i18n="game.exit"></button>
             </div>
             <div id="turn-indicator" class="turn-indicator"></div>
@@ -80,12 +101,27 @@
             </div>
             <button onclick="forfeit()" data-i18n="game.forfeit"></button>
             <div id="board"></div>
+        </div>
+
         <script>
             const GAME_ID = "${param.gameId}";
-            console.log(GAME_ID);
             const TOKEN   = localStorage.getItem("authToken");
             const COLOR   = "${param.color}".toLowerCase();
-            console.log(COLOR);
+            const CONTEXT_PATH = "${pageContext.request.contextPath}";
+
+            if (!GAME_ID || GAME_ID.trim() === "" || GAME_ID.startsWith("match_")) {
+                alert("Błąd ID gry. Powrót do menu.");
+                window.location.href = CONTEXT_PATH + "/";
+            }
+
+
+            function downloadPdf() {
+                window.location.href = CONTEXT_PATH + "/game/pdf?gameId=" + GAME_ID;
+            }
+
+            function exitGame() {
+                window.location.href = CONTEXT_PATH + "/";
+            }
 
             function showResult(result, status) {
                 const overlay = document.getElementById("game-status");
@@ -115,6 +151,7 @@
 
             function updateTurnIndicator(sideToMove) {
                 const el = document.getElementById("turn-indicator");
+                let sidePl = sideToMove === "WHITE" ? "Białe" : "Czarne";
 
                 if (sideToMove.toLowerCase() === COLOR) {
                     el.innerText =
@@ -151,39 +188,25 @@
             }
 
             let socket = null;
-            const wsUrl =
-                (location.protocol === "https:" ? "wss://" : "ws://") +
-                location.host +
-                "/ws/chess?gameId=" + GAME_ID +
-                "&token=" + TOKEN;
+            const wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
+            const wsUrl = wsProtocol + location.host + CONTEXT_PATH + "/ws/chess?gameId=" + GAME_ID + "&token=" + TOKEN;
 
             socket = new WebSocket(wsUrl);
 
-            socket.onopen = function () {
-                console.log("Chess socket connected");
-            };
-
-            function exitGame() {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.close(1000, "Player left the game");
-                }
-            }
+            socket.onopen = function () { console.log("Połączono z grą"); };
+            
 
             socket.onclose = function () {
                 //alert("Connection closed");
                 window.location.href = "/index.jsp";
             };
 
-            socket.onerror = function () {
-                alert("WebSocket error");
-            };
-
-            var board = null
-            var game = new Chess()
+            var board = null;
+            var game = new Chess();
+            let awaitingServer = false;
 
             socket.onmessage = function (event) { try {
                 const msg = JSON.parse(event.data);
-
 
                 if (msg.type === "ERROR") {
                     console.log(msg.message);
@@ -214,40 +237,22 @@
                 console.log(event);
             }};
 
-            let awaitingServer = false;
-
             function onDragStart(source, piece) {
-                if (awaitingServer) return false;
-                if (game.game_over()) return false;
-
-                if ((COLOR === 'white' && piece.startsWith('b')) ||
-                    (COLOR === 'black' && piece.startsWith('w'))) {
-                    return false;
-                }
+                if (awaitingServer || game.game_over()) return false;
+                if ((COLOR === 'white' && piece.startsWith('b')) || (COLOR === 'black' && piece.startsWith('w'))) return false;
             }
 
             function onDrop (source, target) {
-                var move = game.move({
-                    from: source,
-                    to: target,
-                    promotion: 'q'
-                });
-
+                var move = game.move({ from: source, to: target, promotion: 'q' });
                 if (move === null) return 'snapback';
 
                 game.undo();
                 awaitingServer = true;
+                socket.send(JSON.stringify({ from: source, to: target }));
+            }
 
-                socket.send(JSON.stringify({
-                    from: source,
-                    to: target
-                }));
-            }
-            // update the board position after the piece snap
-            // for castling, en passant, pawn promotion
-            function onSnapEnd () {
-                board.position(game.fen())
-            }
+            function onSnapEnd () { board.position(game.fen()) }
+
             var config = {
                 draggable: true,
                 position: 'start',
@@ -255,12 +260,12 @@
                 onDragStart: onDragStart,
                 onDrop: onDrop,
                 onSnapEnd: onSnapEnd,
-                pieceTheme: '/assets/pieces/{piece}.png'
-            }
-            board = Chessboard('board', config)
 
-            function getHistory() {
+                pieceTheme: CONTEXT_PATH + '/assets/pieces/{piece}.png'
             }
+            board = Chessboard('board', config);
+
+            window.addEventListener('resize', board.resize);
         </script>
         <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </main>

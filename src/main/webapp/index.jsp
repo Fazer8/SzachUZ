@@ -94,13 +94,5 @@
             </div>
         </div>
     </main>
-    <footer style="display: flex; gap: 10px;">
-        <p data-i18n="footer.devLinks"></p>
-        <a href="hello-servlet">Hello Servlet</a>
-        <a href="users/userProfile.jsp"data-i18n="footer.profile"></a>
-        <a href="users/login.jsp"data-i18n="footer.login"></a>
-        <a href="users/register.jsp"data-i18n="footer.register"></a>
-
-    </footer>
     </jsp:attribute>
 </t:layout>

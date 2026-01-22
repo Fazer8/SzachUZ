@@ -13,7 +13,6 @@ import java.util.Map;
 @ServerEndpoint("/ws/matchmaking")
 public class MatchmakingSocket implements SzachuzWebSocket {
 
-    // Tworzymy repozytorium ręcznie, aby uniknąć problemów z wstrzykiwaniem w WebSocket
     private final LeaderboardRepository leaderboardRepository = new LeaderboardRepository();
     private final MatchmakingService matchmakingService = MatchmakingService.getInstance();
 
@@ -31,12 +30,10 @@ public class MatchmakingSocket implements SzachuzWebSocket {
         }
 
         try {
-            // 1. Parsowanie ID z tokena
             this.userId = JWTDecoder.parseUserIdFromToken(tokenList.getFirst());
 
-            // 2. Pobieranie danych z bazy (MMR + Nick)
             int mmr = 1200;
-            String username = "Gracz " + userId; // Domyślna nazwa
+            String username = "Gracz " + userId;
 
             try {
                 Leaderboard lb = leaderboardRepository.findByUserId(userId);
@@ -52,7 +49,6 @@ public class MatchmakingSocket implements SzachuzWebSocket {
 
             System.out.println("Połączono: " + username + " [" + userId + "]");
 
-            // 3. Dodanie do kolejki z pobranym nickiem
             matchmakingService.addPlayerToQueue(new QueuedPlayer(userId, mmr, username, session));
 
         } catch (Exception e) {

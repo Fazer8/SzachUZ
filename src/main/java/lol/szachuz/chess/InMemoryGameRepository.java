@@ -3,6 +3,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Repository with all the ongoing matches, stored in app's runtime memory.
@@ -66,5 +68,15 @@ public final class InMemoryGameRepository {
      */
     public boolean isPlayerInGame(long playerId) {
         return playerToMatch.containsKey(playerId);
+    }
+
+    public void archive(Match match) {
+        playerToMatch.remove(match.getWhite().getId());
+        playerToMatch.remove(match.getBlack().getId());
+
+
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            matches.remove(match.getMatchUUID());
+        }, 10, TimeUnit.MINUTES);
     }
 }

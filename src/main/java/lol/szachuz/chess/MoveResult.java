@@ -1,6 +1,7 @@
 package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
+import java.util.List;
 
 /**
  * Record {@link MoveResult} representing match state after the previous move.
@@ -18,7 +19,8 @@ public record MoveResult(
     GameResult result,
     Side sideToMove,
     long whiteTimeRemaining,
-    long blackTimeRemaining
+    long blackTimeRemaining,
+    List<String> history
 ) {
 
     /**
@@ -26,6 +28,15 @@ public record MoveResult(
      * @return {@code String}, which is an object serialized to JSON.
      */
     public String toJson() {
+        StringBuilder historyJson = new StringBuilder("[");
+        if (history != null) {
+            for (int i = 0; i < history.size(); i++) {
+                historyJson.append("\"").append(history.get(i)).append("\"");
+                if (i < history.size() - 1) historyJson.append(",");
+            }
+        }
+        historyJson.append("]");
+
         return "{ \"fen\": \"" + fen
             + "\", \"status\": \"" + status
             + "\", \"result\": \"" + result
@@ -46,7 +57,8 @@ public record MoveResult(
             match.getResult(),
             match.getSideToMove(),
             match.getWhiteTimeRemaining(),
-            match.getBlackTimeRemaining()
+            match.getBlackTimeRemaining(),
+            match.getMoveHistorySan()
         );
     }
 }
