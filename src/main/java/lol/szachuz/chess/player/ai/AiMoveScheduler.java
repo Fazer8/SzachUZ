@@ -1,42 +1,50 @@
 package lol.szachuz.chess.player.ai;
 
 import lol.szachuz.chess.*;
-import lol.szachuz.chess.player.Player;
 
 import java.util.concurrent.*;
 
+/**
+ * Class used for generating AI moves.
+ * @author Rafał Kubacki
+ */
 public class AiMoveScheduler {
 
-    private static final ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor();
-
-    private AiMoveScheduler() {}
-
+    /**
+     * Static method, that checks if game has an AI player, and generates move acordingly.
+     * @param match {@link Match} to check and generate for.
+     */
     public static void scheduleIfNeeded(Match match) {
 
-        //Player black = match.getBlack();
-        Player black = null;
-        if (!(black instanceof AiPlayer ai)) return;
+        if (match == null) {
+            return;
+        }
+        if (!match.hasAiPlayer()) {
+            return;
+        }
 
-        executor.schedule(() -> {
-            try {
-                if (match.getStatus() == GameStatus.FINISHED) return;
+        AiPlayer ai = (AiPlayer) (match.getBlack() instanceof AiPlayer ? match.getBlack() : match.getWhite());
 
-                // Very naive placeholder
-                AiMove move = AiEngine.computeMove(
-                        match.getFen(),
-                        ai.getSkillLevel()
-                );
+        try {
+            if (match.getStatus() == GameStatus.FINISHED) return;
 
-                MoveResult result = MatchService.getInstance()
-                        .processMove(ai.getId(), move.from(), move.to());
+            String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    match.getFen() + "\" }";
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), err);
+            MoveMessage move = AiEngineBean.computeMove(
+                    match.getFen(),
+                    ai.getSkillLevel()
+            );
 
-                ChessSocketRegistry.broadcast(
-                        match.getMatchUUID(),
-                        result.toJson()
-                );
+            MoveResult result = MatchService.getInstance()
+                    .processMove(ai.getId(), move);
 
-            } catch (Exception ignored) {}
-        }, 500, TimeUnit.MILLISECONDS);
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
+
+        } catch (Exception e) {
+            String err = "{ \"type\": \"ERROR\", \"message\": \"" +
+                    e.getMessage() + "\" }";
+            ChessSocketRegistry.broadcast(match.getMatchUUID(), err);
+        }
     }
 }

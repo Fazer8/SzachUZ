@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="Szachy">
+<t:layout page_name="game.title">
     <jsp:attribute name="head">
     <link rel="stylesheet"
           href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
@@ -87,17 +87,19 @@
 
     <jsp:attribute name="body">
     <main class="site-margin">
-        <div id="game-status" style="display:none" class="overlay">
-            <div class="modal-content">
-                <h2 id="status-text" style="margin-bottom: 20px; font-size: 2rem;">Koniec Gry</h2>
-                <button onclick="downloadPdf()" class="btn-modal btn-download">📥 Pobierz Historię (PDF)</button>
-                <br><br>
-                <button onclick="exitGame()" class="btn-modal btn-exit">🚪 Wyjdź z gry</button>
-            </div>
-        </div>
 
         <div class="game-container">
-            <div id="turn-indicator" class="turn-indicator">Łączenie z serwerem...</div>
+            <div id="game-status" style="display:none" class="overlay">
+                <p id="status-text"></p>
+                <button onclick="downloadPdf()" data-i18n="game.history"></button>
+                <button onclick="exitGame()" data-i18n="game.exit"></button>
+            </div>
+            <div id="turn-indicator" class="turn-indicator"></div>
+            <div>
+              <span data-i18n="game.whiteTime"></span>: <span id="whiteClock"></span>
+              <span data-i18n="game.blackTime"></span>: <span id="blackClock"></span>
+            </div>
+            <button onclick="forfeit()" data-i18n="game.forfeit"></button>
             <div id="board"></div>
         </div>
 
@@ -121,17 +123,28 @@
                 window.location.href = CONTEXT_PATH + "/";
             }
 
-            function showResult(result) {
+            function showResult(result, status) {
                 const overlay = document.getElementById("game-status");
                 const textField = document.getElementById("status-text");
                 let text = "Koniec Gry";
 
-                if (result === "DRAW") text = "🤝 Remis!";
-                else if ((result === "WHITE_WON" && COLOR === "white") || (result === "BLACK_WON" && COLOR === "black")) {
-                    text = "🏆 Zwycięstwo!";
+                let text;
+                if (result === "DRAW") {
+                    text = translations["game.result.draw"] || "Draw";
+                } else if (
+                    (result === "WHITE_WON" && COLOR === "white") ||
+                    (result === "BLACK_WON" && COLOR === "black")
+                ) {
+                    text = translations["game.result.win"] || "Wygrałeś";
                 } else {
-                    text = "💀 Porażka";
+                    text = translations["game.result.lose"] || "Przegrałeś";
                 }
+
+                if (status === "FORFEIT") {
+                    text += " " + (translations["game.result.forfeit"] || "przez walkower");
+                }
+
+                text += "!";
 
                 textField.innerText = text;
                 overlay.style.display = "flex";
@@ -142,18 +155,38 @@
                 let sidePl = sideToMove === "WHITE" ? "Białe" : "Czarne";
 
                 if (sideToMove.toLowerCase() === COLOR) {
-                    el.innerText = "Twój ruch (" + sidePl + ")";
-                    el.style.border = "2px solid #4CAF50";
-                    el.style.color = "#4CAF50";
+                    el.innerText =
+                        (translations["game.turn.yours"] || "Twój ruch") +
+                        " (" + sideToMove + ")";
+                    el.style.color = "green";
                     board.draggable = true;
                 } else {
-                    el.innerText = "Ruch przeciwnika (" + sidePl + ")";
-                    el.style.border = "2px solid #F44336";
-                    el.style.color = "#F44336";
+                    el.innerText =
+                        (translations["game.turn.enemy"] || "Ruch przeciwnika") +
+                        " (" + sideToMove + ")";
+                    el.style.color = "gray";
                     board.draggable = false;
                 }
             }
 
+            function renderClock(ms) {
+                let s = Math.max(0, Math.floor(ms / 1000));
+                return Math.floor(s / 60) + ":" + (s % 60).toString().padStart(2, "0");
+            }
+
+            function updateClock(msg) {
+                document.getElementById("whiteClock").innerText = renderClock(msg.timeRemaining.white);
+                document.getElementById("blackClock").innerText = renderClock(msg.timeRemaining.black);
+            }
+
+            function forfeit() {
+                let res = confirm(
+                    translations["game.confirm.forfeit"] || "Opuścić grę?"
+                );
+                if (res) {
+                    socket.send(JSON.stringify({type: "FORFEIT"}));
+                }
+            }
 
             let socket = null;
             const wsProtocol = location.protocol === "https:" ? "wss://" : "ws://";
@@ -162,23 +195,28 @@
             socket = new WebSocket(wsUrl);
 
             socket.onopen = function () { console.log("Połączono z grą"); };
-            socket.onclose = function (e) {
-                if(e.code !== 1000 && !document.getElementById("game-status").style.display === "flex") {
-                    console.log("Rozłączono");
-                }
+            
+
+            socket.onclose = function () {
+                //alert("Connection closed");
+                window.location.href = "/index.jsp";
             };
 
             var board = null;
             var game = new Chess();
             let awaitingServer = false;
 
-            socket.onmessage = function (event) {
+            socket.onmessage = function (event) { try {
                 const msg = JSON.parse(event.data);
 
                 if (msg.type === "ERROR") {
-                    alert(msg.message);
+                    console.log(msg.message);
                     awaitingServer = false;
                     return;
+                }
+
+                if (msg.type === "TIME_TICK") {
+                    updateClock(msg);
                 }
 
                 if (msg.fen) {
@@ -186,13 +224,19 @@
                     board.position(msg.fen);
 
                     if (msg.status === "FINISHED") {
-                        showResult(msg.result);
+                       showResult(msg.result, msg.status);
+                    } else if (msg.status == "FORFEIT") {
+                       showResult(msg.result, msg.status);
                     }
+
+                    updateClock(msg);
 
                     updateTurnIndicator(msg.sideToMove);
                     awaitingServer = false;
                 }
-            };
+            } catch (error) {
+                console.log(event);
+            }};
 
             function onDragStart(source, piece) {
                 if (awaitingServer || game.game_over()) return false;
@@ -224,6 +268,7 @@
 
             window.addEventListener('resize', board.resize);
         </script>
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </main>
     </jsp:attribute>
 </t:layout>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:layout page_name="Strona główna">
+<t:layout page_name="main.title">
     <jsp:attribute name="head">
     <script>
         function handlePlayClick() {
@@ -65,37 +65,42 @@
             }
         }
     </style>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
         <div class="left-panel">
             <div class="secondary-bg">
-                <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" alt="Zdjęcie pionków w rzędach, z królem pomiędzy nimi.">
-                <p>Zostań królem SzachUZ</p>
+                <img src="${pageContext.request.contextPath}/assets/chess-image-become-king.png" data-i18n="image.alt.king">
+                <p data-i18n="home.becomeKing"></p>
             </div>
 
-            <button type="button" onclick="handlePlayClick()">Zagraj teraz</button>
 
         </div>
         <div class="right-panel">
             <div class="secondary-bg">
-                <p>Ranking najlepszych graczy</p>
+                <p data-i18n="home.leaderboard"></p>
                 <t:leaderboard />
             </div>
-            <div class="secondary-bg">
-                <p>
-                    Rywalizuj ze znajomymi<br>lub<br>Trenuj samemu
-                </p>
+            <div class="secondary-bg-1">
+                <button type="button" onclick="handlePlayClick()" data-i18n="button.playOnline" style="padding:15px 32px"></button>
+                <p data-i18n="common.or"></p>
+                <button type="button"
+                        onclick="location.href = '${pageContext.request.contextPath}/game/training.jsp'"
+                        style="padding:15px 32px"
+                        data-i18n="button.train">
+                </button>
             </div>
         </div>
     </main>
     <footer style="display: flex; gap: 10px;">
-        <p>Development links: </p>
+        <p data-i18n="footer.devLinks"></p>
         <a href="hello-servlet">Hello Servlet</a>
-        <a href="users/userProfile.jsp">Profil Użytkownika</a>
-        <a href="users/login.jsp">Zaloguj Się</a>
-        <a href="users/register.jsp">Zarejestruj Się</a>
+        <a href="users/userProfile.jsp"data-i18n="footer.profile"></a>
+        <a href="users/login.jsp"data-i18n="footer.login"></a>
+        <a href="users/register.jsp"data-i18n="footer.register"></a>
+
     </footer>
     </jsp:attribute>
 </t:layout>

@@ -9,7 +9,7 @@
     pageContext.setAttribute("recaptchaSiteKey", envKey);
 %>
 
-<t:layout page_name="Register" block="logged">
+<t:layout page_name="register.title" block="logged">
     <jsp:attribute name="head">
     <script>
         window.onload = function () {
@@ -23,14 +23,16 @@
 
                 if (!username || !email || !password) {
                     resultBox.className = "error";
-                    resultBox.textContent = "Wypełnij wszystkie pola!";
+                    resultBox.textContent =
+                      translations["register.error.empty"] || "Wypełnij wszystkie pola!";
                     return;
                 }
 
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
                     resultBox.className = "error";
-                    resultBox.textContent = "Podaj poprawny adres email!";
+                    resultBox.textContent =
+                      translations["register.error.email"] || "Podaj poprawny adres email!";
                     return;
                 }
 
@@ -47,15 +49,19 @@
 
                     if (!res.ok) {
                         resultBox.className = "error";
-                        resultBox.textContent = "Błąd: " + text;
+                        resultBox.textContent =
+                          (translations["register.error"] || "Błąd: ") + text;
                     } else {
                         resultBox.className = "success";
-                        resultBox.textContent = "Sukces: " + text;
+                        resultBox.textContent =
+                          (translations["register.success"] || "Sukces: ") + text;
                     }
                 } catch (err) {
                     console.error(err);
                     resultBox.className = "error";
-                    resultBox.textContent = "Wystąpił błąd połączenia z serwerem.";
+                    resultBox.textContent =
+                       translations["register.error.connection"] ||
+                       "Wystąpił błąd połączenia z serwerem.";
                 }
 
                 grecaptcha.reset();
@@ -148,24 +154,35 @@
     <jsp:attribute name="body">
 
     <main class="site-margin border-color border-radius container center-content">
+      <div class="secondary-bg-1 container center-content" style="border-radius: 50px;padding: 20px 20px 20px 20px">
         <form>
-            <label for="username">Nazwa uzytkownika</label>
-            <input type="text" id="username" placeholder="Username"/>
+            <label for="username" data-i18n="register.username"></label>
+            <input type="text"
+                   id="username"
+                   data-i18n-placeholder="register.username.placeholder"/>
             <div id="username-status" class="status"></div>
-            <label for="email">E-mail</label>
-            <input type="email" id="email" placeholder="Email"/>
+            <label for="email" data-i18n="register.email"></label>
+            <input type="email"
+                   id="email"
+                   data-i18n-placeholder="register.email.placeholder"/>
             <div id="email-status" class="status"></div>
-            <label for="password">Hasło</label>
-            <input type="password" id="password" placeholder="Password"/>
+            <label for="password" data-i18n="register.password"></label>
+            <input type="password"
+                   id="password"
+                   data-i18n-placeholder="register.password.placeholder"/>
             <div class="g-recaptcha" data-sitekey="${recaptchaSiteKey}"></div>
 
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-            <button type="button" onclick="registerUser()">Register</button>
+            <button type="button"
+                    onclick="registerUser()"
+                    data-i18n="register.submit">
+            </button>
 
             <div id="result"></div>
         </form>
-
+      </div>
+        <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </main>
     </jsp:attribute>
 </t:layout>
