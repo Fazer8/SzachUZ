@@ -89,12 +89,5 @@
             </div>
         </div>
     </main>
-    <footer style="display: flex; gap: 10px;">
-        <p>Development links: </p>
-        <a href="hello-servlet">Hello Servlet</a>
-        <a href="users/userProfile.jsp">Profil Użytkownika</a>
-        <a href="users/login.jsp">Zaloguj Się</a>
-        <a href="users/register.jsp">Zarejestruj Się</a>
-    </footer>
     </jsp:attribute>
 </t:layout>

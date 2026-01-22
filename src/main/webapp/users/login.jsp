@@ -63,7 +63,7 @@
                     resultBox.textContent = "Login successful! Redirecting...";
 
                     // Reset widgetu jeśli istnieje
-                    try { if(window.grecaptcha) grecaptcha.reset(); } catch(e){}
+                    grecaptcha.reset();
 
                     window.location.href = "${pageContext.request.contextPath}/dashboard.jsp";
                 }
