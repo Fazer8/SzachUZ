@@ -147,7 +147,7 @@ public final class MatchService {
         updateMmr(match);
         repository.remove(match);
 
-        return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null, -1, -1);
+        return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null, -1, -1,match.getMoveHistorySan());
     }
 
     /**
@@ -199,7 +199,8 @@ public final class MatchService {
                     match.getResult(),
                     match.getSideToMove(),
                     match.getWhiteTimeRemaining(),
-                    match.getBlackTimeRemaining()
+                    match.getBlackTimeRemaining(),
+                    match.getMoveHistorySan()
             );
             ChessSocketRegistry.broadcast(match.getMatchUUID(), result.toJson());
         }

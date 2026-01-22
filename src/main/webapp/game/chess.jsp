@@ -126,7 +126,6 @@
             function showResult(result, status) {
                 const overlay = document.getElementById("game-status");
                 const textField = document.getElementById("status-text");
-                let text = "Koniec Gry";
 
                 let text;
                 if (result === "DRAW") {

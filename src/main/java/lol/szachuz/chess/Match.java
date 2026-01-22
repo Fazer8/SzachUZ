@@ -4,7 +4,6 @@ import com.github.bhlangonijr.chesslib.*;
 import lol.szachuz.chess.player.Player;
 import lol.szachuz.chess.player.ai.AiPlayer;
 
-import java.util.Timer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,9 +80,8 @@ public class Match {
             return;
         }
 
-        engine.applyMove(from, to);
-
         String pieceCode = getPieceCode(piece);
+        engine.applyMove(from, to);
 
         boolean isCapture = (target != Piece.NONE);
         boolean isCastling = false;
@@ -101,7 +99,6 @@ public class Match {
         }
 
         String san = generateSan(from, to);
-        engine.applyMove(from, to);
         moveHistorySan.add(san);
 
 
