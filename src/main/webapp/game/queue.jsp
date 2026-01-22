@@ -34,7 +34,7 @@
 
         #timer { font-size: 2rem; font-weight: bold; margin-top: 10px; }
         .status-msg { margin-top: 10px; font-size: 1.2rem; }
-        
+
         #match-modal {
             display: none;
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;

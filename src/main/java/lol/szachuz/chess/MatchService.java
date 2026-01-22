@@ -39,13 +39,11 @@ public class MatchService {
                 int id1 = (int) p1.getId();
                 int id2 = (int) p2.getId();
 
-                // Pobieramy dane
                 String email1 = emailRepo.getEmailByUserId(id1);
                 String email2 = emailRepo.getEmailByUserId(id2);
                 String name1 = emailRepo.getUsernameByUserId(id1);
                 String name2 = emailRepo.getUsernameByUserId(id2);
 
-                // Wysyłamy, jeśli e-mail istnieje
                 if (email1 != null) {
                     emailService.sendGameStartEmail(email1, name2, match.getMatchUUID());
                 }
@@ -55,7 +53,6 @@ public class MatchService {
                 }
 
             } catch (Exception e) {
-                // Wypisujemy błąd tylko na czerwono (err), żeby nie śmiecić, ale wiedzieć o awarii
                 System.err.println("Błąd w procesie wysyłania maili: " + e.getMessage());
                 e.printStackTrace();
             }
