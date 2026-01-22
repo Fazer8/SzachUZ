@@ -9,11 +9,12 @@
             window.location.href = "${pageContext.request.contextPath}/index.jsp";
         };
     </script>
+    <script src="${pageContext.request.contextPath}/js/i18n.js"></script>
     </jsp:attribute>
 
     <jsp:attribute name="body">
     <main class="site-margin">
-        <p>Trwa przekierowanie do strony użytkownika...</p>
+        <p data-i18n="dashboard.redirecting"></p>
 
 
 

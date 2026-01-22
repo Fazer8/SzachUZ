@@ -25,9 +25,6 @@ public final class MatchService {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     //private final List<MatchEventListener> listeners = new CopyOnWriteArrayList<>();
 
-    /**
-     * Private constructor.
-     */
     private MatchService() {
         scheduler.scheduleAtFixedRate(this::checkClocks, 1, 1, TimeUnit.SECONDS);
     }
@@ -35,7 +32,6 @@ public final class MatchService {
     /**
      * Method returning a reference to the instance of the {@link MatchService}.
      * @return {@link MatchService} refenrence.
-     * @author Rafał Kubacki
      */
     public static MatchService getInstance() {
         return INSTANCE;
@@ -48,7 +44,6 @@ public final class MatchService {
      * @param p1 one of the two players taking part in this match. Doesn't matter which one.
      * @param p2 other one the two players taking part in this match.
      * @return a new {@link Match} object.
-     * @author Rafał Kubacki
      */
     public Match createMatch(Player p1, Player p2) {
 
@@ -76,7 +71,6 @@ public final class MatchService {
      * @param playerId {@code long} ID of a player that wants to move
      * @param move {@link MoveMessage} record with move data.
      * @throws IllegalStateException if player tried to make an illegal move or match doesn't exist.
-     * @author Rafał Kubacki
      */
     public MoveResult processMove(long playerId, MoveMessage move) {
         Match match = loadMatchByPlayerId(playerId);
@@ -97,7 +91,6 @@ public final class MatchService {
      * Method that forcefully ends match by forfeit.
      * @param playerId {@code long} ID of a player that forfeits.
      * @throws IllegalStateException if match doesnt exist.
-     * @author Rafał Kubacki
      */
     public MoveResult forfeit(long playerId) {
         Match match = loadMatchByPlayerId(playerId);
@@ -117,7 +110,6 @@ public final class MatchService {
      * Finds a match what has a specific player in it.
      * @param playerId {@code long} ID of a player we're looking for.
      * @return Match with that player. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match loadMatchByPlayerId(long playerId) {
         return repository.findByPlayer(playerId);
@@ -127,7 +119,6 @@ public final class MatchService {
      * Finds a match basing on it's UUID.
      * @param matchId {@code String} UUID of a match we're looking for.
      * @return Match with that UUID. Can be either {@link Match} or {@code null}.
-     * @author Rafał Kubacki
      */
     public Match loadMatchByMatchId(String matchId) {
         return repository.findById(matchId);
@@ -135,7 +126,6 @@ public final class MatchService {
 
     /**
      * Method privided for scheduler.
-     * @author Rafał Kubacki
      */
     private void checkClocks() {
         for (Match match : repository.findAll()) {

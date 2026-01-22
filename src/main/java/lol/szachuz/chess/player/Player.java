@@ -9,8 +9,7 @@ public abstract class Player {
 
     /**
      * Player constructor.
-     * @param {@code long} player id.
-     * @author Rafał Kubacki
+     * @param id {@code long} player id.
      */
     public Player(long id) {
         this.id = id;
@@ -19,7 +18,6 @@ public abstract class Player {
     /**
      * ID getter.
      * @return {@code long} player id.
-     * @author Rafał Kubacki
      */
     public long getId() {
         return id;

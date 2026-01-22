@@ -13,7 +13,6 @@ public class AiPlayer extends Player {
      * Constructor of Ai Player.
      * @param aiId {@code long} id gracza.
      * @param skillLevel {@link Difficulty} poziom umiejętności AI.
-     * @author Rafał Kubacki
      */
     public AiPlayer(long aiId, Difficulty skillLevel) {
         super(aiId);
@@ -23,7 +22,6 @@ public class AiPlayer extends Player {
     /**
      * Difficulty getter.
      * @return {@link Difficulty} enum.
-     * @author Rafał Kubacki
      */
     public Difficulty getSkillLevel() {
         return skillLevel;

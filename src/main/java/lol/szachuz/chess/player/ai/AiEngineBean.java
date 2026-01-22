@@ -15,6 +15,7 @@ import lol.szachuz.chess.MoveMessage;
 
 /**
  * Stateless Bean responsible for creating AI moves.
+ * @see jakarta.ejb.Stateless
  * @author Rafał Kubacki
  */
 @Stateless
