@@ -2,10 +2,17 @@ package lol.szachuz.chess;
 
 import com.github.bhlangonijr.chesslib.Side;
 import lol.szachuz.chess.player.Player;
+
+import lol.szachuz.email.EmailService;
+import lol.szachuz.db.Repository.EmailRepository;
+
 import lol.szachuz.chess.player.ai.AiPlayer;
 
 import java.util.List;
 import java.util.UUID;
+
+import java.util.concurrent.CompletableFuture;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,9 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @author Rafał Kubacki
  */
 public final class MatchService {
-
     private static final MatchService INSTANCE = new MatchService();
-
     private final InMemoryGameRepository repository = new InMemoryGameRepository();
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -63,6 +68,35 @@ public final class MatchService {
         );
 
         repository.save(match);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                EmailRepository emailRepo = new EmailRepository();
+                EmailService emailService = new EmailService();
+
+                int id1 = (int) p1.getId();
+                int id2 = (int) p2.getId();
+
+                String email1 = emailRepo.getEmailByUserId(id1);
+                String email2 = emailRepo.getEmailByUserId(id2);
+                String name1 = emailRepo.getUsernameByUserId(id1);
+                String name2 = emailRepo.getUsernameByUserId(id2);
+
+                if (email1 != null) {
+                    emailService.sendGameStartEmail(email1, name2, match.getMatchUUID());
+                }
+
+                if (email2 != null) {
+                    emailService.sendGameStartEmail(email2, name1, match.getMatchUUID());
+                }
+
+            } catch (Exception e) {
+                System.err.println("Błąd w procesie wysyłania maili: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+
         return match;
     }
 
