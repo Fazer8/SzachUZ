@@ -146,7 +146,7 @@ public final class MatchService {
 
         match.forfeit(playerId);
         updateMmr(match);
-        repository.remove(match);
+        repository.archive(match);
 
         return new MoveResult(match.getFen(), GameStatus.FORFEIT, match.getResult(), null, -1, -1,match.getMoveHistorySan());
     }
@@ -193,7 +193,7 @@ public final class MatchService {
                 continue;
             }
             updateMmr(match);
-            repository.remove(match);
+            repository.archive(match);
             MoveResult result = new MoveResult(
                     match.getFen(),
                     match.getStatus(),
