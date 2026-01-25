@@ -8,7 +8,7 @@ import java.util.Properties;
 public class EmailService {
 
     private final String username = "szachuz044@gmail.com";
-    private final String password = "eckv mdmv ckwr wftp";
+    private final String password = "vbgg piit iorc jnvx";
     private final String host = "smtp.gmail.com";
     private final int port = 587;
 
